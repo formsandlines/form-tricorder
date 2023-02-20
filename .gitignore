@@ -17,6 +17,8 @@ node_modules/
 .backups/
 .clj-kondo/.cache
 .lsp/
+.cpcache/
+.clerk/
 
 target/
 public/js/

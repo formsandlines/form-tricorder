@@ -547,7 +547,7 @@ __metadata:
   dependencies:
     react: ^18.2.0
     react-dom: ^18.2.0
-    shadow-cljs: ^2.20.20
+    shadow-cljs: ^2.21.0
   languageName: unknown
   linkType: soft
 
@@ -1417,26 +1417,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"shadow-cljs-jar@npm:1.3.2":
-  version: 1.3.2
-  resolution: "shadow-cljs-jar@npm:1.3.2"
-  checksum: 2f3a1f48b4d792dec875f891744e3c27a27d786ffa7df632e70734d52684b59ebfec858cab23676e76246dec19b3b83742ec174d2ba9a876a0430bb568d0073d
+"shadow-cljs-jar@npm:1.3.4":
+  version: 1.3.4
+  resolution: "shadow-cljs-jar@npm:1.3.4"
+  checksum: 94feeba96c828464f315906bfda875f7ac8e0c770df1aae7fd5e65a24e084374d158278f715bc42d9578945e2a058ceca4e932eb5393bdc00ef051d1b8fa1459
   languageName: node
   linkType: hard
 
-"shadow-cljs@npm:^2.20.20":
-  version: 2.20.20
-  resolution: "shadow-cljs@npm:2.20.20"
+"shadow-cljs@npm:^2.21.0":
+  version: 2.21.0
+  resolution: "shadow-cljs@npm:2.21.0"
   dependencies:
     node-libs-browser: ^2.2.1
     readline-sync: ^1.4.7
-    shadow-cljs-jar: 1.3.2
+    shadow-cljs-jar: 1.3.4
     source-map-support: ^0.4.15
     which: ^1.3.1
     ws: ^7.4.6
   bin:
     shadow-cljs: cli/runner.js
-  checksum: 497e7c59b3984bb3b6db1eaa7f8cc9382a0655c113602a0aec00235b5f022cf541b2cb79e6d3a928642b867a4ce5d0aead5f438fa5ea805b8e6a6cd873dbabbc
+  checksum: f30069a0f45949c92b600f010ba5ec41d1e415e4b89fbdbdd9b219c7a403f413a58149d089328e2c1dc7ad6e502c3e7feb6ef54038c33f2fd58d058c55d0636d
   languageName: node
   linkType: hard
 

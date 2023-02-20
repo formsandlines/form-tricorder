@@ -1,0 +1,4 @@
+{:paths ["src"]
+ :tasks
+ {dev {:doc "Runs shadow-cljs build & watch with nREPL for vim-iced"
+       :task (shell "iced repl --force-shadow-cljs app")}}}
