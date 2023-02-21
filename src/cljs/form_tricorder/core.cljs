@@ -4,9 +4,16 @@
     [form-tricorder.events :as events]
     [form-tricorder.subs :as subs]
     [form-tricorder.effects :as effects]
+    [form-tricorder.views.radix-test :refer [PopoverDemo Button]]
     [reagent.core :as r]
     [reagent.dom :as d]
-    [re-frame.core :as rf]))
+    [re-frame.core :as rf]
+    ; ["/components/Button/Button" :refer [Button]]
+    ))
+
+; (defn js-test
+;   []
+;   [:> Button])
 
 (defn re-frame-test
   []
@@ -31,7 +38,9 @@
    [:h1 "FORM tricorder"]
    [:p [:span {:style {:color "red"}} "Work in progress…"]]
    [re-frame-test]
-   [formform-test]])
+   [formform-test]
+   [PopoverDemo]
+   [:> Button "Styled"]])
 
 (defn ^:dev/after-load mount-root []
   (rf/clear-subscription-cache!)

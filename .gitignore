@@ -19,6 +19,7 @@ node_modules/
 .lsp/
 .cpcache/
 .clerk/
+repl-client-debug
 
 target/
 public/js/
