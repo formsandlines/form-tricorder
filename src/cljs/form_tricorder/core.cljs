@@ -9,6 +9,8 @@
     [form-tricorder.views.function-menubar :refer [FunctionMenubar]]
     ; [form-tricorder.views.function-radio-group :refer [FunctionRadioGroup]]
     [form-tricorder.views.function-tabs :refer [FunctionTabs]]
+    [form-tricorder.views.output-area :refer [OutputArea]]
+    [form-tricorder.components.splitview-test :refer [SplitView]]
     [reagent.core :as r]
     [reagent.dom :as d]
     [re-frame.core :as rf]
@@ -29,14 +31,18 @@
 (defn fc-b [] [:div [:h2 "Content of C.b"]])
 (defn fc-c [] [:div [:h2 "Content of C.c"]])
 
+(defn testc [props content]
+  [:div {:class "testc"}
+   content])
+
 (defn views-test
   []
   (let [state (r/atom {:mode "a" :func "a"})
         style (-> {:backgroundColor "darkgray"}
                   clj->js
                   css)
-        func-content {"a" {"a" fa-a "b" fa-b "c" fa-c} 
-                      "b" {"a" fb-a "b" fb-b "c" fb-c} 
+        func-content {"a" {"a" fa-a "b" fa-b "c" fa-c}
+                      "b" {"a" fb-a "b" fb-b "c" fb-c}
                       "c" {"a" fc-a "b" fc-b "c" fc-c}}
         make-on-select (fn [{:keys [type subtype] :as m}]
                          (fn [_]
@@ -52,7 +58,16 @@
        [FunctionMenubar {:on-select make-on-select}]
        [FunctionTabs (assoc @state
                             :fn-change-handler fn-change-handler
-                            :func-content func-content)]])))
+                            :func-content func-content)]
+       [:div {:style {:height "400px"}}
+        [SplitView
+         {}
+         [:div {:style {:height "100%"
+                        :backgroundColor "lightblue"}} "A"]
+         [:div {:style {:height "100%"
+                        :backgroundColor "lightgreen"}} "B"]]]
+       #_[OutputArea {}]
+       #_[testc {:x 12} [:p "Hallo"]]])))
 
 (defn re-frame-test
   []
