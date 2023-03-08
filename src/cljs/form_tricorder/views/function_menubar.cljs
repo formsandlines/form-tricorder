@@ -57,41 +57,47 @@
             {})))
 
 
-(defn FunctionMenubar [{:keys [on-select]}]
-  [:> Root
-   [:> Menu
-    [:> Trigger {:type "a"} "visualize"]
-    [:> Portal
-     [:> Content
-      [:> Item
-       {:onSelect (on-select {:type "a" :subtype "a"})}
-       "hooks notation"]
-      [:> Item 
-       {:onSelect (on-select {:type "a" :subtype "b"})}
-       "graph notation"]
-      [:> Item 
-       {:onSelect (on-select {:type "a" :subtype "c"})}
-       "depth tree"] ]]]
-   [:> Menu
-    [:> Trigger {:type "b"} "calculate"]
-    [:> Portal
-     [:> Content
-      [:> Item 
-       {:onSelect (on-select {:type "b" :subtype "a"})}
-       "value table"]
-      [:> Item 
-       {:onSelect (on-select {:type "b" :subtype "b"})}
-       "vmap"]]]]
-   [:> Menu
-    [:> Trigger {:type "c"} "emulate"]
-    [:> Portal
-     [:> Content
-      [:> Item 
-       {:onSelect (on-select {:type "c" :subtype "a"})}
-       "SelFi"]
-      [:> Item 
-       {:onSelect (on-select {:type "c" :subtype "b"})}
-       "mindFORM"]
-      [:> Item 
-       {:onSelect (on-select {:type "c" :subtype "c"})}
-       "lifeFORM"]]]]])
+(defn FunctionMenubar [{:keys [views* set-views]}]
+  (let [make-on-select (fn [{:keys [type subtype] :as m}]
+                         (fn [e]
+                           (set-views
+                            (update @views* 0 assoc
+                                    :mode type :func subtype))))]
+    (fn [_]
+      [:> Root
+       [:> Menu
+        [:> Trigger {:type "a"} "visualize"]
+        [:> Portal
+         [:> Content
+          [:> Item
+           {:onSelect (make-on-select {:type "a" :subtype "a"})}
+           "hooks notation"]
+          [:> Item
+           {:onSelect (make-on-select {:type "a" :subtype "b"})}
+           "graph notation"]
+          [:> Item
+           {:onSelect (make-on-select {:type "a" :subtype "c"})}
+           "depth tree"] ]]]
+       [:> Menu
+        [:> Trigger {:type "b"} "calculate"]
+        [:> Portal
+         [:> Content
+          [:> Item
+           {:onSelect (make-on-select {:type "b" :subtype "a"})}
+           "value table"]
+          [:> Item
+           {:onSelect (make-on-select {:type "b" :subtype "b"})}
+           "vmap"]]]]
+       [:> Menu
+        [:> Trigger {:type "c"} "emulate"]
+        [:> Portal
+         [:> Content
+          [:> Item
+           {:onSelect (make-on-select {:type "c" :subtype "a"})}
+           "SelFi"]
+          [:> Item
+           {:onSelect (make-on-select {:type "c" :subtype "b"})}
+           "mindFORM"]
+          [:> Item
+           {:onSelect (make-on-select {:type "c" :subtype "c"})}
+           "lifeFORM"]]]]])))

@@ -50,6 +50,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lit-labs/ssr-dom-shim@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@lit-labs/ssr-dom-shim@npm:1.0.0"
+  checksum: ccba6675ad631c6f7360af4e12e328e88d877a52ec992ae9254a1be9902ef699b7916d851b073803dd91244d0f709de2c0539a7db643889cfe341ff6e1a74eb5
+  languageName: node
+  linkType: hard
+
+"@lit/reactive-element@npm:^1.3.0, @lit/reactive-element@npm:^1.6.0":
+  version: 1.6.1
+  resolution: "@lit/reactive-element@npm:1.6.1"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": ^1.0.0
+  checksum: fab0bcfdade9c26af2ad5115fb564bcf8ba0732a3a8be86c157851c2771e3fdc65ab38f2cd60fa121946058bf6e487461fd217f87b01f96e88ee7a95d5d866ba
+  languageName: node
+  linkType: hard
+
 "@npmcli/fs@npm:^2.1.0":
   version: 2.1.2
   resolution: "@npmcli/fs@npm:2.1.2"
@@ -575,6 +591,43 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@spectrum-web-components/base@npm:^0.7.4":
+  version: 0.7.4
+  resolution: "@spectrum-web-components/base@npm:0.7.4"
+  dependencies:
+    lit: ^2.5.0
+  checksum: 92c5f9e45080c616e1ba19cf5ebd3b1f60e8dea3ad0a64d3b9c4d85cf2737ea4ef7a337dbd8386247372fa74132c75ddcb2b587cf39502219784453798bcb4d0
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/split-view@npm:^0.5.7":
+  version: 0.5.7
+  resolution: "@spectrum-web-components/split-view@npm:0.5.7"
+  dependencies:
+    "@spectrum-web-components/base": ^0.7.4
+  checksum: e5380976ea9b912224cac3d4ae1c4278dc65df750595c3f56daf556ea93368fd369fb13f48b4fb2351e0ef9f3647a50616369e97073ce7e62dd92b4cf1093e03
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/styles@npm:^0.23.0":
+  version: 0.23.0
+  resolution: "@spectrum-web-components/styles@npm:0.23.0"
+  dependencies:
+    "@spectrum-web-components/base": ^0.7.4
+  checksum: f40785e34fb7a649f21fb3acf6a4f36d0930def330a783ace5cc829f4f94ab906557ca89410a29eaf723ecda066a095cba5d7de3141471058e2e100d13a37c0f
+  languageName: node
+  linkType: hard
+
+"@spectrum-web-components/theme@npm:^0.14.11":
+  version: 0.14.11
+  resolution: "@spectrum-web-components/theme@npm:0.14.11"
+  dependencies:
+    "@spectrum-web-components/base": ^0.7.4
+    "@spectrum-web-components/styles": ^0.23.0
+  checksum: 701ca4cf5c47034ac09c4d4398efe2ef17e0e1588464238f01e8472744da86bb239b899dc84088337932ad2fc4705aefdef47a015ddbaaca57385bcff3a4e043
+  languageName: node
+  linkType: hard
+
 "@stitches/react@npm:^1.2.8":
   version: 1.2.8
   resolution: "@stitches/react@npm:1.2.8"
@@ -588,6 +641,13 @@ __metadata:
   version: 2.0.0
   resolution: "@tootallnate/once@npm:2.0.0"
   checksum: ad87447820dd3f24825d2d947ebc03072b20a42bfc96cbafec16bff8bbda6c1a81fcb0be56d5b21968560c5359a0af4038a68ba150c3e1694fe4c109a063bed8
+  languageName: node
+  linkType: hard
+
+"@types/trusted-types@npm:^2.0.2":
+  version: 2.0.3
+  resolution: "@types/trusted-types@npm:2.0.3"
+  checksum: 4794804bc4a4a173d589841b6d26cf455ff5dc4f3e704e847de7d65d215f2e7043d8757e4741ce3a823af3f08260a8d04a1a6e9c5ec9b20b7b04586956a6b005
   languageName: node
   linkType: hard
 
@@ -1127,6 +1187,8 @@ __metadata:
     "@radix-ui/react-tabs": ^1.0.2
     "@radix-ui/react-toggle-group": ^1.0.2
     "@radix-ui/react-toolbar": ^1.0.2
+    "@spectrum-web-components/split-view": ^0.5.7
+    "@spectrum-web-components/theme": ^0.14.11
     "@stitches/react": ^1.2.8
     react: ^18.2.0
     react-dom: ^18.2.0
@@ -1406,6 +1468,36 @@ __metadata:
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
   checksum: 8a95213a5a77deb6cbe94d86340e8d9ace2b93bc367790b260101d2f36a2eaf4e4e22d9fa9cf459b38af3a32fb4190e638024cf82ec95ef708680e405ea7cc78
+  languageName: node
+  linkType: hard
+
+"lit-element@npm:^3.2.0":
+  version: 3.2.2
+  resolution: "lit-element@npm:3.2.2"
+  dependencies:
+    "@lit/reactive-element": ^1.3.0
+    lit-html: ^2.2.0
+  checksum: e1df57c02ad5ae4c42b49a5066b3b623bccf7fa6610bbc3f65bc22cbbe1546ecd6a7f717b1f01863929262f416c4b8b7a39ff166114215f93cc22f4e5b3825c3
+  languageName: node
+  linkType: hard
+
+"lit-html@npm:^2.2.0, lit-html@npm:^2.6.0":
+  version: 2.6.1
+  resolution: "lit-html@npm:2.6.1"
+  dependencies:
+    "@types/trusted-types": ^2.0.2
+  checksum: 32291eb5bcaa7fcc1d433522a9a62c3c3d240e49bb8c57ccea5c10014823d94f62f17e2d5361781cb6ee0b3c9078ef839de6164d5374371d650471904515e48e
+  languageName: node
+  linkType: hard
+
+"lit@npm:^2.5.0":
+  version: 2.6.1
+  resolution: "lit@npm:2.6.1"
+  dependencies:
+    "@lit/reactive-element": ^1.6.0
+    lit-element: ^3.2.0
+    lit-html: ^2.6.0
+  checksum: 74f2813152a48f195784f01b6b4ff7e4e7d8fa90ac272b725d1953fa3e1d6c9dca60b77da435f34144fcdd38705480889a8ea986835676932a8559c897cea517
   languageName: node
   linkType: hard
 

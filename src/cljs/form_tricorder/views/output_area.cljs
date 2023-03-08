@@ -1,71 +1,68 @@
 (ns form-tricorder.views.output-area
   (:require
-    [reagent.core :as r]
-    [reagent.dom :as d]
-    [form-tricorder.components.splitview :refer [Root Divider Handle Pane]]
-    [form-tricorder.utils :refer [clj->js*]]
-    ["/stitches.config" :refer (styled css)]))
+   [form-tricorder.utils :refer [clj->js*]]
+   [form-tricorder.views.function-tabs :refer [FunctionTabs]]
+   ["@spectrum-web-components/split-view/sp-split-view.js"]
+   ["@spectrum-web-components/theme/sp-theme.js"]
+   ["@spectrum-web-components/theme/src/themes.js"]
+   ["/stitches.config" :refer (css globalCss)]))
 
-(def splitview-root-style
-  (-> {:width "100%"
-       :height "400px"
-       :backgroundColor "gainsboro"}
+
+(def view-style
+  (-> {:height "200px"
+       :width "100%"}
       clj->js*
       css))
 
-(def splitview-divider-style
-  (let [diam "2px"]
-    (-> {:backgroundColor "blue"
-         "&[data-orientation=horizontal]"
-         {:width "100%"
-          :height diam}
-         "&[data-orientation=vertical]"
-         {:height "100%"
-          :width diam}}
-        clj->js*
-        css)))
+; (def splitter-style
+;   (-> {; "*" {:color "red"}
+;        ":host #gripper" {:border "3px solid yellow"
+;                          :color "red"}}
+;       clj->js*
+;       globalCss))
 
-(def splitview-handle-style
-  (let [diam   13
-        len    40
-        dshift (- (int (/ diam 2)))
-        lshift (- (int (/ len 2)))]
-    (-> {:backgroundColor "violet"
-         "&[data-orientation=horizontal]"
-         {:left "50%"
-          :width len
-          :height diam
-          :margin-left lshift
-          :margin-top dshift}
-         "&[data-orientation=vertical]"
-         {:top "50%"
-          :width diam
-          :height len
-          :margin-left dshift
-          :margin-top lshift}}
-        clj->js*
-        css)))
+(defn OutputPane [{:keys [id style views* set-views]}]
+  (let [value-change-handler (fn [v]
+                               (set-views (update @views* id
+                                                  assoc :func v)))]
+    [:div.OutputPane
+     {:style style}
+     [FunctionTabs
+      {:view (@views* id)
+       :value-change-handler value-change-handler}]]))
 
-(def splitview-pane-style
-  (-> {:border "1px solid black"}
-      clj->js*
-      css))
+(defn OutputArea [{:keys [views* set-views]}]
+  (let [active-views (filter :active @views*)]
+    [:div.OutputArea
+     {:style {:height "400px"}}
+     (condp == (count active-views)
+       1 [OutputPane {:id        0
+                      :style     {:backgroundColor "orange"}
+                      :views*    views*
+                      :set-views set-views}]
+       2 [:<>
+          ; {:class (str (view-style))}
+          [:> "sp-theme"
+           {"scale" "medium"
+            "color" "dark"
+            "style" {}
+            }
+           [:> "sp-split-view"
+            {"style" {:height "200px"
+                      :width "100%"}
+             "label" "Output splitview"
+             "resizable" true
+             ; "vertical" true
+             "primary-min" "50"
+             "secondary-min" "50" }
+            [OutputPane {:id        0
+                         :views*    views*
+                         :set-views set-views}]
+            [OutputPane {:id        1
+                         :views*    views*
+                         :set-views set-views}]]]]
+       (assert "Must have at least one active view."))]))
 
 
-(defn OutputArea
-  [{:keys []}]
-  [Root {:props {:id "OutputArea"
-                 :class (splitview-root-style)}
-         :horizontal? false}
-   [Divider {:props {:id "OutputDivider"
-                     :class (splitview-divider-style)}}
-    [Handle {:props {:id "OutputDividerHandle"
-                     :class (splitview-handle-style)}}]]
-   [Pane {:props {:id "Output_a"
-                  :class (splitview-pane-style)}}
-    "A"]
-   [Pane {:props {:id "Output_b"
-                  :class (splitview-pane-style)}}
-    "B"]])
 
 

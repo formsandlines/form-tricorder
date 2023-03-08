@@ -135,16 +135,6 @@
 
 ;; Components
 
-(defn- DarkmodeRadioGroup
-  [{:keys [mode value-change-handler]}]
-  [:> Root-darkmode {:value mode
-                     :onValueChange value-change-handler
-                     :orientation "vertical"}
-   [:> Item-darkmode {:value "dark"}
-    [:> Indicator-darkmode] "🌙"]
-   [:> Item-darkmode {:value "light"}
-    [:> Indicator-darkmode] "🔅"]])
-
 (defn- SplitviewRadioGroup
   [{:keys [mode value-change-handler]}]
   [:> Root-splitview {:value mode
@@ -159,15 +149,27 @@
    [:> Item-splitview {:value "split-vt"}
     [:> Indicator-splitview] "⬓"]])
 
-(defn AppToolbar []
+(defn- DarkmodeRadioGroup
+  [{:keys [mode value-change-handler]}]
+  [:> Root-darkmode {:value mode
+                     :onValueChange value-change-handler
+                     :orientation "vertical"}
+   [:> Item-darkmode {:value "dark"}
+    [:> Indicator-darkmode] "🌙"]
+   [:> Item-darkmode {:value "light"}
+    [:> Indicator-darkmode] "🔅"]])
+
+(defn AppToolbar [{:keys [views* set-views]}]
   [:> Root {}
    [:> AppLink {:href "https://tricorder.formform.dev"}
     "FORM tricorder"]
-   [SplitviewRadioGroup {:mode "1"
+   [SplitviewRadioGroup {:mode :split1
                          :value-change-handler
                          (fn [_] (js/console.log "View change"))}]
    [:> Button-splitview {:on-click
-                         (fn [_] (js/console.log "View swap"))}
+                         (fn [_] (set-views
+                                  (let [[v1 v2] @views*]
+                                    [v2 v1])))}
     "⇄"]
    [:> Separator]
    [DarkmodeRadioGroup {:mode "🌙"

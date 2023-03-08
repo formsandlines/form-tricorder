@@ -74,30 +74,33 @@
 
 
 (defn FunctionTabs
-  [{:keys [mode func fn-change-handler func-content]}]
-  [:> Root {:value func
-            :onValueChange fn-change-handler
-            :activationMode "manual"
-            :orientation "vertical"}
-   [:> TabList 
-    [:> Trigger {:type mode
-                 :subtype "a"
-                 :value "a"}
-     "A"]
-    [:> Trigger {:type mode
-                 :subtype "b"
-                 :value "b"}
-     "B"]
-    [:> Trigger {:type mode
-                 :subtype "c"
-                 :value "c"}
-     "C"]]
-   [:> Content {:value "a"}
-    [(get-in func-content [mode "a"])]]
-   [:> Content {:value "b"}
-    [(get-in func-content [mode "b"])]]
-   [:> Content {:value "c"}
-    [(get-in func-content [mode "c"])]]])
+  [{:keys [view value-change-handler func-content]}]
+  (let [{:keys [mode func]} view
+        current-view-el [:div mode "." func]
+        ]
+    [:> Root {:value func
+              :onValueChange value-change-handler
+              :activationMode "manual"
+              :orientation "vertical"}
+     [:> TabList
+      [:> Trigger {:type mode
+                   :subtype "a"
+                   :value "a"}
+       "A"]
+      [:> Trigger {:type mode
+                   :subtype "b"
+                   :value "b"}
+       "B"]
+      [:> Trigger {:type mode
+                   :subtype "c"
+                   :value "c"}
+       "C"]]
+     [:> Content {:value "a"}
+      current-view-el]
+     [:> Content {:value "b"}
+      current-view-el]
+     [:> Content {:value "c"}
+      current-view-el]]))
 
 
 
