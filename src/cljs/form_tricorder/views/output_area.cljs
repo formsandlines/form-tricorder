@@ -2,24 +2,30 @@
   (:require
    [form-tricorder.utils :refer [clj->js*]]
    [form-tricorder.views.function-tabs :refer [FunctionTabs]]
-   ["@spectrum-web-components/split-view/sp-split-view.js"]
-   ["@spectrum-web-components/theme/sp-theme.js"]
-   ["@spectrum-web-components/theme/src/themes.js"]
-   ["/stitches.config" :refer (css globalCss)]))
+   ["@devbookhq/splitter$default" :as Splitter]
+   ["/stitches.config" :refer (css)]))
 
 
-(def view-style
-  (-> {:height "200px"
-       :width "100%"}
+(def gutter-styles
+  (-> {:position "relative"
+       "&:hover > *" {:backgroundColor "#333"}
+       "&::before" {:content ""
+                    :position "absolute"
+                    :width 1
+                    :height "100%"
+                    :backgroundColor "#888"}
+       "&[dir=Vertical]::before" {:width "100%"
+                                  :height 1}}
       clj->js*
       css))
 
-; (def splitter-style
-;   (-> {; "*" {:color "red"}
-;        ":host #gripper" {:border "3px solid yellow"
-;                          :color "red"}}
-;       clj->js*
-;       globalCss))
+(def dragger-styles
+  (-> {:backgroundColor "#666"
+       :position "relative"
+       :z-index 999}
+      clj->js*
+      css))
+
 
 (defn OutputPane [{:keys [id style views* set-views]}]
   (let [value-change-handler (fn [v]
@@ -32,37 +38,28 @@
        :value-change-handler value-change-handler}]]))
 
 (defn OutputArea [{:keys [views* set-views]}]
-  (let [active-views (filter :active @views*)]
-    [:div.OutputArea
-     {:style {:height "400px"}}
-     (condp == (count active-views)
-       1 [OutputPane {:id        0
-                      :style     {:backgroundColor "orange"}
-                      :views*    views*
-                      :set-views set-views}]
-       2 [:<>
-          ; {:class (str (view-style))}
-          [:> "sp-theme"
-           {"scale" "medium"
-            "color" "dark"
-            "style" {}
-            }
-           [:> "sp-split-view"
-            {"style" {:height "200px"
-                      :width "100%"}
-             "label" "Output splitview"
-             "resizable" true
-             ; "vertical" true
-             "primary-min" "50"
-             "secondary-min" "50" }
-            [OutputPane {:id        0
-                         :views*    views*
-                         :set-views set-views}]
-            [OutputPane {:id        1
-                         :views*    views*
-                         :set-views set-views}]]]]
-       (assert "Must have at least one active view."))]))
-
-
-
-
+  (let [sizes* (atom (array 50 50))]
+    (fn [_]
+      (let [active-views (filter :active @views*)]
+        [:div.OutputArea
+         {:style {:height "400px"}}
+         (condp == (count active-views)
+           1 [OutputPane {:id        0
+                          :style     {:backgroundColor "orange"}
+                          :views*    views*
+                          :set-views set-views}]
+           2 [:> Splitter
+              {:gutterClassName (gutter-styles)
+               :draggerClassName (dragger-styles)
+               :minWidths (array 100 100)
+               :minHeights (array 100 100)
+               :initialSizes @sizes*
+               :onResizeFinished (fn [_ newSizes] (reset! sizes* newSizes))
+               :direction "Horizontal"}
+              [OutputPane {:id        0
+                           :views*    views*
+                           :set-views set-views}]
+              [OutputPane {:id        1
+                           :views*    views*
+                           :set-views set-views}]]
+           (assert "Must have at least one active view."))]))))
