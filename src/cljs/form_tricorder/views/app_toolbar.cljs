@@ -1,11 +1,12 @@
 (ns form-tricorder.views.app-toolbar
   (:require
-   [reagent.core :as r]
-   [reagent.dom :as d]
-   [form-tricorder.utils :refer [clj->js*]]
-   ["@radix-ui/react-radio-group" :as RadioGroup]
-   ["@radix-ui/react-toolbar" :as Toolbar]
-   ["/stitches.config" :refer (styled css)]))
+    [helix.core :refer [defnc $ <>]]
+    [helix.hooks :as hooks]
+    [helix.dom :as d :refer [$d]]
+    [form-tricorder.utils :refer [clj->js*]]
+    ["@radix-ui/react-radio-group" :as RadioGroup]
+    ["@radix-ui/react-toolbar" :as Toolbar]
+    ["/stitches.config" :refer (styled)]))
 
 
 ;; Shared styles
@@ -135,52 +136,55 @@
 
 ;; Components
 
-(defn- SplitviewRadioGroup
+(defnc SplitviewRadioGroup
   [{:keys [mode value-change-handler]}]
-  [:> Root-splitview {:value mode
-                      :onValueChange value-change-handler
-                      :orientation "vertical"}
-   [:> Item-splitview {:value "single-1"}
-    [:> Indicator-splitview] "1"]
-   [:> Item-splitview {:value "single-2"}
-    [:> Indicator-splitview] "2"]
-   [:> Item-splitview {:value "split-hz"}
-    [:> Indicator-splitview] "◨"]
-   [:> Item-splitview {:value "split-vt"}
-    [:> Indicator-splitview] "⬓"]])
+  ($d Root-splitview
+      {:value mode
+       :onValueChange value-change-handler
+       :orientation "vertical"}
+      ($d Item-splitview {:value "single-1"}
+          ($d Indicator-splitview) "1")
+      ($d Item-splitview {:value "single-2"}
+          ($d Indicator-splitview) "2")
+      ($d Item-splitview {:value "split-hz"}
+          ($d Indicator-splitview) "◨")
+      ($d Item-splitview {:value "split-vt"}
+          ($d Indicator-splitview) "⬓")))
 
-(defn- DarkmodeRadioGroup
+(defnc DarkmodeRadioGroup
   [{:keys [mode value-change-handler]}]
-  [:> Root-darkmode {:value mode
-                     :onValueChange value-change-handler
-                     :orientation "vertical"}
-   [:> Item-darkmode {:value "dark"}
-    [:> Indicator-darkmode] "🌙"]
-   [:> Item-darkmode {:value "light"}
-    [:> Indicator-darkmode] "🔅"]])
+  ($d Root-darkmode 
+      {:value mode
+       :onValueChange value-change-handler
+       :orientation "vertical"}
+      ($d Item-darkmode {:value "dark"}
+          ($d Indicator-darkmode) "🌙")
+      ($d Item-darkmode {:value "light"}
+          ($d Indicator-darkmode) "🔅")))
 
-(defn AppToolbar [{:keys [views* set-views]}]
-  [:> Root {}
-   [:> AppLink {:href "https://tricorder.formform.dev"}
-    "FORM tricorder"]
-   [SplitviewRadioGroup {:mode :split1
-                         :value-change-handler
-                         (fn [_] (js/console.log "View change"))}]
-   [:> Button-splitview {:on-click
-                         (fn [_] (set-views
-                                  (let [[v1 v2] @views*]
-                                    [v2 v1])))}
-    "⇄"]
-   [:> Separator]
-   [DarkmodeRadioGroup {:mode "🌙"
-                        :value-change-handler
-                        (fn [_] (js/console.log "Mode change"))}]
-   [:> Separator]
-   [:> Button {:on-click (fn [_] (js/console.log "Clicked about"))}
-    "about"]
-   [:> Button {:on-click (fn [_] (js/console.log "Clicked help"))}
-    "help"]
-   [:> Separator]
-   [:> Link {:href "https://github.com/formsandlines/form-tricorder"
-             :target "_blank"}
-    "src"]])
+(defnc AppToolbar 
+  [{:keys [views set-views]}]
+  ($d Root {}
+      ($d AppLink {:href "https://tricorder.formform.dev"}
+          "FORM tricorder")
+      ($ SplitviewRadioGroup 
+         {:mode :split1
+          :value-change-handler (fn [_] (js/console.log "View change"))})
+      ($d Button-splitview 
+          {:on-click (fn [_] (set-views #(let [[v1 v2] %]
+                                           [v2 v1])))}
+          "⇄")
+      ($d Separator)
+      ($ DarkmodeRadioGroup 
+         {:mode "🌙"
+          :value-change-handler (fn [_] (js/console.log "Mode change"))})
+      ($d Separator)
+      ($d Button {:on-click (fn [_] (js/console.log "Clicked about"))}
+          "about")
+      ($d Button {:on-click (fn [_] (js/console.log "Clicked help"))}
+          "help")
+      ($d Separator)
+      ($d Link 
+          {:href "https://github.com/formsandlines/form-tricorder"
+           :target "_blank"}
+          "src")))

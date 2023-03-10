@@ -1,9 +1,8 @@
 (ns form-tricorder.effects
-  (:require
-    [re-frame.core :as rf]))
+  (:require [refx.alpha :as refx]))
 
-(rf/reg-fx
- :test-effect!
- (fn [msg]
-   (js/console.log msg)))
 
+(refx/reg-fx
+  :test-effect!
+  (fn [msg]
+    (js/console.log msg)))

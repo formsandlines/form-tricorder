@@ -6,7 +6,8 @@
                   :asset-path "/js"
                   :modules    {:app
                                {:entries [form-tricorder.core]}}
-                  :devtools   {:preloads [flow-storm.api]
+                  :devtools   {:reload-strategy :full
+                               :preloads [flow-storm.api form-tricorder.dev]
                                :after-load form-tricorder.core/init!}}}
 
  :dev-http {3000 {:root "public"}}}

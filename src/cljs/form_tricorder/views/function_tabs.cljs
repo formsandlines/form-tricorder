@@ -1,7 +1,8 @@
 (ns form-tricorder.views.function-tabs
   (:require
-    [reagent.core :as r]
-    [reagent.dom :as d]
+    [helix.core :refer [defnc $ <> fnc]]
+    ; [helix.hooks :as hooks]
+    [helix.dom :as d :refer [$d]]
     [form-tricorder.utils :refer [clj->js*]]
     ["@radix-ui/react-tabs" :as Tabs]
     ["/stitches.config" :refer (styled css)]))
@@ -73,34 +74,33 @@
              })))
 
 
-(defn FunctionTabs
+(defnc FunctionTabs
   [{:keys [view value-change-handler func-content]}]
   (let [{:keys [mode func]} view
-        current-view-el [:div mode "." func]
-        ]
-    [:> Root {:value func
+        current-view-el     (fnc [] (d/div mode "." func))]
+    ($d Root {:value func
               :onValueChange value-change-handler
               :activationMode "manual"
               :orientation "vertical"}
-     [:> TabList
-      [:> Trigger {:type mode
-                   :subtype "a"
-                   :value "a"}
-       "A"]
-      [:> Trigger {:type mode
-                   :subtype "b"
-                   :value "b"}
-       "B"]
-      [:> Trigger {:type mode
-                   :subtype "c"
-                   :value "c"}
-       "C"]]
-     [:> Content {:value "a"}
-      current-view-el]
-     [:> Content {:value "b"}
-      current-view-el]
-     [:> Content {:value "c"}
-      current-view-el]]))
+        ($d TabList
+            ($d Trigger {:type mode
+                         :subtype "a"
+                         :value "a"}
+                "A")
+            ($d Trigger {:type mode
+                         :subtype "b"
+                         :value "b"}
+                "B")
+            ($d Trigger {:type mode
+                         :subtype "c"
+                         :value "c"}
+                "C"))
+        ($d Content {:value "a"}
+            ($ current-view-el))
+        ($d Content {:value "b"}
+            ($ current-view-el))
+        ($d Content {:value "c"}
+            ($ current-view-el)))))
 
 
 

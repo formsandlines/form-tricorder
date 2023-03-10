@@ -1,7 +1,8 @@
 (ns form-tricorder.views.function-menubar
   (:require
-    [reagent.core :as r]
-    [reagent.dom :as d]
+    [helix.core :refer [defnc $ <>]]
+    [helix.hooks :as hooks]
+    [helix.dom :as d :refer [$d]]
     [form-tricorder.utils :refer [clj->js*]]
     ["@radix-ui/react-menubar" :as Menubar]
     ["/stitches.config" :refer (styled css)]))
@@ -57,47 +58,47 @@
             {})))
 
 
-(defn FunctionMenubar [{:keys [views* set-views]}]
+(defnc FunctionMenubar 
+  [{:keys [views set-views]}]
   (let [make-on-select (fn [{:keys [type subtype] :as m}]
                          (fn [e]
                            (set-views
-                            (update @views* 0 assoc
-                                    :mode type :func subtype))))]
-    (fn [_]
-      [:> Root
-       [:> Menu
-        [:> Trigger {:type "a"} "visualize"]
-        [:> Portal
-         [:> Content
-          [:> Item
-           {:onSelect (make-on-select {:type "a" :subtype "a"})}
-           "hooks notation"]
-          [:> Item
-           {:onSelect (make-on-select {:type "a" :subtype "b"})}
-           "graph notation"]
-          [:> Item
-           {:onSelect (make-on-select {:type "a" :subtype "c"})}
-           "depth tree"] ]]]
-       [:> Menu
-        [:> Trigger {:type "b"} "calculate"]
-        [:> Portal
-         [:> Content
-          [:> Item
-           {:onSelect (make-on-select {:type "b" :subtype "a"})}
-           "value table"]
-          [:> Item
-           {:onSelect (make-on-select {:type "b" :subtype "b"})}
-           "vmap"]]]]
-       [:> Menu
-        [:> Trigger {:type "c"} "emulate"]
-        [:> Portal
-         [:> Content
-          [:> Item
-           {:onSelect (make-on-select {:type "c" :subtype "a"})}
-           "SelFi"]
-          [:> Item
-           {:onSelect (make-on-select {:type "c" :subtype "b"})}
-           "mindFORM"]
-          [:> Item
-           {:onSelect (make-on-select {:type "c" :subtype "c"})}
-           "lifeFORM"]]]]])))
+                             #(update % 0 assoc
+                                      :mode type :func subtype))))]
+    ($d Root
+        ($d Menu
+            ($d Trigger {:type "a"} "visualize")
+            ($d Portal
+                ($d Content
+                    ($d Item
+                        {:onSelect (make-on-select {:type "a" :subtype "a"})}
+                        "hooks notation")
+                    ($d Item
+                        {:onSelect (make-on-select {:type "a" :subtype "b"})}
+                        "graph notation")
+                    ($d Item
+                        {:onSelect (make-on-select {:type "a" :subtype "c"})}
+                        "depth tree") )))
+        ($d Menu
+            ($d Trigger {:type "b"} "calculate")
+            ($d Portal
+                ($d Content
+                    ($d Item
+                        {:onSelect (make-on-select {:type "b" :subtype "a"})}
+                        "value table")
+                    ($d Item
+                        {:onSelect (make-on-select {:type "b" :subtype "b"})}
+                        "vmap"))))
+        ($d Menu
+            ($d Trigger {:type "c"} "emulate")
+            ($d Portal
+                ($d Content
+                    ($d Item
+                        {:onSelect (make-on-select {:type "c" :subtype "a"})}
+                        "SelFi")
+                    ($d Item
+                        {:onSelect (make-on-select {:type "c" :subtype "b"})}
+                        "mindFORM")
+                    ($d Item
+                        {:onSelect (make-on-select {:type "c" :subtype "c"})}
+                        "lifeFORM")))))))

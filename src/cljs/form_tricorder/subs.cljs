@@ -1,9 +1,8 @@
 (ns form-tricorder.subs
-  (:require
-    [re-frame.core :as rf]))
+  (:require [refx.alpha :as refx]))
 
 
-(rf/reg-sub
+(refx/reg-sub
   :test/subs
   (fn [db]
     (:test/answer db)))
