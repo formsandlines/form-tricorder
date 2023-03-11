@@ -34,6 +34,7 @@
             :width "30px"
             :height "30px"
             "&[data-state=active]" {:backgroundColor "lightgray"}
+            "&:focus" {:border "1px solid black"}
             :variants
             {:type {:a {} :b {} :c {}}
              :subtype {:a {} :b {} :c {}}}

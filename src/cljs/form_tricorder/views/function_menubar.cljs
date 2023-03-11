@@ -34,6 +34,7 @@
             :color "white"
             :boxShadow "0 0.5px 1px 0.5px black"
             :fontSize "15px"
+            "&:focus" {:boxShadow "0 0.5px 1px 0.5px red"}
             :variants
             {:type {:a {:backgroundColor "$teal8"
                         "&:hover" {:backgroundColor "$teal9"}}

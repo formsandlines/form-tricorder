@@ -8,7 +8,11 @@
 
 
 (defnc InputArea []
-  (d/div
-    {:class "InputArea"}
-    (d/input
-      {:value "Test"})))
+  (let [[input set-input] (hooks/use-state "")]
+    (d/div
+     {:class "InputArea"}
+     (d/input
+      {:value input
+       :on-change (fn [e]
+                    (.preventDefault e)
+                    (set-input (.. e -target -value)))}))))

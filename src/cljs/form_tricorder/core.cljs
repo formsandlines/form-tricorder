@@ -16,7 +16,7 @@
     ["/stitches.config" :refer (css)]))
 
 
-(defnc Test-views
+(defnc App
   []
   (let [[views set-views] (hooks/use-state
                             [{:mode "a" :func "a" :active true}
@@ -48,21 +48,6 @@
                              [:test/event 
                               {:new-answer "within yourself"}]))}
         "Click me!"))))
-
-(defnc Test-formform
-  []
-  (<>
-    (d/p "Testing formform.calc:")
-    (d/pre (str (calc/rel [:N :U :I :M :N :N :I :I :N :U :N :U :N :N :N :N :N :U :I :M :N :U :I :M :N :U :N :U :N :U :N :U :N :U :I :M :N :N :I :I :N :U :I :M :N :N :I :I :N :U :I :M :N :U :I :M :N :U :I :M :N :U :I :M]
-                          [:M :I :U :N :I :M :N :U :U :N :M :I :N :U :I :M])))))
-
-(defnc App
-  []
-  (d/div 
-    {:class "App"}
-    ; ($ Test-refx)
-    ; ($ Test-formform)
-    ($ Test-views)))
 
 (defonce root
   (rdom/createRoot (js/document.getElementById "app")))

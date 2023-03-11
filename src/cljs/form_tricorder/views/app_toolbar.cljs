@@ -18,7 +18,8 @@
 (def itemStyles
   {:flex "0 0 auto"
    :color "white"
-   :alignItems "center"})
+   :alignItems "center"
+   "&:focus" {:outline "solid"}})
 
 (def linkStyles
   {:textDecoration "none"
@@ -125,14 +126,17 @@
           (clj->js*
            {})))
 
-(def ToggleItem
+(def DarkmodeToggleItem
   (styled (.-ToggleItem Toolbar)
           (clj->js*
-           (merge itemStyles
-                  {:border "1px solid black"
-                   :background "none"
-                   :outline "none"}))))
+            (merge buttonStyles
+                   {}))))
 
+(def FocusFix
+  (styled (.-Button Toolbar)
+          (clj->js*
+            {:all "unset"
+             "&:focus" {:outline "solid"}})))
 
 ;; Components
 
@@ -141,7 +145,8 @@
   ($d Root-splitview
       {:value mode
        :onValueChange value-change-handler
-       :orientation "vertical"}
+       :orientation "horizontal"
+       :aria-label "Splitview controls"}
       ($d Item-splitview {:value "single-1"}
           ($d Indicator-splitview) "1")
       ($d Item-splitview {:value "single-2"}
@@ -151,12 +156,15 @@
       ($d Item-splitview {:value "split-vt"}
           ($d Indicator-splitview) "⬓")))
 
+
+
 (defnc DarkmodeRadioGroup
   [{:keys [mode value-change-handler]}]
   ($d Root-darkmode 
       {:value mode
        :onValueChange value-change-handler
-       :orientation "vertical"}
+       :orientation "horizontal"
+       :aria-label "Darkmode controls"}
       ($d Item-darkmode {:value "dark"}
           ($d Indicator-darkmode) "🌙")
       ($d Item-darkmode {:value "light"}
@@ -164,20 +172,30 @@
 
 (defnc AppToolbar 
   [{:keys [views set-views]}]
-  ($d Root {}
+  ($d Root {:orientation "horizontal"
+            :aria-label "App toolbar"}
       ($d AppLink {:href "https://tricorder.formform.dev"}
           "FORM tricorder")
-      ($ SplitviewRadioGroup 
-         {:mode :split1
-          :value-change-handler (fn [_] (js/console.log "View change"))})
+      ($d FocusFix
+          ($ SplitviewRadioGroup 
+             {:mode :split1
+              ; :rovingFocus false
+              :value-change-handler (fn [_] (js/console.log "View change"))}))
       ($d Button-splitview 
           {:on-click (fn [_] (set-views #(let [[v1 v2] %]
                                            [v2 v1])))}
           "⇄")
       ($d Separator)
-      ($ DarkmodeRadioGroup 
-         {:mode "🌙"
-          :value-change-handler (fn [_] (js/console.log "Mode change"))})
+      ($d ToggleGroup
+          {:type "single"}
+          ($d DarkmodeToggleItem
+              {:on-click (fn [_] (js/console.log "Mode change"))}
+              "🌙"))
+      #_($d FocusFix
+            ($ DarkmodeRadioGroup 
+               {:mode "🌙"
+                ; :rovingFocus false
+                :value-change-handler (fn [_] (js/console.log "Mode change"))}))
       ($d Separator)
       ($d Button {:on-click (fn [_] (js/console.log "Clicked about"))}
           "about")
