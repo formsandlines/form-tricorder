@@ -1,10 +1,10 @@
-(ns form-tricorder.views.output-area
+(ns form-tricorder.components.output-area
   (:require
     [helix.core :refer [defnc $ <>]]
     [helix.hooks :as hooks]
     [helix.dom :as d :refer [$d]]
     [form-tricorder.utils :refer [clj->js*]]
-    [form-tricorder.views.function-tabs :refer [FunctionTabs]]
+    [form-tricorder.components.function-tabs :refer [FunctionTabs]]
     ["@devbookhq/splitter$default" :as Splitter]
     ["/stitches.config" :refer (css)]))
 
@@ -30,16 +30,17 @@
       css))
 
 
-(defnc OutputPane 
+(defnc OutputPane
   [{:keys [id style views set-views]}]
   (let [value-change-handler (fn [v]
-                               (set-views #(update % id assoc :func v)))]
+                               (set-views
+                                #(update % id assoc :func-id v)))]
     (d/div
-      {:class "OutputPane"
-       :style style}
-      ($ FunctionTabs
-         {:view (views id)
-          :value-change-handler value-change-handler}))))
+     {:class "OutputPane"
+      :style style}
+     ($ FunctionTabs
+        {:view (views id)
+         :value-change-handler value-change-handler}))))
 
 (defnc OutputArea 
   [{:keys [views set-views]}]

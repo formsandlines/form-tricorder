@@ -1,4 +1,4 @@
-(ns form-tricorder.views.input-area
+(ns form-tricorder.components.input-area
   (:require
     [helix.core :refer [defnc $ <>]]
     [helix.hooks :as hooks]
@@ -7,12 +7,15 @@
     ["/stitches.config" :refer (css)]))
 
 
-(defnc InputArea []
-  (let [[input set-input] (hooks/use-state "")]
+(defnc InputArea [{:keys [submit-handler]}]
+  (let [[text set-text] (hooks/use-state "")]
     (d/div
      {:class "InputArea"}
      (d/input
-      {:value input
+      {:value text
        :on-change (fn [e]
                     (.preventDefault e)
-                    (set-input (.. e -target -value)))}))))
+                    (set-text (.. e -target -value)))})
+     (d/button
+       {:on-click (fn [_] (submit-handler text))}
+       "submit"))))

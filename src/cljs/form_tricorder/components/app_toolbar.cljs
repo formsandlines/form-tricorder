@@ -1,4 +1,4 @@
-(ns form-tricorder.views.app-toolbar
+(ns form-tricorder.components.app-toolbar
   (:require
     [helix.core :refer [defnc $ <>]]
     [helix.hooks :as hooks]

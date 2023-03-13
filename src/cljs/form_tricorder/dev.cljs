@@ -1,7 +1,7 @@
 (ns form-tricorder.dev
   "A place to add preloads for developer tools!"
   (:require [helix.experimental.refresh :as r]
-            [refx.alpha :as refx]))
+            #_[refx.alpha :as refx]))
 
 ;; inject-hook! needs to run on application start.
 ;; For ease, we run it at the top level.
@@ -13,5 +13,5 @@
 ;; function, which will tell react to refresh any components which have a
 ;; signature created by turning on the `:fast-refresh` feature flag.
 (defn ^:dev/after-load refresh []
-  (refx/clear-subscription-cache!)
+  ; (refx/clear-subscription-cache!)
   (r/refresh!))
