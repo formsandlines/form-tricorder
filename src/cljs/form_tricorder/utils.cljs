@@ -11,3 +11,7 @@
   "Calls `assoc` on props map of given component."
   [cp & kvs]
   (update cp 1 (fn [props] (apply assoc props kvs))))
+
+(defn pow-nat [x n] (apply * (repeat n x)))
+
+(defn geom-seq [k r] (map (fn [n] (* k (pow-nat r n))) (range)))

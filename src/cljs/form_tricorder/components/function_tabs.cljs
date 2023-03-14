@@ -57,11 +57,12 @@
 (defnc FunctionTabs
   [{:keys [view value-change-handler]}]
   (let [{:keys [mode-id func-id]} view
-        output ((hooks/use-context OutputContext) view)
-        current-view-el
-        (fnc []
-             (d/div mode-id "." func-id
-                    ": " output))]
+        Output ((hooks/use-context OutputContext) view)
+        ; current-view-el
+        ; (fnc []
+        ;      (d/div mode-id "." func-id
+        ;             ": " output))
+        ]
     ($d Root {:value func-id
               :onValueChange value-change-handler
               :activationMode "manual"
@@ -76,7 +77,7 @@
         (for [{:keys [id]} (-> modes-map (get mode-id) :items)]
           ($d Content {:key id
                        :value id}
-              ($ current-view-el))))))
+              ($ Output))))))
 
 
 

@@ -1,8 +1,5 @@
 (ns form-tricorder.core
   (:require
-    ; [form-tricorder.events :as events]
-    ; [form-tricorder.subs :as subs]
-    ; [form-tricorder.effects :as effects]
    [form-tricorder.processor :refer [process]]
    [form-tricorder.contexts :refer [OutputContext]]
    [form-tricorder.components.app-toolbar :refer [AppToolbar]]
@@ -18,7 +15,7 @@
 
 (defnc App
   []
-  (let [[input set-input] (hooks/use-state "")
+  (let [[input set-input] (hooks/use-state "((a)b)")
         [views set-views] (hooks/use-state
                            [{:mode-id "calc", :func-id "vtable",
                              :active true}
@@ -45,16 +42,6 @@
          {:views     views
           :set-views set-views})))))
 
-; (defnc Test-refx
-;   []
-;   (let [answer (refx/use-sub [:test/subs])]
-;     (<>
-;       (d/p "The answer is: " answer)
-;       (d/button
-;         {:on-click (fn [e] (refx/dispatch
-;                              [:test/event 
-;                               {:new-answer "within yourself"}]))}
-;         "Click me!"))))
 
 (defonce root
   (rdom/createRoot (js/document.getElementById "app")))
