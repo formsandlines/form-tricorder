@@ -1,11 +1,10 @@
 (ns form-tricorder.core
   (:require
-   [helix.core :refer [defnc $ <> provider]]
+   [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
-   [formform.calc :as calc]
-   [formform.expr :as expr]
    [formform.io :as io]
+   [form-tricorder.functions :as func]
    [form-tricorder.utils :refer [log]]
    ["react-dom/client" :as rdom]
    ["/stitches.config" :refer (css)]))
@@ -35,11 +34,14 @@
         func-data [{:func-id "edn"
                     :label "EDN data"}
                    {:func-id "vtable"
-                    :label "Value table"}]]
+                    :label "Value table"}
+                   {:func-id "vmap"
+                    :label "vmap"}]]
     (d/div
       {:class "FunctionMenu"}
       (for [{:keys [func-id label]} func-data]
         (d/label
+          {:key func-id}
           (d/input
             {:type "radio"
              :name "func"
@@ -49,26 +51,19 @@
           label)))))
 
 (defnc OutputArea
-  [{:keys [expr func]}]
-  (let [apply-func (fn [func-id expr]
-                     (case func-id
-                       "edn"    (str expr)
-                       "vtable" (str (:results (expr/eval-all expr)))
-                       (throw (ex-info "Unknown function" {}))))]
+  [{:keys [expr func-id]}]
+  (let [Output (func/gen-component (keyword func-id) expr)]
     (d/div
-      {:class "OutputArea"
-       :style {:border "1px solid lightgray"
-               :padding 10
-               :margin "10px 0"}}
-      (d/pre
-        {:style {:font-family "monospace"}}
-        func ": "
-        (str (apply-func func expr))))))
+     {:class "OutputArea"
+      :style {:border "1px solid lightgray"
+              :padding 10
+              :margin "10px 0"}}
+     ($ Output {}))))
 
 (defnc App
   []
-  (let [[expr set-expr] (hooks/use-state nil)
-        [func set-func] (hooks/use-state "edn")]
+  (let [[expr set-expr] (hooks/use-state '((a) b))
+        [func-id set-func-id] (hooks/use-state "vtable")]
     (d/div
      {:class "App"
       :style {:margin "2rem 2rem"}}
@@ -76,10 +71,10 @@
       {:style {:margin-bottom 10}}
       "FORM tricorder")
      ($ FormulaInput {:set-expr set-expr})
-     ($ FunctionMenu {:set-value set-func
-                      :value func})
+     ($ FunctionMenu {:set-value set-func-id
+                      :value func-id})
      ($ OutputArea {:expr expr
-                    :func func}))))
+                    :func-id func-id}))))
 
 
 (defonce root
@@ -90,4 +85,7 @@
   (.render root ($ App)))
 
 
-
+(comment
+  (:results (expr/eval-all '((a) b)))
+  
+  )
