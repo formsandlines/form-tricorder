@@ -1,5 +1,7 @@
 (ns form-tricorder.utils)
 
+(def log js/console.log)
+
 (defn clj->js* 
   "Recursively calls `clj->js` on given map and each submap in the tree."
   [m]
