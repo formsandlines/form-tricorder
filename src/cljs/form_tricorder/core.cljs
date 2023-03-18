@@ -36,7 +36,13 @@
                    {:func-id "vtable"
                     :label "Value table"}
                    {:func-id "vmap"
-                    :label "vmap"}]]
+                    :label "vmap"}
+                   {:func-id "depth-tree"
+                    :label "Depth tree"}
+                   {:func-id "graph"
+                    :label "Graph notation"}
+                   {:func-id "hooks"
+                    :label "Hooks notation"}]]
     (d/div
       {:class "FunctionMenu"}
       (for [{:keys [func-id label]} func-data]

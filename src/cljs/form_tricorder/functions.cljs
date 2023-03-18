@@ -1,12 +1,14 @@
 (ns form-tricorder.functions
   (:require
     [helix.core :refer [defnc fnc $ <> provider]]
-    ; [helix.hooks :as hooks]
+    [helix.hooks :as hooks]
     [helix.dom :as d]
     [formform.calc :as calc]
     [formform.expr :as expr]
+    [formform.io :as io]
+    ["/form-svg$default" :as form-svg]
     [clojure.math]
-    [form-tricorder.utils :as utils]))
+    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 
 (defmulti gen-component (fn [func-id _] func-id))
@@ -146,3 +148,72 @@
                       (d/text {}
                               label))))))))
 
+; (defmethod gen-component :depth-tree
+;   [_ expr]
+;   (let [json (clj->js* (io/uniform-expr {:branchname :space
+;                                          :use-unmarked? true} expr))]
+;     (js/console.log json)
+;     (fnc [{}]
+;          ; (d/div (str json))
+;          (let [; root-ref (hooks/use-ref nil)
+;                ]
+;            (hooks/use-effect
+;              :once
+;              (form-svg "tree" json
+;                        (clj->js
+;                          {:parentId "DepthTree"}))
+;              ; (let [viz (form-svg "tree" expr)]
+;              ;   (js/console.log viz)
+;              ;   (swap! root-ref #(.appendChild (.-current %)
+;              ;                                  (.-container viz))))
+;              )
+;            (d/div
+;              {:class "Output"
+;               :id "DepthTree"
+;               ; :ref root-ref
+;               })))))
+
+(defmethod gen-component :depth-tree
+  [_ expr]
+  (let [id   "depthtree" ; (random-uuid)
+        json (clj->js* (io/uniform-expr {:branchname :space
+                                         :use-unmarked? true} expr))]
+    (fnc [{}]
+         (hooks/use-effect
+          :once
+          (form-svg "tree" json
+                    (clj->js
+                     {:parentId id})))
+         (d/div
+          {:class "Output"
+           :id id}))))
+
+(defmethod gen-component :graph
+  [_ expr]
+  (let [id   "graph" ; (random-uuid)
+        json (clj->js* (io/uniform-expr {:branchname :space
+                                         :use-unmarked? true} expr))]
+    (fnc [{}]
+         (hooks/use-effect
+          :once
+          (form-svg "pack" json
+                    (clj->js
+                     {:parentId id})))
+         (d/div
+          {:class "Output"
+           :id id}))))
+
+(defmethod gen-component :hooks
+  [_ expr]
+  (let [id   "hooks" ; (random-uuid)
+        json (clj->js* (io/uniform-expr {:branchname :space
+                                         :use-unmarked? true} expr))]
+    (fnc [{}]
+         (hooks/use-effect
+          :once
+          (form-svg "gsbhooks" json
+                    (clj->js
+                     {:parentId id})))
+         (d/div
+          {:class "Output"
+           :id id}))))
