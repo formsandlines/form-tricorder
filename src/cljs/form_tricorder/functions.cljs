@@ -173,11 +173,16 @@
 ;               ; :ref root-ref
 ;               })))))
 
+(defn expr->json
+  [expr]
+  (io/uniform-expr {:branchname :space
+                    :use-unmarked? true
+                    :use-const? true} expr))
+
 (defmethod gen-component :depth-tree
   [_ expr]
   (let [id   "depthtree" ; (random-uuid)
-        json (clj->js* (io/uniform-expr {:branchname :space
-                                         :use-unmarked? true} expr))]
+        json (clj->js* (expr->json expr))]
     (fnc [{}]
          (hooks/use-effect
           :once
@@ -191,8 +196,7 @@
 (defmethod gen-component :graph
   [_ expr]
   (let [id   "graph" ; (random-uuid)
-        json (clj->js* (io/uniform-expr {:branchname :space
-                                         :use-unmarked? true} expr))]
+        json (clj->js* (expr->json expr))]
     (fnc [{}]
          (hooks/use-effect
           :once
@@ -206,8 +210,7 @@
 (defmethod gen-component :hooks
   [_ expr]
   (let [id   "hooks" ; (random-uuid)
-        json (clj->js* (io/uniform-expr {:branchname :space
-                                         :use-unmarked? true} expr))]
+        json (clj->js* (expr->json expr))]
     (fnc [{}]
          (hooks/use-effect
           :once

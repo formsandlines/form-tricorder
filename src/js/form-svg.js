@@ -427,7 +427,7 @@ class D3Form {
                         w += skewDiff((h + unclearPad.vt*2))*2 + unclearPad.hz*2;
                         h += unclearPad.vt*2;
                         break;
-                    case 'const':
+                    case 'constant':
                         txtSz = textSize(d.data.value, fontConst.size, fontConst.family, fontConst.style);
                         w = txtSz.width;
                         h = txtSz.height * 0.7;

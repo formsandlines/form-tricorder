@@ -30,7 +30,7 @@ global.basic = {
             family: 'georgia, serif', style: 'italic'
         },
     fontConst: { ...global.common.fontConst,
-        family: 'georgia, serif'
+        family: 'courier, monospace' // 'georgia, serif'
     },
     fontContext: { ...global.common.fontContext,
             family: 'courier, monospace'
