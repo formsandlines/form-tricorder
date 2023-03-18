@@ -414,7 +414,7 @@ class D3Form {
                 if (isText(d)) {
                     let txtSz = undefined;
                     switch (d.data.type) {
-                    case 'var':
+                    case 'variable':
                         txtSz = textSize(d.data.label, fontVar.size, fontVar.family, fontVar.style);
                         w = txtSz.width;
                         h = txtSz.height * 0.7;

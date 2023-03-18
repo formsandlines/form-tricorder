@@ -69,7 +69,7 @@
 (defnc App
   []
   (let [[expr set-expr] (hooks/use-state '((a) b))
-        [func-id set-func-id] (hooks/use-state "vtable")]
+        [func-id set-func-id] (hooks/use-state "hooks")]
     (d/div
      {:class "App"
       :style {:margin "2rem 2rem"}}
