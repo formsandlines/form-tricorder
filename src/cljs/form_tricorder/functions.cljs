@@ -175,9 +175,7 @@
 
 (defn expr->json
   [expr]
-  (io/uniform-expr {:branchname :space
-                    :use-unmarked? true
-                    :use-const? true} expr))
+  (io/uniform-expr {:legacy? true} expr))
 
 (defmethod gen-component :depth-tree
   [_ expr]

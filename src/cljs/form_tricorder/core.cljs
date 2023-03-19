@@ -3,6 +3,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
+   [formform.expr :as expr]
    [formform.io :as io]
    [form-tricorder.functions :as func]
    [form-tricorder.utils :refer [log]]
@@ -11,7 +12,7 @@
 
 (defnc FormulaInput
   [{:keys [set-expr]}]
-  (let [[input set-input] (hooks/use-state "((a) b)")
+  (let [[input set-input] (hooks/use-state "")
         apply-input #(set-expr (io/read-expr input))]
     (d/div
      {:class "FormulaInput"
@@ -68,7 +69,13 @@
 
 (defnc App
   []
-  (let [[expr set-expr] (hooks/use-state '((a) b))
+  (let [[expr set-expr] (hooks/use-state
+                         [['a :M]
+                          (expr/seq-re :<r
+                                       [:- 'a ['b]]
+                                       (expr/seq-re :<..r :M 'x)
+                                       :U)
+                          'b])
         [func-id set-func-id] (hooks/use-state "hooks")]
     (d/div
      {:class "App"
