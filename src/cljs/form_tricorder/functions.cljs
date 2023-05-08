@@ -11,6 +11,10 @@
     [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 
+(defn expr->json
+  [expr]
+  (clj->js* (io/uniform-expr {:legacy? true} expr)))
+
 (defmulti gen-component (fn [func-id _] func-id))
 
 (defmethod gen-component :default
@@ -23,7 +27,14 @@
   [_ expr]
   (fnc [{}]
        (d/pre {:style {:font-family "monospace"}}
-              (str expr))))
+              (d/code (str expr)))))
+
+(defmethod gen-component :json
+  [_ expr]
+  (fnc [{}]
+       (d/pre {:style {:font-family "monospace"}}
+              (d/code (.stringify js/JSON (expr->json expr)
+                                  js/undefined 2)))))
 
 (defmethod gen-component :vtable
   [_ expr]
@@ -77,10 +88,10 @@
 (defmethod gen-component :vmap
   [_ expr]
   (let [vmap (-> expr
-                 (expr/=>*)
+                 expr/=>*
                  (expr/op-get :dna)
-                 (calc/dna->vdict {})
-                 (calc/vdict->vmap))] 
+                 calc/dna->vdict
+                 calc/vdict->vmap)] 
     (fnc
       [{:keys [scale-to-fit? cellsize padding margins stroke-width
                colors bg-color stroke-color label]
@@ -173,14 +184,10 @@
 ;               ; :ref root-ref
 ;               })))))
 
-(defn expr->json
-  [expr]
-  (io/uniform-expr {:legacy? true} expr))
-
 (defmethod gen-component :depth-tree
   [_ expr]
   (let [id   "depthtree" ; (random-uuid)
-        json (clj->js* (expr->json expr))]
+        json (expr->json expr)]
     (fnc [{}]
          (hooks/use-effect
           :once
@@ -194,7 +201,7 @@
 (defmethod gen-component :graph
   [_ expr]
   (let [id   "graph" ; (random-uuid)
-        json (clj->js* (expr->json expr))]
+        json (expr->json expr)]
     (fnc [{}]
          (hooks/use-effect
           :once
@@ -208,7 +215,7 @@
 (defmethod gen-component :hooks
   [_ expr]
   (let [id   "hooks" ; (random-uuid)
-        json (clj->js* (expr->json expr))]
+        json (expr->json expr)]
     (fnc [{}]
          (hooks/use-effect
           :once

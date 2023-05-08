@@ -3,6 +3,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
+   [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
    [form-tricorder.functions :as func]
@@ -33,7 +34,9 @@
   (let [handle-change (fn [e] (set-value (.. e -target -value)))
         checked? (fn [s] (if (= value s) true ""))
         func-data [{:func-id "edn"
-                    :label "EDN data"}
+                    :label "EDN"}
+                   {:func-id "json"
+                    :label "JSON"}
                    {:func-id "vtable"
                     :label "Value table"}
                    {:func-id "vmap"
@@ -99,6 +102,16 @@
 
 
 (comment
-  (:results (expr/eval-all '((a) b)))
+  (-> (expr/make '((a) b))
+      expr/=>*
+      (expr/op-get :dna)
+      calc/dna->vdict
+      calc/vdict->vmap
+      meta
+      :dim)
+
+  (expr/defsymbol :x ["y"])
+  (expr/interpret :x)
+  (:results (expr/eval-all '((a) b))))
   
-  )
+  
