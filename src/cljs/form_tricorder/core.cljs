@@ -6,10 +6,12 @@
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
+   [form-tricorder.model :as model :refer [modes]]
    [form-tricorder.functions :as func]
    [form-tricorder.utils :refer [log]]
    ["react-dom/client" :as rdom]
    ["/stitches.config" :refer (css)]))
+
 
 (defnc FormulaInput
   [{:keys [set-expr]}]
@@ -32,54 +34,26 @@
 (defnc FunctionMenu
   [{:keys [set-value value]}]
   (let [handle-change (fn [e] (set-value (.. e -target -value)))
-        checked? (fn [s] (if (= value s) true ""))
-        data [{:group-id "calculate"
-               :label "Calculate"
-               :content [{:func-id "vtable"
-                          :label "Value table"}
-                         {:func-id "vmap"
-                          :label "vmap"}]}
-              {:group-id "visualize"
-               :label "Visualize"
-               :content [{:func-id "hooks"
-                          :label "Hooks notation"}
-                         {:func-id "graph"
-                          :label "Graph notation"}
-                         {:func-id "depth-tree"
-                          :label "Depth tree"}]}
-              {:group-id "emulate"
-               :label "Emulate"
-               :content [{:func-id "selfi"
-                          :label "SelFi"}
-                         {:func-id "mindform"
-                          :label "mindFORM"}
-                         {:func-id "lifeform"
-                          :label "lifeFORM"}]}
-              {:group-id "more"
-               :label "…"
-               :content [{:func-id "edn"
-                          :label "EDN"}
-                         {:func-id "json"
-                          :label "JSON"}]}]]
+        checked? (fn [s] (if (= value s) true ""))]
     (d/div
      {:class "FunctionMenu"
       :style {:display "flex"
               :gap 10}}
-     (for [{:keys [group-id content label]} data]
+     (for [{:keys [id label items]} modes]
        (d/fieldset
-        {:style {:flex (if (= group-id "more") "none" "1 1 0%")
+        {:style {:flex (if (= id "more") "none" "1 1 0%")
                  :padding 4
                  :border "1px solid black"}}
         (d/legend label)
-        (for [{:keys [func-id label]} content]
+        (for [{:keys [id label]} items]
           (d/label
-           {:key func-id
+           {:key id
             :style {:display "block"}}
            (d/input
             {:type "radio"
              :name "func"
-             :value func-id
-             :checked (checked? func-id)
+             :value id
+             :checked (checked? id)
              :on-change handle-change})
            label)))))))
 

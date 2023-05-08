@@ -184,7 +184,7 @@
 ;               ; :ref root-ref
 ;               })))))
 
-(defmethod gen-component :depth-tree
+(defmethod gen-component :depthtree
   [_ expr]
   (let [id   "depthtree" ; (random-uuid)
         json (expr->json expr)]
@@ -198,7 +198,7 @@
           {:class "Output"
            :id id}))))
 
-(defmethod gen-component :graph
+(defmethod gen-component :graphs
   [_ expr]
   (let [id   "graph" ; (random-uuid)
         json (expr->json expr)]
