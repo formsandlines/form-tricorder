@@ -33,32 +33,55 @@
   [{:keys [set-value value]}]
   (let [handle-change (fn [e] (set-value (.. e -target -value)))
         checked? (fn [s] (if (= value s) true ""))
-        func-data [{:func-id "edn"
-                    :label "EDN"}
-                   {:func-id "json"
-                    :label "JSON"}
-                   {:func-id "vtable"
-                    :label "Value table"}
-                   {:func-id "vmap"
-                    :label "vmap"}
-                   {:func-id "depth-tree"
-                    :label "Depth tree"}
-                   {:func-id "graph"
-                    :label "Graph notation"}
-                   {:func-id "hooks"
-                    :label "Hooks notation"}]]
+        data [{:group-id "calculate"
+               :label "Calculate"
+               :content [{:func-id "vtable"
+                          :label "Value table"}
+                         {:func-id "vmap"
+                          :label "vmap"}]}
+              {:group-id "visualize"
+               :label "Visualize"
+               :content [{:func-id "hooks"
+                          :label "Hooks notation"}
+                         {:func-id "graph"
+                          :label "Graph notation"}
+                         {:func-id "depth-tree"
+                          :label "Depth tree"}]}
+              {:group-id "emulate"
+               :label "Emulate"
+               :content [{:func-id "selfi"
+                          :label "SelFi"}
+                         {:func-id "mindform"
+                          :label "mindFORM"}
+                         {:func-id "lifeform"
+                          :label "lifeFORM"}]}
+              {:group-id "more"
+               :label "…"
+               :content [{:func-id "edn"
+                          :label "EDN"}
+                         {:func-id "json"
+                          :label "JSON"}]}]]
     (d/div
-      {:class "FunctionMenu"}
-      (for [{:keys [func-id label]} func-data]
-        (d/label
-          {:key func-id}
-          (d/input
+     {:class "FunctionMenu"
+      :style {:display "flex"
+              :gap 10}}
+     (for [{:keys [group-id content label]} data]
+       (d/fieldset
+        {:style {:flex (if (= group-id "more") "none" "1 1 0%")
+                 :padding 4
+                 :border "1px solid black"}}
+        (d/legend label)
+        (for [{:keys [func-id label]} content]
+          (d/label
+           {:key func-id
+            :style {:display "block"}}
+           (d/input
             {:type "radio"
              :name "func"
              :value func-id
              :checked (checked? func-id)
              :on-change handle-change})
-          label)))))
+           label)))))))
 
 (defnc OutputArea
   [{:keys [expr func-id]}]
@@ -73,6 +96,7 @@
 (defnc App
   []
   (let [[expr set-expr] (hooks/use-state
+                         ;; dummy expression
                          [['a :M]
                           (expr/seq-re :<r
                                        [:- 'a ['b]]
@@ -101,17 +125,6 @@
   (.render root ($ App)))
 
 
-(comment
-  (-> (expr/make '((a) b))
-      expr/=>*
-      (expr/op-get :dna)
-      calc/dna->vdict
-      calc/vdict->vmap
-      meta
-      :dim)
-
-  (expr/defsymbol :x ["y"])
-  (expr/interpret :x)
-  (:results (expr/eval-all '((a) b))))
+(comment)
   
   
