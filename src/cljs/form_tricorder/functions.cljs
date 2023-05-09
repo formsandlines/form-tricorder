@@ -1,14 +1,14 @@
 (ns form-tricorder.functions
   (:require
-    [helix.core :refer [defnc fnc $ <> provider]]
-    [helix.hooks :as hooks]
-    [helix.dom :as d]
-    [formform.calc :as calc]
-    [formform.expr :as expr]
-    [formform.io :as io]
-    ["/form-svg$default" :as form-svg]
-    [clojure.math]
-    [form-tricorder.utils :as utils :refer [clj->js*]]))
+   [helix.core :refer [defnc fnc $ <> provider]]
+   [helix.hooks :as hooks]
+   [helix.dom :as d]
+   [formform.calc :as calc]
+   [formform.expr :as expr]
+   [formform.io :as io]
+   ["/form-svg$default" :as form-svg]
+   [clojure.math]
+   [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 
 (defn expr->json
@@ -27,7 +27,7 @@
   [_ expr]
   (fnc [{}]
        (d/pre {:style {:font-family "monospace"}}
-              (d/code (str expr)))))
+              (d/code (prn-str expr)))))
 
 (defmethod gen-component :json
   [_ expr]
@@ -83,7 +83,8 @@
 (def const->coords {:N [0 0]
                     :U [0 1]
                     :I [1 0]
-                    :M [1 1]})
+                    :M [1 1]
+                    :_ [0 0]})
 
 (defmethod gen-component :vmap
   [_ expr]
@@ -91,14 +92,15 @@
                  expr/=>*
                  (expr/op-get :dna)
                  calc/dna->vdict
-                 calc/vdict->vmap)] 
+                 calc/vdict->vmap)
+        dim  (calc/vmap-dimension vmap)
+        vmap (if (> dim 0) vmap {:_ vmap})]
     (fnc
       [{:keys [scale-to-fit? cellsize padding margins stroke-width
                colors bg-color stroke-color label]
         :or {scale-to-fit? false padding 0 stroke-width 0.5
              colors KRGB bg-color nil stroke-color nil label nil}}]
-      (let [dim       (:dim (meta vmap))
-            cellsize  (if (nil? cellsize)
+      (let [cellsize  (if (nil? cellsize)
                         12
                         cellsize)
             margins   (reverse (take dim (if (nil? margins)

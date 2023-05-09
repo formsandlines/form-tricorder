@@ -62,3 +62,13 @@
 
 (def modes-map
   (update-vals (group-by :id modes) first))
+
+(def func->mode
+  (into {}
+        (for [{:keys [id items]} modes
+              {func-id :id} items]
+          [func-id id])))
+
+
+(comment
+  (modes-map "calc"))

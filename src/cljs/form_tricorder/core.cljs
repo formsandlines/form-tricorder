@@ -41,7 +41,8 @@
               :gap 10}}
      (for [{:keys [id label items]} modes]
        (d/fieldset
-        {:style {:flex (if (= id "more") "none" "1 1 0%")
+        {:key id
+         :style {:flex (if (= id "more") "none" "1 1 0%")
                  :padding 4
                  :border "1px solid black"}}
         (d/legend label)
@@ -59,12 +60,14 @@
 
 (defnc OutputArea
   [{:keys [expr func-id]}]
-  (let [Output (func/gen-component (keyword func-id) expr)]
+  (let [Output  (func/gen-component (keyword func-id) expr)
+        mode-id (model/func->mode func-id)]
     (d/div
      {:class "OutputArea"
       :style {:border "1px solid lightgray"
               :padding 10
               :margin "10px 0"}}
+     (d/p mode-id)
      ($ Output {}))))
 
 (defnc App
@@ -99,6 +102,12 @@
   (.render root ($ App)))
 
 
-(comment)
+(comment
+  (let [expr 'a]
+    (meta (-> expr
+              expr/=>*
+              (expr/op-get :dna)
+              calc/dna->vdict
+              calc/vdict->vmap))))
   
   
