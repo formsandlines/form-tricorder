@@ -1,5 +1,6 @@
 (ns form-tricorder.functions
   (:require
+   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
@@ -8,6 +9,7 @@
    [formform.io :as io]
    ["/form-svg$default" :as form-svg]
    [clojure.math]
+   [form-tricorder.mode-ui :as mode-ui]
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 
@@ -19,50 +21,63 @@
 
 (defmethod gen-component :default
   [func-id _]
-  (fnc [] (d/pre {:style {:font-family "monospace"}}
-                 (str (ex-info "Unknown function"
-                               {:func-id func-id})))))
+  (d/pre {:style {:font-family "monospace"}}
+         (str (ex-info "Unknown function"
+                       {:func-id func-id}))))
+
+(defnc F-EDN
+  [_]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    (d/pre {:style {:font-family "monospace"}}
+           (d/code (prn-str expr)))))
 
 (defmethod gen-component :edn
-  [_ expr]
-  (fnc [{}]
-       (d/pre {:style {:font-family "monospace"}}
-              (d/code (prn-str expr)))))
+  [_ args]
+  ($ F-EDN {& args}))
+
+
+(defnc F-JSON
+  [_]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    (d/pre {:style {:font-family "monospace"}}
+           (d/code (.stringify js/JSON (expr->json expr)
+                               js/undefined 2)))))
 
 (defmethod gen-component :json
-  [_ expr]
-  (fnc [{}]
-       (d/pre {:style {:font-family "monospace"}}
-              (d/code (.stringify js/JSON (expr->json expr)
-                                  js/undefined 2)))))
+  [_ args]
+  ($ F-JSON {& args}))
 
-(defmethod gen-component :vtable
-  [_ expr]
-  (let [{:keys [results varorder]} (expr/eval-all expr)
+
+(defnc F-Vtable
+  [_]
+  (let [{:keys [expr]} (refx/use-sub [:input])
+        {:keys [results varorder]} (expr/eval-all expr) ;; memoize!
         results (map (fn [[intpr res]]
                        {:id (random-uuid)
                         :intpr intpr
                         :result res})
                      results)]
-    (fnc
-      []
-      (d/table
-        {:style {:font-family "monospace"}}
-        (d/thead
+    (d/table
+      {:style {:font-family "monospace"}}
+      (d/thead
+        (d/tr
+          (for [x varorder
+                :let [x (str x)]]
+            (d/th {:key x}
+                  x))
+          (d/th "Result")))
+      (d/tbody
+        (for [{:keys [id intpr result]} results]
           (d/tr
-            (for [x varorder
-                  :let [x (str x)]]
-              (d/th {:key x}
-                    x))
-            (d/th "Result")))
-        (d/tbody
-          (for [{:keys [id intpr result]} results]
-            (d/tr
-              {:key id}
-              (for [[i v] (map-indexed vector intpr)]
-                (d/td {:key (str id "-" i)}
-                      (str v) "\u00a0"))
-              (d/td (str result)))))))))
+            {:key id}
+            (for [[i v] (map-indexed vector intpr)]
+              (d/td {:key (str id "-" i)}
+                    (str v) "\u00a0"))
+            (d/td (str result))))))))
+
+(defmethod gen-component :vtable
+  [_ args]
+  ($ F-Vtable {& args}))
 
 
 (defn gen-margins
@@ -86,83 +101,115 @@
                     :M [1 1]
                     :_ [0 0]})
 
-(defmethod gen-component :vmap
-  [_ expr]
-  (let [vmap (-> expr
-                 expr/=>*
-                 (expr/op-get :dna)
-                 calc/dna->vdict
-                 calc/vdict->vmap)
-        dim  (calc/vmap-dimension vmap)
-        vmap (if (> dim 0) vmap {:_ vmap})]
-    (fnc
-      [{:keys [scale-to-fit? cellsize padding margins stroke-width
-               colors bg-color stroke-color label]
-        :or {scale-to-fit? false padding 0 stroke-width 0.5
-             colors KRGB bg-color nil stroke-color nil label nil}}]
-      (let [cellsize  (if (nil? cellsize)
-                        12
-                        cellsize)
-            margins   (reverse (take dim (if (nil? margins)
-                                           (utils/geom-seq 0.1 2.0)
-                                           margins)))
-            sum-gaps  (fn [margins] (apply + (map (fn [n i]
-                                                    (* n (utils/pow-nat 2 i)))
-                                                  margins (range))))
-            vmap-size (+ (* (utils/pow-nat 2 dim) cellsize)
-                         (* (sum-gaps margins) cellsize))
-            vmap-diag (clojure.math/sqrt (* (* vmap-size vmap-size) 2))
-            full-size (+ vmap-diag padding)]
+(defnc F-Vmap
+  [{:keys [vmap scale-to-fit? cellsize padding margins stroke-width
+           colors bg-color stroke-color label]
+    :or {scale-to-fit? false padding 0 stroke-width 0.5
+         colors KRGB bg-color nil stroke-color nil label nil}}]
+  (let [dim       (calc/vmap-dimension vmap)
+        vmap      (if (> dim 0) vmap {:_ vmap})
+        cellsize  (if (nil? cellsize)
+                    12
+                    cellsize)
+        margins   (reverse (take dim (if (nil? margins)
+                                       (utils/geom-seq 0.1 2.0)
+                                       margins)))
+        sum-gaps  (fn [margins] (apply + (map (fn [n i]
+                                                (* n (utils/pow-nat 2 i)))
+                                              margins (range))))
+        vmap-size (+ (* (utils/pow-nat 2 dim) cellsize)
+                     (* (sum-gaps margins) cellsize))
+        vmap-diag (clojure.math/sqrt (* (* vmap-size vmap-size) 2))
+        full-size (+ vmap-diag padding)]
 
-        (d/svg {:width  (if scale-to-fit? "100%" full-size)
-                :height (if scale-to-fit? "100%" full-size)
-                :view-box (let [shift (+ (/ padding 2))]
-                            (str "-" shift " -" shift
-                                 " " full-size " " full-size))}
-               (when (some? bg-color)
-                 (d/rect {:x (str "-" (/ padding 2))
-                          :y (str "-" (/ padding 2))
-                          :width  full-size
-                          :height full-size
-                          :fill   bg-color}))
-               (d/g {:transform
-                     (str "translate(" 0 "," (/ vmap-diag 2) ")"
-                          "scale(" cellsize ") "
-                          "rotate(" -45 ") ")}
-                    ((fn f [vmap dim margins]
-                       (for [[k v] vmap]
-                         (d/g {:key (str "dim" dim "_" (name k))
-                               :transform
-                               (let [coords (const->coords k)
-                                     gaps   (if (> (count margins) 1)
-                                              (sum-gaps (rest margins))
-                                              0)
-                                     shift  (+ (utils/pow-nat 2 dim)
-                                               (first margins)
-                                               gaps)
-                                     x (* (coords 0) shift)
-                                     y (* (coords 1) shift)]
-                                 (str "translate(" x "," y ")"))}
-                              (if (> dim 0)
-                                (f v (dec dim) (rest margins))
-                                (d/rect
-                                  {:width  1
-                                   :height 1
-                                   :fill (colors v)
-                                   & (if (nil? stroke-color)
-                                       {}
-                                       {:stroke-width (/ stroke-width cellsize)
-                                        :stroke stroke-color})})))))
-                     vmap (dec dim) margins))
+    (d/svg {:width  (if scale-to-fit? "100%" full-size)
+            :height (if scale-to-fit? "100%" full-size)
+            :view-box (let [shift (+ (/ padding 2))]
+                        (str "-" shift " -" shift
+                             " " full-size " " full-size))}
+           (when (some? bg-color)
+             (d/rect {:x (str "-" (/ padding 2))
+                      :y (str "-" (/ padding 2))
+                      :width  full-size
+                      :height full-size
+                      :fill   bg-color}))
+           (d/g {:transform
+                 (str "translate(" 0 "," (/ vmap-diag 2) ")"
+                      "scale(" cellsize ") "
+                      "rotate(" -45 ") ")}
+                ((fn f [vmap dim margins]
+                   (for [[k v] vmap]
+                     (d/g {:key (str "dim" dim "_" (name k))
+                           :transform
+                           (let [coords (const->coords k)
+                                 gaps   (if (> (count margins) 1)
+                                          (sum-gaps (rest margins))
+                                          0)
+                                 shift  (+ (utils/pow-nat 2 dim)
+                                           (first margins)
+                                           gaps)
+                                 x (* (coords 0) shift)
+                                 y (* (coords 1) shift)]
+                             (str "translate(" x "," y ")"))}
+                          (if (> dim 0)
+                            (f v (dec dim) (rest margins))
+                            (d/rect
+                             {:width  1
+                              :height 1
+                              :fill (colors v)
+                              & (if (nil? stroke-color)
+                                  {}
+                                  {:stroke-width (/ stroke-width cellsize)
+                                   :stroke stroke-color})})))))
+                 vmap (dec dim) margins))
 
                ;; ! TODO
-               (when (some? label)
-                 (d/g {:transform (str "translate(" 0 "," vmap-diag ")")}
-                      (d/text {}
-                              label))))))))
+           (when (some? label)
+             (d/g {:transform (str "translate(" 0 "," vmap-diag ")")}
+                  (d/text {}
+                          label))))))
+
+(defnc VmapWrapper
+  [_]
+  (let [cache (refx/use-sub [:cache])
+        {:keys [expr]} (refx/use-sub [:input])
+        value (hooks/use-memo
+                [expr]
+                ; (println "value!")
+                (let [cached-expr  (:expr cache)
+                      cached-value (:value cache)]
+                  (if (and cached-value (= cached-expr expr))
+                    cached-value
+                    (expr/=>* expr))))
+        vmap (hooks/use-memo
+               [value]
+               ; (println "vmap!")
+               (when value
+                 (-> value
+                     (expr/op-get :dna)
+                     calc/dna->vdict
+                     calc/vdict->vmap)))]
+    ; (println "expr: " expr)
+    ; (println "cache: " cache)
+    (hooks/use-effect
+      [vmap]
+      ; (println "vmap changed -> caching…")
+      (refx/dispatch [:update-cache
+                      {:update-fn
+                       #(assoc % :value value :expr expr)}]))
+    (d/div {:class "Vmap"}
+           ($ mode-ui/Calc {:value value})
+           ; (d/pre (str value))
+           (when vmap
+             ($ F-Vmap {:vmap vmap})))))
+
+(defmethod gen-component :vmap
+  [_ args]
+  ($ VmapWrapper {& args}))
+
 
 ; (defmethod gen-component :depth-tree
-;   [_ expr]
+;   [_ {:keys [expr]}]
 ;   (let [json (clj->js* (io/uniform-expr {:branchname :space
 ;                                          :use-unmarked? true} expr))]
 ;     (js/console.log json)
@@ -186,44 +233,69 @@
 ;               ; :ref root-ref
 ;               })))))
 
+
+(defn remove-children
+  [parent]
+  (let [children (when (.. parent hasChildNodes)
+                   (.. parent -children))]
+    (doseq [el children] (.remove el))))
+
+
+(defnc F-Depthtree
+  [_]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    (let [id   "depthtree" ; (random-uuid)
+          json (expr->json expr)]
+      (hooks/use-effect
+        [expr]
+        (remove-children (.. js/document (getElementById id)))
+        (form-svg "tree" json
+                  (clj->js
+                    {:parentId id})))
+      (d/div
+        {:class "Output"
+         :id id}))))
+
 (defmethod gen-component :depthtree
-  [_ expr]
-  (let [id   "depthtree" ; (random-uuid)
+  [_ args]
+  ($ F-Depthtree {& args}))
+
+
+(defnc F-Graphs
+  [_]
+  (let [{:keys [expr]} (refx/use-sub [:input])
+        id   "graph" ; (random-uuid)
         json (expr->json expr)]
-    (fnc [{}]
-         (hooks/use-effect
-          :once
-          (form-svg "tree" json
-                    (clj->js
-                     {:parentId id})))
-         (d/div
-          {:class "Output"
-           :id id}))))
+    (hooks/use-effect
+      [expr]
+      (remove-children (.. js/document (getElementById id)))
+      (form-svg "pack" json
+                (clj->js
+                  {:parentId id})))
+    (d/div
+      {:class "Output"
+       :id id})))
 
 (defmethod gen-component :graphs
-  [_ expr]
-  (let [id   "graph" ; (random-uuid)
-        json (expr->json expr)]
-    (fnc [{}]
-         (hooks/use-effect
-          :once
-          (form-svg "pack" json
-                    (clj->js
-                     {:parentId id})))
-         (d/div
-          {:class "Output"
-           :id id}))))
+  [_ args]
+  ($ F-Graphs {& args}))
+
+
+(defnc F-Hooks
+  [_]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    (let [id   "hooks" ; (random-uuid)
+          json (expr->json expr)]
+      (hooks/use-effect
+        [expr]
+        (remove-children (.. js/document (getElementById id)))
+        (form-svg "gsbhooks" json
+                  (clj->js
+                    {:parentId id})))
+      (d/div
+        {:class "Output"
+         :id id}))))
 
 (defmethod gen-component :hooks
-  [_ expr]
-  (let [id   "hooks" ; (random-uuid)
-        json (expr->json expr)]
-    (fnc [{}]
-         (hooks/use-effect
-          :once
-          (form-svg "gsbhooks" json
-                    (clj->js
-                     {:parentId id})))
-         (d/div
-          {:class "Output"
-           :id id}))))
+  [_ args]
+  ($ F-Hooks {& args}))

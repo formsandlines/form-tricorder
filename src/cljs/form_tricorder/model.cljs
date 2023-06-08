@@ -60,6 +60,7 @@
             :hover "darkgrey"}
     :items misc-items}])
 
+
 (def modes-map
   (update-vals (group-by :id modes) first))
 
