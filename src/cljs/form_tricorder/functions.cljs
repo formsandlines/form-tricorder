@@ -25,60 +25,88 @@
          (str (ex-info "Unknown function"
                        {:func-id func-id}))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; EDN
+
 (defnc F-EDN
-  [_]
+  [{:keys [expr]}]
+  (d/pre {:style {:font-family "monospace"}}
+         (d/code (prn-str expr))))
+
+(defnc F-EDN--init
+  [args]
   (let [{:keys [expr]} (refx/use-sub [:input])]
-    (d/pre {:style {:font-family "monospace"}}
-           (d/code (prn-str expr)))))
+    ($ F-EDN {:expr expr
+              & args})))
 
 (defmethod gen-component :edn
   [_ args]
-  ($ F-EDN {& args}))
+  ($ F-EDN--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; JSON
 
 (defnc F-JSON
-  [_]
+  [{:keys [expr]}]
+  (d/pre {:style {:font-family "monospace"}}
+         (d/code (.stringify js/JSON (expr->json expr)
+                             js/undefined 2))))
+
+(defnc F-JSON--init
+  [args]
   (let [{:keys [expr]} (refx/use-sub [:input])]
-    (d/pre {:style {:font-family "monospace"}}
-           (d/code (.stringify js/JSON (expr->json expr)
-                               js/undefined 2)))))
+    ($ F-JSON {:expr expr
+               & args})))
 
 (defmethod gen-component :json
   [_ args]
-  ($ F-JSON {& args}))
+  ($ F-JSON--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Value table
 
 (defnc F-Vtable
-  [_]
-  (let [{:keys [expr]} (refx/use-sub [:input])
-        {:keys [results varorder]} (expr/eval-all expr) ;; memoize!
+  [{:keys [expr]}]
+  (let [{:keys [results varorder]} (expr/eval-all expr) ;; memoize!
         results (map (fn [[intpr res]]
                        {:id (random-uuid)
                         :intpr intpr
                         :result res})
                      results)]
     (d/table
-      {:style {:font-family "monospace"}}
-      (d/thead
+     {:style {:font-family "monospace"}}
+     (d/thead
+      (d/tr
+       (for [x varorder
+             :let [x (str x)]]
+         (d/th {:key x}
+               x))
+       (d/th "Result")))
+     (d/tbody
+      (for [{:keys [id intpr result]} results]
         (d/tr
-          (for [x varorder
-                :let [x (str x)]]
-            (d/th {:key x}
-                  x))
-          (d/th "Result")))
-      (d/tbody
-        (for [{:keys [id intpr result]} results]
-          (d/tr
-            {:key id}
-            (for [[i v] (map-indexed vector intpr)]
-              (d/td {:key (str id "-" i)}
-                    (str v) "\u00a0"))
-            (d/td (str result))))))))
+         {:key id}
+         (for [[i v] (map-indexed vector intpr)]
+           (d/td {:key (str id "-" i)}
+                 (str v) "\u00a0"))
+         (d/td (str result))))))))
+
+(defnc F-Vtable--init
+  [args]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    ($ F-Vtable {:expr expr
+                 & args})))
 
 (defmethod gen-component :vtable
   [_ args]
-  ($ F-Vtable {& args}))
+  ($ F-Vtable--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; vmap
 
 (defn gen-margins
   [{:keys [gap-bounds gap-growth]
@@ -101,7 +129,7 @@
                     :M [1 1]
                     :_ [0 0]})
 
-(defnc F-Vmap
+(defnc Vmap-viz
   [{:keys [vmap scale-to-fit? cellsize padding margins stroke-width
            colors bg-color stroke-color label]
     :or {scale-to-fit? false padding 0 stroke-width 0.5
@@ -169,70 +197,47 @@
                   (d/text {}
                           label))))))
 
-(defnc VmapWrapper
-  [_]
+(defnc F-Vmap
+  [{:keys [expr value]}]
+  (let [vmap (hooks/use-memo
+              [value]
+              (when value
+                (-> value
+                    (expr/op-get :dna)
+                    calc/dna->vdict
+                    calc/vdict->vmap)))]
+    (hooks/use-effect
+     [vmap]
+     (refx/dispatch [:update-cache
+                     {:update-fn
+                      #(assoc % :value value :expr expr)}]))
+    (d/div {:class "Vmap"}
+           ($ mode-ui/Calc {:value value})
+           (when vmap
+             ($ Vmap-viz {:vmap vmap})))))
+
+(defnc F-Vmap--init
+  [args]
   (let [cache (refx/use-sub [:cache])
         {:keys [expr]} (refx/use-sub [:input])
         value (hooks/use-memo
-                [expr]
-                ; (println "value!")
-                (let [cached-expr  (:expr cache)
-                      cached-value (:value cache)]
-                  (if (and cached-value (= cached-expr expr))
-                    cached-value
-                    (expr/=>* expr))))
-        vmap (hooks/use-memo
-               [value]
-               ; (println "vmap!")
-               (when value
-                 (-> value
-                     (expr/op-get :dna)
-                     calc/dna->vdict
-                     calc/vdict->vmap)))]
-    ; (println "expr: " expr)
-    ; (println "cache: " cache)
-    (hooks/use-effect
-      [vmap]
-      ; (println "vmap changed -> caching…")
-      (refx/dispatch [:update-cache
-                      {:update-fn
-                       #(assoc % :value value :expr expr)}]))
-    (d/div {:class "Vmap"}
-           ($ mode-ui/Calc {:value value})
-           ; (d/pre (str value))
-           (when vmap
-             ($ F-Vmap {:vmap vmap})))))
+               [expr]
+               (let [cached-expr  (:expr cache)
+                     cached-value (:value cache)]
+                 (if (and cached-value (= cached-expr expr))
+                   cached-value
+                   (expr/=>* expr))))]
+    ($ F-Vmap {:expr  expr
+               :value value
+               & args})))
 
 (defmethod gen-component :vmap
   [_ args]
-  ($ VmapWrapper {& args}))
+  ($ F-Vmap--init {& args}))
 
 
-; (defmethod gen-component :depth-tree
-;   [_ {:keys [expr]}]
-;   (let [json (clj->js* (io/uniform-expr {:branchname :space
-;                                          :use-unmarked? true} expr))]
-;     (js/console.log json)
-;     (fnc [{}]
-;          ; (d/div (str json))
-;          (let [; root-ref (hooks/use-ref nil)
-;                ]
-;            (hooks/use-effect
-;              :once
-;              (form-svg "tree" json
-;                        (clj->js
-;                          {:parentId "DepthTree"}))
-;              ; (let [viz (form-svg "tree" expr)]
-;              ;   (js/console.log viz)
-;              ;   (swap! root-ref #(.appendChild (.-current %)
-;              ;                                  (.-container viz))))
-;              )
-;            (d/div
-;              {:class "Output"
-;               :id "DepthTree"
-;               ; :ref root-ref
-;               })))))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Depth tree
 
 (defn remove-children
   [parent]
@@ -242,29 +247,36 @@
 
 
 (defnc F-Depthtree
-  [_]
+  [{:keys [expr]}]
+  (let [id   "depthtree" ; (random-uuid)
+        json (expr->json expr)]
+    (hooks/use-effect
+     [expr]
+     (remove-children (.. js/document (getElementById id)))
+     (form-svg "tree" json
+               (clj->js
+                {:parentId id})))
+    (d/div
+     {:class "Output"
+      :id id})))
+
+(defnc F-Depthtree--init
+  [args]
   (let [{:keys [expr]} (refx/use-sub [:input])]
-    (let [id   "depthtree" ; (random-uuid)
-          json (expr->json expr)]
-      (hooks/use-effect
-        [expr]
-        (remove-children (.. js/document (getElementById id)))
-        (form-svg "tree" json
-                  (clj->js
-                    {:parentId id})))
-      (d/div
-        {:class "Output"
-         :id id}))))
+    ($ F-Depthtree {:expr expr
+                    & args})))
 
 (defmethod gen-component :depthtree
   [_ args]
-  ($ F-Depthtree {& args}))
+  ($ F-Depthtree--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Graph notation
 
 (defnc F-Graphs
-  [_]
-  (let [{:keys [expr]} (refx/use-sub [:input])
-        id   "graph" ; (random-uuid)
+  [{:keys [expr]}]
+  (let [id   "graph" ; (random-uuid)
         json (expr->json expr)]
     (hooks/use-effect
       [expr]
@@ -276,26 +288,42 @@
       {:class "Output"
        :id id})))
 
+(defnc F-Graphs--init
+  [args]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    ($ F-Graphs {:expr expr
+                 & args})))
+
 (defmethod gen-component :graphs
   [_ args]
-  ($ F-Graphs {& args}))
+  ($ F-Graphs--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Hooks notation
 
 (defnc F-Hooks
-  [_]
+  [{:keys [expr]}]
+  (let [id   "hooks" ; (random-uuid)
+        json (expr->json expr)]
+    (hooks/use-effect
+     [expr]
+     (remove-children (.. js/document (getElementById id)))
+     (form-svg "gsbhooks" json
+               (clj->js
+                {:parentId id})))
+    (d/div
+     {:class "Output"
+      :id id})))
+
+(defnc F-Hooks--init
+  [args]
   (let [{:keys [expr]} (refx/use-sub [:input])]
-    (let [id   "hooks" ; (random-uuid)
-          json (expr->json expr)]
-      (hooks/use-effect
-        [expr]
-        (remove-children (.. js/document (getElementById id)))
-        (form-svg "gsbhooks" json
-                  (clj->js
-                    {:parentId id})))
-      (d/div
-        {:class "Output"
-         :id id}))))
+    ($ F-Hooks {:expr expr
+                & args})))
 
 (defmethod gen-component :hooks
   [_ args]
-  ($ F-Hooks {& args}))
+  ($ F-Hooks--init {& args}))
+
+
