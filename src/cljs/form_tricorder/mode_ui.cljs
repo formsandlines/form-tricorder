@@ -25,8 +25,15 @@
 
 (comment
 
-  (expr/=>* [['a] 'b])
-  (expr/eval-all [['a] 'b])
-  
+  (calc/dna->vdict (expr/op-get (expr/=>* [['a] 'b]) :dna))
+  (into {} (:results (expr/eval-all [['a] 'b])))
+
+  (->> (expr/eval-all [['a] 'b])
+       :results
+       (into {})
+       calc/vdict->vmap)
+
+  (rseq (mapv second (:results (expr/eval-all [['a] 'b]))))
+
 
   )

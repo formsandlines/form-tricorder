@@ -4,6 +4,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
+   ["react" :as react]
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
@@ -24,6 +25,51 @@
   (d/pre {:style {:font-family "monospace"}}
          (str (ex-info "Unknown function"
                        {:func-id func-id}))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Data provider
+
+(def ExprContext (react/createContext :not-found))
+(def ValueContext (react/createContext :not-found))
+
+(defnc ExprProvider
+  [{:keys [children]}]
+  (let [{:keys [expr]} (refx/use-sub [:input])]
+    (helix.core/provider
+     {:context ExprContext
+      :value expr}
+     children)))
+
+(defnc ValueProvider
+  [{:keys [children]}]
+  (let [expr  (let [expr (hooks/use-context ExprContext)]
+                (if (= expr :not-found)
+                  (throw (ex-info "Expression data missing!" {}))
+                  expr))
+        cache (refx/use-sub [:cache])
+        ;; only recompute value if expr changed
+        value (hooks/use-memo
+               [expr]
+               (let [cached-expr  (get cache :expr :not-found)
+                     cached-value (get cache :value :not-found)]
+                 ;; if expr changed but matches cached-expr, use cached-value
+                 (println "expr: " expr)
+                 (println "cached expr: " cached-expr)
+                 (if (and (not= :not-found cached-value)
+                          (= cached-expr expr))
+                   (do (println "cached") cached-value)
+                   (do (println "computed") (expr/eval-all expr)))))]
+    ;; if value changed, cache it in db for later reuse
+    (hooks/use-effect
+     [value]
+     (refx/dispatch [:update-cache
+                     {:update-fn #(assoc % :value value :expr expr)}]))
+    (helix.core/provider
+     {:context ValueContext
+      :value {:value    (:results  value)
+              :varorder (:varorder value)}}
+     children)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -69,13 +115,12 @@
 ;; Value table
 
 (defnc F-Vtable
-  [{:keys [expr]}]
-  (let [{:keys [results varorder]} (expr/eval-all expr) ;; memoize!
-        results (map (fn [[intpr res]]
+  [{:keys [expr value varorder]}]
+  (let [results (map (fn [[intpr res]]
                        {:id (random-uuid)
                         :intpr intpr
                         :result res})
-                     results)]
+                     value)]
     (d/table
      {:style {:font-family "monospace"}}
      (d/thead
@@ -96,13 +141,18 @@
 
 (defnc F-Vtable--init
   [args]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
+  (let [expr (hooks/use-context ExprContext)
+        {:keys [value varorder]} (hooks/use-context ValueContext)]
     ($ F-Vtable {:expr expr
+                 :value value
+                 :varorder varorder
                  & args})))
 
 (defmethod gen-component :vtable
   [_ args]
-  ($ F-Vtable--init {& args}))
+  ($ ExprProvider
+     ($ ValueProvider
+        ($ F-Vtable--init {& args}))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -202,15 +252,7 @@
   (let [vmap (hooks/use-memo
               [value]
               (when value
-                (-> value
-                    (expr/op-get :dna)
-                    calc/dna->vdict
-                    calc/vdict->vmap)))]
-    (hooks/use-effect
-     [vmap]
-     (refx/dispatch [:update-cache
-                     {:update-fn
-                      #(assoc % :value value :expr expr)}]))
+                (->> value (into {}) calc/vdict->vmap)))]
     (d/div {:class "Vmap"}
            ($ mode-ui/Calc {:value value})
            (when vmap
@@ -218,22 +260,17 @@
 
 (defnc F-Vmap--init
   [args]
-  (let [cache (refx/use-sub [:cache])
-        {:keys [expr]} (refx/use-sub [:input])
-        value (hooks/use-memo
-               [expr]
-               (let [cached-expr  (:expr cache)
-                     cached-value (:value cache)]
-                 (if (and cached-value (= cached-expr expr))
-                   cached-value
-                   (expr/=>* expr))))]
-    ($ F-Vmap {:expr  expr
+  (let [expr (hooks/use-context ExprContext)
+        {:keys [value]} (hooks/use-context ValueContext)]
+    ($ F-Vmap {:expr expr
                :value value
                & args})))
 
 (defmethod gen-component :vmap
   [_ args]
-  ($ F-Vmap--init {& args}))
+  ($ ExprProvider
+     ($ ValueProvider
+        ($ F-Vmap--init {& args}))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
