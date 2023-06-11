@@ -4,7 +4,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
-   ["react" :as react]
+   ; ["react" :as react]
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
@@ -30,46 +30,46 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Data provider
 
-(def ExprContext (react/createContext :not-found))
-(def ValueContext (react/createContext :not-found))
+; (def ExprContext (react/createContext :not-found))
+; (def ValueContext (react/createContext :not-found))
 
-(defnc ExprProvider
-  [{:keys [children]}]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
-    (helix.core/provider
-     {:context ExprContext
-      :value expr}
-     children)))
+; (defnc ExprProvider
+;   [{:keys [children]}]
+;   (let [{:keys [expr]} (refx/use-sub [:input])]
+;     (helix.core/provider
+;      {:context ExprContext
+;       :value expr}
+;      children)))
 
-(defnc ValueProvider
-  [{:keys [children]}]
-  (let [expr  (let [expr (hooks/use-context ExprContext)]
-                (if (= expr :not-found)
-                  (throw (ex-info "Expression data missing!" {}))
-                  expr))
-        cache (refx/use-sub [:cache])
-        ;; only recompute value if expr changed
-        value (hooks/use-memo
-               [expr]
-               (let [cached-expr  (get cache :expr :not-found)
-                     cached-value (get cache :value :not-found)]
-                 ;; if expr changed but matches cached-expr, use cached-value
-                 (println "expr: " expr)
-                 (println "cached expr: " cached-expr)
-                 (if (and (not= :not-found cached-value)
-                          (= cached-expr expr))
-                   (do (println "cached") cached-value)
-                   (do (println "computed") (expr/eval-all expr)))))]
-    ;; if value changed, cache it in db for later reuse
-    (hooks/use-effect
-     [value]
-     (refx/dispatch [:update-cache
-                     {:update-fn #(assoc % :value value :expr expr)}]))
-    (helix.core/provider
-     {:context ValueContext
-      :value {:value    (:results  value)
-              :varorder (:varorder value)}}
-     children)))
+; (defnc ValueProvider
+;   [{:keys [children]}]
+;   (let [expr  (let [expr (hooks/use-context ExprContext)]
+;                 (if (= expr :not-found)
+;                   (throw (ex-info "Expression data missing!" {}))
+;                   expr))
+;         cache (refx/use-sub [:cache])
+;         ;; only recompute value if expr changed
+;         value (hooks/use-memo
+;                [expr]
+;                (let [cached-expr  (get cache :expr :not-found)
+;                      cached-value (get cache :value :not-found)]
+;                  ;; if expr changed but matches cached-expr, use cached-value
+;                  (println "expr: " expr)
+;                  (println "cached expr: " cached-expr)
+;                  (if (and (not= :not-found cached-value)
+;                           (= cached-expr expr))
+;                    (do (println "cached") cached-value)
+;                    (do (println "computed") (expr/eval-all expr)))))]
+;     ;; if value changed, cache it in db for later reuse
+;     (hooks/use-effect
+;      [value]
+;      (refx/dispatch [:update-cache
+;                      {:update-fn #(assoc % :value value :expr expr)}]))
+;     (helix.core/provider
+;      {:context ValueContext
+;       :value {:value    (:results  value)
+;               :varorder (:varorder value)}}
+;      children)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -82,7 +82,7 @@
 
 (defnc F-EDN--init
   [args]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
+  (let [expr (refx/use-sub [:expr])]
     ($ F-EDN {:expr expr
               & args})))
 
@@ -102,7 +102,7 @@
 
 (defnc F-JSON--init
   [args]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
+  (let [expr (refx/use-sub [:expr])]
     ($ F-JSON {:expr expr
                & args})))
 
@@ -115,12 +115,12 @@
 ;; Value table
 
 (defnc F-Vtable
-  [{:keys [expr value varorder]}]
+  [{:keys [results varorder]}]
   (let [results (map (fn [[intpr res]]
                        {:id (random-uuid)
                         :intpr intpr
                         :result res})
-                     value)]
+                     results)]
     (d/table
      {:style {:font-family "monospace"}}
      (d/thead
@@ -141,18 +141,22 @@
 
 (defnc F-Vtable--init
   [args]
-  (let [expr (hooks/use-context ExprContext)
-        {:keys [value varorder]} (hooks/use-context ValueContext)]
-    ($ F-Vtable {:expr expr
-                 :value value
-                 :varorder varorder
-                 & args})))
+  (let [varorder (refx/use-sub [:varorder])
+        varperms (refx/use-sub [:varorder-permutations])
+        results  (refx/use-sub [:value])]
+    (d/div {:class "Vtable"}
+           ($ mode-ui/Calc {:current-varorder varorder
+                            :permutations varperms
+                            :set-varorder
+                            #(refx/dispatch
+                              [:changed-varorder {:next-varorder %}])})
+           ($ F-Vtable {:results results
+                        :varorder varorder
+                        & args}))))
 
 (defmethod gen-component :vtable
   [_ args]
-  ($ ExprProvider
-     ($ ValueProvider
-        ($ F-Vtable--init {& args}))))
+  ($ F-Vtable--init {& args}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -179,7 +183,7 @@
                     :M [1 1]
                     :_ [0 0]})
 
-(defnc Vmap-viz
+(defnc F-Vmap
   [{:keys [vmap scale-to-fit? cellsize padding margins stroke-width
            colors bg-color stroke-color label]
     :or {scale-to-fit? false padding 0 stroke-width 0.5
@@ -247,30 +251,23 @@
                   (d/text {}
                           label))))))
 
-(defnc F-Vmap
-  [{:keys [expr value]}]
-  (let [vmap (hooks/use-memo
-              [value]
-              (when value
-                (->> value (into {}) calc/vdict->vmap)))]
-    (d/div {:class "Vmap"}
-           ($ mode-ui/Calc {:value value})
-           (when vmap
-             ($ Vmap-viz {:vmap vmap})))))
-
 (defnc F-Vmap--init
   [args]
-  (let [expr (hooks/use-context ExprContext)
-        {:keys [value]} (hooks/use-context ValueContext)]
-    ($ F-Vmap {:expr expr
-               :value value
-               & args})))
+  (let [varorder (refx/use-sub [:varorder])
+        varperms (refx/use-sub [:varorder-permutations])
+        vmap     (refx/use-sub [:vmap])]
+    (d/div {:class "Vmap"}
+           ($ mode-ui/Calc {:current-varorder varorder
+                            :permutations varperms
+                            :set-varorder
+                            #(refx/dispatch
+                              [:changed-varorder {:next-varorder %}])})
+           ($ F-Vmap {:vmap vmap
+                      & args}))))
 
 (defmethod gen-component :vmap
   [_ args]
-  ($ ExprProvider
-     ($ ValueProvider
-        ($ F-Vmap--init {& args}))))
+  ($ F-Vmap--init {& args}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -299,7 +296,7 @@
 
 (defnc F-Depthtree--init
   [args]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
+  (let [expr (refx/use-sub [:expr])]
     ($ F-Depthtree {:expr expr
                     & args})))
 
@@ -327,7 +324,7 @@
 
 (defnc F-Graphs--init
   [args]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
+  (let [expr (refx/use-sub [:expr])]
     ($ F-Graphs {:expr expr
                  & args})))
 
@@ -355,7 +352,7 @@
 
 (defnc F-Hooks--init
   [args]
-  (let [{:keys [expr]} (refx/use-sub [:input])]
+  (let [expr (refx/use-sub [:expr])]
     ($ F-Hooks {:expr expr
                 & args})))
 
