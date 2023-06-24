@@ -28,51 +28,6 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Data provider
-
-; (def ExprContext (react/createContext :not-found))
-; (def ValueContext (react/createContext :not-found))
-
-; (defnc ExprProvider
-;   [{:keys [children]}]
-;   (let [{:keys [expr]} (refx/use-sub [:input])]
-;     (helix.core/provider
-;      {:context ExprContext
-;       :value expr}
-;      children)))
-
-; (defnc ValueProvider
-;   [{:keys [children]}]
-;   (let [expr  (let [expr (hooks/use-context ExprContext)]
-;                 (if (= expr :not-found)
-;                   (throw (ex-info "Expression data missing!" {}))
-;                   expr))
-;         cache (refx/use-sub [:cache])
-;         ;; only recompute value if expr changed
-;         value (hooks/use-memo
-;                [expr]
-;                (let [cached-expr  (get cache :expr :not-found)
-;                      cached-value (get cache :value :not-found)]
-;                  ;; if expr changed but matches cached-expr, use cached-value
-;                  (println "expr: " expr)
-;                  (println "cached expr: " cached-expr)
-;                  (if (and (not= :not-found cached-value)
-;                           (= cached-expr expr))
-;                    (do (println "cached") cached-value)
-;                    (do (println "computed") (expr/eval-all expr)))))]
-;     ;; if value changed, cache it in db for later reuse
-;     (hooks/use-effect
-;      [value]
-;      (refx/dispatch [:update-cache
-;                      {:update-fn #(assoc % :value value :expr expr)}]))
-;     (helix.core/provider
-;      {:context ValueContext
-;       :value {:value    (:results  value)
-;               :varorder (:varorder value)}}
-;      children)))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EDN
 
 (defnc F-EDN
@@ -142,11 +97,9 @@
 (defnc F-Vtable--init
   [args]
   (let [varorder (refx/use-sub [:varorder])
-        varperms (refx/use-sub [:varorder-permutations])
         results  (refx/use-sub [:value])]
     (d/div {:class "Vtable"}
            ($ mode-ui/Calc {:current-varorder varorder
-                            :permutations varperms
                             :set-varorder
                             #(refx/dispatch
                               [:changed-varorder {:next-varorder %}])})
@@ -254,11 +207,9 @@
 (defnc F-Vmap--init
   [args]
   (let [varorder (refx/use-sub [:varorder])
-        varperms (refx/use-sub [:varorder-permutations])
         vmap     (refx/use-sub [:vmap])]
     (d/div {:class "Vmap"}
            ($ mode-ui/Calc {:current-varorder varorder
-                            :permutations varperms
                             :set-varorder
                             #(refx/dispatch
                               [:changed-varorder {:next-varorder %}])})

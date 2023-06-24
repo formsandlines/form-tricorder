@@ -7,13 +7,18 @@
 
 (refx/reg-sub
  :test/subs
- (fn [db]
+ (fn [db _]
    (:test/answer db)))
 
 (refx/reg-sub
  :func-id
- (fn [db]
+ (fn [db _]
    (:func-id db)))
+
+; (refx/reg-sub
+;  :cache
+;  (fn [db]
+;    (:cache db)))
 
 
 (refx/reg-sub
@@ -27,24 +32,46 @@
    (get-in db [:input :varorder] nil)))
 
 (refx/reg-sub
+ :expr-data
+ (fn [db _]
+   (let [input (:input db)]
+     [(get input :expr :not-found)
+      (get input :varorder nil)])))
+
+
+(refx/reg-sub
  :varorder-permutations
  :<- [:expr]
+ ; (fn [expr [_ varorder]]
  (fn [expr _]
    (println "computing permutations")
-   (cond
-     (= :not-found expr) (throw (ex-info "Expression data missing!" {}))
-     :else (expr/permute-vars (expr/find-vars expr {:ordered? true})))))
+   ; (println "| " expr)
+   ; (println "| " varorder)
+   (when (= :not-found expr)
+     (throw (ex-info "Expression data missing!" {})))
+   (let [
+         ; sorted-varorder (if (some? varorder)
+         ;                   (do
+         ;                     (println "sort vars")
+         ;                     (sort varorder))
+         ;                   (do
+         ;                     (println "find-vars")
+         ;                     (expr/find-vars expr {:ordered? true})))
+         sorted-varorder (expr/find-vars expr {:ordered? true})
+         permutations    (expr/permute-vars sorted-varorder)]
+     permutations)))
 
 (refx/reg-sub
  :value
- :<- [:expr]
- :<- [:varorder]
+ :<- [:expr-data]
  (fn [[expr varorder] _]
-   (println "computing value")
-   (cond
-     (= :not-found expr) (throw (ex-info "Expression data missing!" {}))
-     (nil? varorder)     (throw (ex-info "Unknown variable ordering!" {}))
-     :else (:results (expr/eval-all {:varorder varorder} expr {})))))
+   (when (= :not-found expr)
+     (throw (ex-info "Expression data missing!" {})))
+   (when (nil? varorder)
+     (throw (ex-info "Unknown variable ordering!" {})))
+   (let [value (expr/eval-all {:varorder varorder} expr {})]
+     (println "computing value")
+     (:results value))))
 
 (refx/reg-sub
  :vmap

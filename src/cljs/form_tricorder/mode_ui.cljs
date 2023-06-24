@@ -1,5 +1,6 @@
 (ns form-tricorder.mode-ui
   (:require
+   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
@@ -11,19 +12,32 @@
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 (defnc Calc
-  [{:keys [current-varorder permutations set-varorder]}]
-  (when current-varorder
-    (d/div
-     (d/label "Variable interpretation order:")
-     (d/select
-      {:on-change (fn [e]
-                    (set-varorder (edn/read-string (.. e -target -value))))}
-      (for [varorder permutations
-            :let [label (reduce #(str %1 " " %2) varorder)]]
-        (d/option {:key label
-                   :value varorder
-                   :default-value (= varorder current-varorder)}
-                  label))))))
+  [{:keys [current-varorder set-varorder]}]
+  (println "curr. varorder: " current-varorder)
+  (let [sorted-varorder (sort current-varorder)
+        permutations (refx/use-sub
+                      [:varorder-permutations]
+                       ; [:varorder-permutations sorted-varorder]
+                      )
+        ; permutations    (hooks/use-memo
+        ;                   (utils/use-custom-compare-memoize
+        ;                     [sorted-varorder] =)
+        ;                   (do (println "calc permutations")
+        ;                       (println sorted-varorder)
+        ;                       (expr/permute-vars sorted-varorder)))
+        ]
+    (when current-varorder
+      (d/div
+       (d/label "Variable interpretation order:")
+       (d/select
+        {:default-value current-varorder
+         :on-change (fn [e]
+                      (set-varorder (edn/read-string (.. e -target -value))))}
+        (for [varorder permutations
+              :let [label (reduce #(str %1 " " %2) varorder)]]
+          (d/option {:key label
+                     :value varorder}
+                    label)))))))
 
 
 
