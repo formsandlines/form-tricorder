@@ -40,25 +40,18 @@
 
 
 (refx/reg-sub
+ :sorted-varorder
+ :<- [:expr-data]
+ (fn [[_ varorder] _]
+   (println "sorting: " varorder)
+   (sort varorder)))
+
+(refx/reg-sub
  :varorder-permutations
- :<- [:expr]
- ; (fn [expr [_ varorder]]
- (fn [expr _]
+ :<- [:sorted-varorder]
+ (fn [sorted-varorder _]
    (println "computing permutations")
-   ; (println "| " expr)
-   ; (println "| " varorder)
-   (when (= :not-found expr)
-     (throw (ex-info "Expression data missing!" {})))
-   (let [
-         ; sorted-varorder (if (some? varorder)
-         ;                   (do
-         ;                     (println "sort vars")
-         ;                     (sort varorder))
-         ;                   (do
-         ;                     (println "find-vars")
-         ;                     (expr/find-vars expr {:ordered? true})))
-         sorted-varorder (expr/find-vars expr {:ordered? true})
-         permutations    (expr/permute-vars sorted-varorder)]
+   (let [permutations (expr/permute-vars sorted-varorder)]
      permutations)))
 
 (refx/reg-sub
