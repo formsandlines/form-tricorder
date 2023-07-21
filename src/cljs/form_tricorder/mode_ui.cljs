@@ -12,7 +12,11 @@
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 (defnc Calc
-  [{:keys [current-varorder set-varorder]}]
+  [{:keys [current-varorder set-varorder debug-origin]}]
+  ; TODO: remove debug-origin
+  ; (println "Debug origin: " debug-origin)
+  ; (println "Current varorder: " current-varorder)
+  ; (println "---")
   (let [sorted-varorder (sort current-varorder)
         permutations (refx/use-sub
                       [:varorder-permutations]
@@ -22,7 +26,8 @@
       (d/div
        (d/label "Variable interpretation order:")
        (d/select
-        {:default-value current-varorder
+        {:value current-varorder
+         ; :default-value current-varorder
          :on-change (fn [e]
                       (set-varorder (edn/read-string (.. e -target -value))))}
         (for [varorder permutations

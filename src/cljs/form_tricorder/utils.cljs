@@ -30,3 +30,12 @@
 
 ; (defn use-custom-compare-effect [effect deps eq?]
 ;   (react/useEffect effect (use-custom-compare-memoize deps eq?)))
+
+
+(comment
+  
+  (pow-nat 2 3)
+
+  (take 5 (geom-seq 3 5))
+  
+  )

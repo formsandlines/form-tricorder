@@ -100,6 +100,7 @@
         results  (refx/use-sub [:value])]
     (d/div {:class "Vtable"}
            ($ mode-ui/Calc {:current-varorder varorder
+                            :debug-origin "Vtable"
                             :set-varorder
                             #(refx/dispatch
                               [:changed-varorder {:next-varorder %}])})
@@ -210,6 +211,7 @@
         vmap     (refx/use-sub [:vmap])]
     (d/div {:class "Vmap"}
            ($ mode-ui/Calc {:current-varorder varorder
+                            :debug-origin "Vmap"
                             :set-varorder
                             #(refx/dispatch
                               [:changed-varorder {:next-varorder %}])})

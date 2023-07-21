@@ -15,6 +15,11 @@
  (fn [db _]
    (:func-id db)))
 
+(refx/reg-sub
+ :views
+ (fn [db _]
+   (:views db)))
+
 ; (refx/reg-sub
 ;  :cache
 ;  (fn [db]
@@ -38,6 +43,14 @@
      [(get input :expr :not-found)
       (get input :varorder nil)])))
 
+
+;; Computations
+
+; (refx/reg-sub
+;  :active-views
+;  :<- [:views]
+;  (fn [views _]
+;    (filter #(:active? %) views)))
 
 (refx/reg-sub
  :sorted-varorder

@@ -3,7 +3,7 @@
     [refx.alpha :as refx]
     [helix.core :refer [defnc fnc $ <> provider]]
     [helix.hooks :as hooks]
-    [helix.dom :as d]
+    [helix.dom :as d :refer [$d]]
     [formform.calc :as calc]
     [formform.expr :as expr]
     [formform.io :as io]
@@ -12,8 +12,9 @@
     [form-tricorder.effects :as effects]
     [form-tricorder.model :as model :refer [modes]]
     [form-tricorder.functions :as func]
-    [form-tricorder.utils :refer [log]]
+    [form-tricorder.utils :refer [log clj->js*]]
     ["react-dom/client" :as rdom]
+    ["@devbookhq/splitter$default" :as Splitter]
     ["/stitches.config" :refer (css)]))
 
 
@@ -60,36 +61,100 @@
              :on-change handle-change})
            label)))))))
 
+
+(def gutter-styles
+  (-> {:position "relative"
+       "&:hover > *" {:backgroundColor "#333"}
+       "&::before" {:content ""
+                    :position "absolute"
+                    :width 1
+                    :height "100%"
+                    :backgroundColor "#888"}
+       "&[dir=Vertical]::before" {:width "100%"
+                                  :height 1}}
+      clj->js*
+      css))
+
+(def dragger-styles
+  (-> {:backgroundColor "#666"
+       :position "relative"
+       :z-index 999}
+      clj->js*
+      css))
+
+(defnc ViewPane
+  [{:keys [id view]}]
+  (let [{:keys [func-id]} view]
+    (d/div
+     {:class "ViewPane"
+      :style {:display "flex"
+              :flex-direction "column"
+              :height "100%"
+              :width "100%"
+              :overflow-y "auto"}
+      ; :style style
+      }
+     (<> (d/pre id)
+         (d/code (str view))
+         (d/hr)
+         (func/gen-component func-id {})))))
+
 (defnc OutputArea
-  [{:keys [func-id]}]
+  [{:keys [views func-id]}]
   ;; ? cache component in state
-  (let [mode-id (model/func->mode func-id)]
+  (let [; mode-id (model/func->mode func-id) ;; ! obsolete
+        *sizes (hooks/use-ref (array 50 50))
+        views  (refx/use-sub [:views])]
     (d/div
      {:class "OutputArea"
       :style {:border "1px solid lightgray"
               :padding 10
-              :margin "10px 0"}}
-     (d/p mode-id)
-     (func/gen-component func-id {}))))
+              :margin "10px 0"
+              :display "flex"
+              :flex-direction "column"
+              :height "600px" ;; ! must be fixed because gutter-style
+              }}
+     ; (d/p mode-id)
+     (condp == (count (filter #(:active %) views))
+       1 (let [[id active-view] (if (:active (first views))
+                                  [0 (first views)]
+                                  [1 (second views)])]
+           ($ ViewPane {:id   id
+                        :view active-view}))
+       2 ($d Splitter
+             {:gutterClassName (gutter-styles)
+              :draggerClassName (dragger-styles)
+              :minWidths (array 100 100)
+              :minHeights (array 100 100)
+              :initialSizes @*sizes
+              :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
+              :direction "Horizontal"}
+             ($ ViewPane {:id   0
+                          :view (first views)})
+             ($ ViewPane {:id   1
+                          :view (second views)}))
+       (throw (ex-info "Must have at least one active view." {}))))))
+
 
 (defnc App
   []
-  (let [func-id (refx/use-sub [:func-id])]
+  (let [func-id (refx/use-sub [:func-id]) ;; ! obsolete
+        ]
     (d/div
-      {:class "App"
-       :style {:margin "2rem 2rem"}}
-      (d/h1
-        {:style {:margin-bottom 10}}
-        "FORM tricorder")
-      ($ FormulaInput {:apply-input #(refx/dispatch
-                                       [:changed-formula
-                                        {:next-formula %}])})
-      ($ FunctionMenu {:handle-change
-                       (fn [e] (refx/dispatch
-                                 [:set-func-id
-                                  {:next-id (.. e -target -value)}]))
-                       :value (when func-id (name func-id))})
-      ($ OutputArea {:func-id func-id}))))
+     {:class "App"
+      :style {:margin "2rem 2rem"}}
+     (d/h1
+      {:style {:margin-bottom 10}}
+      "FORM tricorder")
+     ($ FormulaInput {:apply-input #(refx/dispatch
+                                     [:changed-formula
+                                      {:next-formula %}])})
+     ($ FunctionMenu {:handle-change
+                      (fn [e] (refx/dispatch
+                               [:set-func-id
+                                {:next-id (.. e -target -value)}]))
+                      :value (when func-id (name func-id))})
+     ($ OutputArea {:func-id func-id}))))
 
 (defonce root
   (rdom/createRoot (js/document.getElementById "app")))
@@ -100,6 +165,9 @@
 
 
 (comment
+
+  #rtrace (+ 1 2)
+
   (let [expr 'a]
     (meta (-> expr
               expr/=>*

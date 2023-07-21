@@ -8,16 +8,20 @@
 ;; ---- Event handler -------------------------------------------
 
 (refx/reg-event-db
-  :initialize-db
-  (fn [_ _]
-    (let [fml  "(a :M) {@ a (b), {..@ :M, x}, :U} b"
-          expr (io/read-expr fml)
-          varorder (expr/find-vars expr {:ordered? true})]
-      {:input {:formula fml
-               :expr expr
-               :varorder varorder}
-       :func-id :vtable
-       :modes {:calc-config nil}})))
+ :initialize-db
+ (fn [_ _]
+   (let [fml  "(a :M) {@ a (b), {..@ :M, x}, :U} b"
+         expr (io/read-expr fml)
+         varorder (expr/find-vars expr {:ordered? true})]
+     {:input {:formula fml
+              :expr expr
+              :varorder varorder}
+      :views [{:func-id :vtable,
+               :active true}
+              {:func-id :vmap,
+               :active true}]
+      :func-id :vtable
+      :modes {:calc-config nil}})))
 
 (refx/reg-event-db
  :changed-formula
@@ -46,6 +50,39 @@
            #(if-not (= (:varorder %) next-varorder)
               (assoc % :varorder next-varorder)
               %))))
+
+
+(refx/reg-event-db
+ :views/swap
+ (fn [{:keys [views] :as db} _]
+   {:pre [(some? views) (== 2 (count views))]}
+   (let [[a b] views]
+     (assoc db :views [b a]))))
+
+;; ! assumes both views are not nil
+(refx/reg-event-db
+ :views/update
+ (fn [db [_ {:keys [id update-fn]}]]
+   (update-in db [:views id] update-fn)))
+
+(refx/reg-event-db
+ :views/->1
+ (fn [{:keys [views] :as db} [_ {:keys [id]}]]
+   {:pre [(some? views) (== 2 (count views))]}
+   (let [selected (views id)]
+     (update db :views
+             #(->> %
+                   (map-indexed (fn [i v] (assoc v :active? (== id i))))
+                   (into []))))))
+
+(refx/reg-event-db
+ :views/->2
+ (fn [{:keys [views] :as db} {:keys [orientation view]}]
+   {:pre [(some? views) (== 2 (count views)) (#{:hz :vt} orientation)]}
+   (-> db
+       (assoc :view-orientation orientation)
+       (update :views (fn [xs] (mapv #(assoc % :active? true) xs))))))
+
 
 (refx/reg-event-db
  :set-func-id
