@@ -36,30 +36,25 @@
       "apply"))))
 
 (defnc FunctionMenu
-  [{:keys [handle-change value]}]
-  (let [checked? (fn [s] (if (= value s) true ""))]
-    (d/div
-     {:class "FunctionMenu"
-      :style {:display "flex"
-              :gap 10}}
-     (for [{:keys [id label items]} modes]
-       (d/fieldset
-        {:key id
-         :style {:flex (if (= id "more") "none" "1 1 0%")
-                 :padding 4
-                 :border "1px solid black"}}
-        (d/legend label)
-        (for [{:keys [id label]} items]
-          (d/label
-           {:key id
-            :style {:display "block"}}
-           (d/input
-            {:type "radio"
-             :name "func"
-             :value id
-             :checked (checked? id)
-             :on-change handle-change})
-           label)))))))
+  [{:keys [handle-click]}]
+  (d/div
+   {:class "FunctionMenu"
+    :style {:display "flex"
+            :gap 10}}
+   (for [{:keys [id label items]} modes]
+     (d/fieldset
+      {:key id
+       :style {:flex (if (= id "more") "none" "1 1 0%")
+               :padding 4
+               :border "1px solid black"}}
+      (d/legend label)
+      (for [{:keys [id label]} items]
+        (d/button
+         {:key id
+          :on-click (fn [e]
+                      (let [view-id (if (.-shiftKey e) 1 0)]
+                        (handle-click id view-id)))}
+         label))))))
 
 
 (def gutter-styles
@@ -135,7 +130,6 @@
                           :view (second views)}))
        (throw (ex-info "Must have at least one active view." {}))))))
 
-
 (defnc App
   []
   (let [func-id (refx/use-sub [:func-id]) ;; ! obsolete
@@ -146,14 +140,13 @@
      (d/h1
       {:style {:margin-bottom 10}}
       "FORM tricorder")
-     ($ FormulaInput {:apply-input #(refx/dispatch
-                                     [:changed-formula
-                                      {:next-formula %}])})
-     ($ FunctionMenu {:handle-change
-                      (fn [e] (refx/dispatch
-                               [:set-func-id
-                                {:next-id (.. e -target -value)}]))
-                      :value (when func-id (name func-id))})
+     ($ FormulaInput {:apply-input
+                      #(refx/dispatch [:changed-formula
+                                       {:next-formula %}])})
+     ($ FunctionMenu {:handle-click
+                      #(refx/dispatch [:set-func-id
+                                       {:next-id %1
+                                        :view-id %2}])})
      ($ OutputArea {:func-id func-id}))))
 
 (defonce root

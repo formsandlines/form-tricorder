@@ -20,7 +20,6 @@
                :active true}
               {:func-id :vmap,
                :active true}]
-      :func-id :vtable
       :modes {:calc-config nil}})))
 
 (refx/reg-event-db
@@ -86,8 +85,10 @@
 
 (refx/reg-event-db
  :set-func-id
- (fn [db [_ {:keys [next-id]}]]
-   (assoc db :func-id (if (keyword? next-id) next-id (keyword next-id)))))
+ (fn [db [_ {:keys [next-id view-id]}]]
+   (println next-id " " view-id)
+   (assoc-in db [:views view-id :func-id]
+             (if (keyword? next-id) next-id (keyword next-id)))))
 
 (refx/reg-event-db
  :update-cache
