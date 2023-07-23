@@ -82,9 +82,7 @@
   (let [{:keys [func-id]} view]
     (d/div
      {:class "ViewPane"
-      :style {:display "flex"
-              :flex-direction "column"
-              :height "100%"
+      :style {:height "100%"
               :width "100%"
               :overflow-y "auto"}
       ; :style style
@@ -95,40 +93,80 @@
          (func/gen-component func-id {})))))
 
 (defnc OutputArea
-  [{:keys [views func-id]}]
+  [{:keys []}]
   ;; ? cache component in state
-  (let [; mode-id (model/func->mode func-id) ;; ! obsolete
-        *sizes (hooks/use-ref (array 50 50))
-        views  (refx/use-sub [:views])]
+  (let [*sizes (hooks/use-ref (array 50 50))
+        views  (refx/use-sub [:views])
+        orientation (refx/use-sub [:view-orientation])
+        split? (refx/use-sub [:view-split?])]
     (d/div
      {:class "OutputArea"
       :style {:border "1px solid lightgray"
               :padding 10
               :margin "10px 0"
-              :display "flex"
-              :flex-direction "column"
               :height "600px" ;; ! must be fixed because gutter-style
               }}
      ; (d/p mode-id)
-     (condp == (count (filter #(:active %) views))
-       1 (let [[id active-view] (if (:active (first views))
-                                  [0 (first views)]
-                                  [1 (second views)])]
-           ($ ViewPane {:id   id
-                        :view active-view}))
-       2 ($d Splitter
-             {:gutterClassName (gutter-styles)
-              :draggerClassName (dragger-styles)
-              :minWidths (array 100 100)
-              :minHeights (array 100 100)
-              :initialSizes @*sizes
-              :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
-              :direction "Horizontal"}
-             ($ ViewPane {:id   0
-                          :view (first views)})
-             ($ ViewPane {:id   1
-                          :view (second views)}))
-       (throw (ex-info "Must have at least one active view." {}))))))
+     (if split?
+       ;; split views
+       ($d Splitter
+           {:gutterClassName (gutter-styles)
+            :draggerClassName (dragger-styles)
+            :minWidths (array 100 100)
+            :minHeights (array 100 100)
+            :initialSizes @*sizes
+            :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
+            :direction orientation}
+           ($ ViewPane {:id   0
+                        :view (first views)})
+           ($ ViewPane {:id   1
+                        :view (second views)}))
+       ;; single view
+       ($ ViewPane {:id   0
+                    :view (first views)})))))
+
+(defnc ViewControls
+  [{:keys [handle-change-orientation handle-change-split handle-swap]}]
+  (d/div
+   {:class "ViewControls"
+    :style {:display "flex"}}
+   (d/div {:style {:display "flex"}}
+          (d/button
+           {:on-click (fn [_] (handle-change-split false))}
+           "Single")
+          (d/button
+           {:on-click (fn [_] (handle-change-split true))}
+           "Split"))
+   (d/div {:style {:display "flex" :margin-left 6}}
+          (d/button
+           {:on-click (fn [_] (handle-change-orientation "Vertical"))}
+           "Split vert.")
+          (d/button
+           {:on-click (fn [_] (handle-change-orientation "Horizontal"))}
+           "Split horiz."))
+   (d/div {:style {:display "flex" :margin-left 6}}
+          (d/button
+           {:on-click (fn [_] (handle-swap))}
+           "Swap"))))
+
+(defnc Header
+  [{}]
+  (d/div
+   {:class "Header"
+    :style {:display "flex"
+            :margin-bottom 10}}
+   (d/div
+    {:style {:class "Title"
+             :flex-grow 1}}
+    (d/h1 "FORM tricorder"))
+   ($ ViewControls {:handle-change-orientation
+                    #(refx/dispatch [:views/change-orientation
+                                     {:next-orientation %}])
+                    :handle-change-split
+                    #(refx/dispatch [:views/change-split
+                                     {:split? %}])
+                    :handle-swap
+                    #(refx/dispatch [:views/swap])})))
 
 (defnc App
   []
@@ -137,9 +175,7 @@
     (d/div
      {:class "App"
       :style {:margin "2rem 2rem"}}
-     (d/h1
-      {:style {:margin-bottom 10}}
-      "FORM tricorder")
+     ($ Header {})
      ($ FormulaInput {:apply-input
                       #(refx/dispatch [:changed-formula
                                        {:next-formula %}])})

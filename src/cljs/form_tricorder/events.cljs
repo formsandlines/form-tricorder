@@ -16,10 +16,10 @@
      {:input {:formula fml
               :expr expr
               :varorder varorder}
-      :views [{:func-id :vtable,
-               :active true}
-              {:func-id :vmap,
-               :active true}]
+      :views [{:func-id :vtable}
+              {:func-id :vmap}]
+      :view-orientation "Horizontal"
+      :view-split? true
       :modes {:calc-config nil}})))
 
 (refx/reg-event-db
@@ -54,33 +54,22 @@
 (refx/reg-event-db
  :views/swap
  (fn [{:keys [views] :as db} _]
-   {:pre [(some? views) (== 2 (count views))]}
    (let [[a b] views]
      (assoc db :views [b a]))))
 
-;; ! assumes both views are not nil
 (refx/reg-event-db
- :views/update
- (fn [db [_ {:keys [id update-fn]}]]
-   (update-in db [:views id] update-fn)))
-
-(refx/reg-event-db
- :views/->1
- (fn [{:keys [views] :as db} [_ {:keys [id]}]]
-   {:pre [(some? views) (== 2 (count views))]}
-   (let [selected (views id)]
-     (update db :views
-             #(->> %
-                   (map-indexed (fn [i v] (assoc v :active? (== id i))))
-                   (into []))))))
-
-(refx/reg-event-db
- :views/->2
- (fn [{:keys [views] :as db} {:keys [orientation view]}]
-   {:pre [(some? views) (== 2 (count views)) (#{:hz :vt} orientation)]}
+ :views/change-split
+ (fn [db [_ {:keys [split?]}]]
+   {:pre [(boolean? split?)]}
    (-> db
-       (assoc :view-orientation orientation)
-       (update :views (fn [xs] (mapv #(assoc % :active? true) xs))))))
+       (assoc :view-split? split?))))
+
+(refx/reg-event-db
+ :views/change-orientation
+ (fn [db [_ {:keys [next-orientation]}]]
+   {:pre [(#{"Horizontal" "Vertical"} next-orientation)]}
+   (-> db
+       (assoc :view-orientation next-orientation))))
 
 
 (refx/reg-event-db

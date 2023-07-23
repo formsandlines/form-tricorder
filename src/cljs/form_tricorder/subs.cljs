@@ -20,6 +20,17 @@
  (fn [db _]
    (:views db)))
 
+(refx/reg-sub
+ :view-split?
+ (fn [db _]
+   (:view-split? db)))
+
+(refx/reg-sub
+ :view-orientation
+ (fn [db _]
+   (:view-orientation db)))
+
+
 ; (refx/reg-sub
 ;  :cache
 ;  (fn [db]
@@ -45,12 +56,6 @@
 
 
 ;; Computations
-
-; (refx/reg-sub
-;  :active-views
-;  :<- [:views]
-;  (fn [views _]
-;    (filter #(:active? %) views)))
 
 (refx/reg-sub
  :sorted-varorder
