@@ -235,7 +235,7 @@
 
 (defnc F-Depthtree
   [{:keys [expr]}]
-  (let [id   "depthtree" ; (random-uuid)
+  (let [id   (str "depthtree" (random-uuid))
         json (expr->json expr)]
     (hooks/use-effect
      [expr]
@@ -263,7 +263,7 @@
 
 (defnc F-Graphs
   [{:keys [expr]}]
-  (let [id   "graph" ; (random-uuid)
+  (let [id   (str "graph" (random-uuid))
         json (expr->json expr)]
     (hooks/use-effect
       [expr]
@@ -291,7 +291,7 @@
 
 (defnc F-Hooks
   [{:keys [expr]}]
-  (let [id   "hooks" ; (random-uuid)
+  (let [id   (str "hooks_" (random-uuid))
         json (expr->json expr)]
     (hooks/use-effect
      [expr]

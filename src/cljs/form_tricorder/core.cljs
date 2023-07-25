@@ -51,9 +51,7 @@
       (for [{:keys [id label]} items]
         (d/button
          {:key id
-          :on-click (fn [e]
-                      (let [view-id (if (.-shiftKey e) 1 0)]
-                        (handle-click id view-id)))}
+          :on-click (fn [e] (handle-click id (.-shiftKey e)))}
          label))))))
 
 
@@ -78,27 +76,47 @@
       css))
 
 (defnc ViewPane
-  [{:keys [id view]}]
-  (let [{:keys [func-id]} view]
+  [{:keys [id view handle-remove-view]}]
+  (let [{:keys [func-id]} view
+        mode-id (model/func->mode func-id)
+        mode    (model/modes-map mode-id)]
+    (println mode)
     (d/div
      {:class "ViewPane"
       :style {:height "100%"
               :width "100%"
-              :overflow-y "auto"}
-      ; :style style
-      }
-     (<> (d/pre id)
-         (d/code (str view))
-         (d/hr)
-         (func/gen-component func-id {})))))
+              :overflow-y "auto"
+              :position "relative"
+              :display "flex"}}
+     (d/div
+      {:class "ViewPaneControls"}
+      (when handle-remove-view
+        (d/button
+         {:on-click (fn [_] (handle-remove-view id))
+          :style {:position "absolute"
+                  :top 0
+                  :right 0}}
+         "[x]"))
+      (d/div
+       {:class "ModeFunctionTabs"}
+       (d/pre (str mode-id))
+       (d/hr)
+       (d/ul
+        (for [{:keys [id]} (:items mode)]
+          (d/li {:key (str id)}
+                (str id))))))
+     (d/div
+      {:class "ViewPaneContent"
+       :style {:margin-left 16}}
+      (d/pre id)
+      (d/code (str view))
+      (d/hr)
+      (func/gen-component func-id {})))))
 
 (defnc OutputArea
-  [{:keys []}]
+  [{:keys [views split-orientation]}]
   ;; ? cache component in state
-  (let [*sizes (hooks/use-ref (array 50 50))
-        views  (refx/use-sub [:views])
-        orientation (refx/use-sub [:view-orientation])
-        split? (refx/use-sub [:view-split?])]
+  (let [*sizes (hooks/use-ref (array 50 50))]
     (d/div
      {:class "OutputArea"
       :style {:border "1px solid lightgray"
@@ -106,51 +124,57 @@
               :margin "10px 0"
               :height "600px" ;; ! must be fixed because gutter-style
               }}
-     ; (d/p mode-id)
-     (if split?
-       ;; split views
-       ($d Splitter
-           {:gutterClassName (gutter-styles)
-            :draggerClassName (dragger-styles)
-            :minWidths (array 100 100)
-            :minHeights (array 100 100)
-            :initialSizes @*sizes
-            :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
-            :direction orientation}
-           ($ ViewPane {:id   0
-                        :view (first views)})
-           ($ ViewPane {:id   1
-                        :view (second views)}))
+     (case (count views)
        ;; single view
-       ($ ViewPane {:id   0
-                    :view (first views)})))))
+       1 ($ ViewPane {:id   0
+                      :view (first views)
+                      :handle-remove-view nil})
+       ;; split views
+       2 (let [remove-view-handler #(refx/dispatch
+                                     [:views/remove {:view-index %}])]
+           ($d Splitter
+               {:gutterClassName (gutter-styles)
+                :draggerClassName (dragger-styles)
+                :minWidths (array 100 100)
+                :minHeights (array 100 100)
+                :initialSizes @*sizes
+                :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
+                :direction (case split-orientation
+                             :cols "Horizontal"
+                             :rows "Vertical"
+                             (throw (ex-info "Invalid split orientation"
+                                             {:split-orientation
+                                              split-orientation})))}
+               ($ ViewPane {:id   0
+                            :view (first views)
+                            :handle-remove-view remove-view-handler})
+               ($ ViewPane {:id   1
+                            :view (second views)
+                            :handle-remove-view remove-view-handler})))
+       (throw (ex-info "Invalid view count" {:views views}))))))
 
 (defnc ViewControls
-  [{:keys [handle-change-orientation handle-change-split handle-swap]}]
+  [{:keys [view-split? handle-split-orientation handle-swap]}]
   (d/div
    {:class "ViewControls"
     :style {:display "flex"}}
-   (d/div {:style {:display "flex"}}
-          (d/button
-           {:on-click (fn [_] (handle-change-split false))}
-           "Single")
-          (d/button
-           {:on-click (fn [_] (handle-change-split true))}
-           "Split"))
    (d/div {:style {:display "flex" :margin-left 6}}
           (d/button
-           {:on-click (fn [_] (handle-change-orientation "Vertical"))}
-           "Split vert.")
+           {:on-click (fn [_] (handle-split-orientation :cols))
+            :disabled (not view-split?)}
+           "Split cols")
           (d/button
-           {:on-click (fn [_] (handle-change-orientation "Horizontal"))}
-           "Split horiz."))
+           {:on-click (fn [_] (handle-split-orientation :rows))
+            :disabled (not view-split?)}
+           "Split rows"))
    (d/div {:style {:display "flex" :margin-left 6}}
           (d/button
-           {:on-click (fn [_] (handle-swap))}
+           {:on-click (fn [_] (handle-swap))
+            :disabled (not view-split?)}
            "Swap"))))
 
 (defnc Header
-  [{}]
+  [{:keys [view-split?]}]
   (d/div
    {:class "Header"
     :style {:display "flex"
@@ -159,31 +183,34 @@
     {:style {:class "Title"
              :flex-grow 1}}
     (d/h1 "FORM tricorder"))
-   ($ ViewControls {:handle-change-orientation
-                    #(refx/dispatch [:views/change-orientation
+   ($ ViewControls {:view-split? view-split?
+                    :handle-split-orientation
+                    #(refx/dispatch [:views/set-split-orientation
                                      {:next-orientation %}])
-                    :handle-change-split
-                    #(refx/dispatch [:views/change-split
-                                     {:split? %}])
                     :handle-swap
                     #(refx/dispatch [:views/swap])})))
 
 (defnc App
   []
-  (let [func-id (refx/use-sub [:func-id]) ;; ! obsolete
-        ]
+  (let [views             (refx/use-sub [:views])
+        split-orientation (refx/use-sub [:split-orientation])]
     (d/div
      {:class "App"
       :style {:margin "2rem 2rem"}}
-     ($ Header {})
+     ($ Header {:view-split? (> (count views) 1)})
      ($ FormulaInput {:apply-input
                       #(refx/dispatch [:changed-formula
                                        {:next-formula %}])})
      ($ FunctionMenu {:handle-click
-                      #(refx/dispatch [:set-func-id
-                                       {:next-id %1
-                                        :view-id %2}])})
-     ($ OutputArea {:func-id func-id}))))
+                      (fn [func-id alt-view?]
+                        (let [view-index (if alt-view? 1 0)]
+                          (do
+                            (when alt-view? (refx/dispatch [:views/split]))
+                            (refx/dispatch [:views/set-func-id
+                                            {:next-id    func-id
+                                             :view-index view-index}]))))})
+     ($ OutputArea {:views views
+                    :split-orientation split-orientation}))))
 
 (defonce root
   (rdom/createRoot (js/document.getElementById "app")))

@@ -11,25 +11,14 @@
    (:test/answer db)))
 
 (refx/reg-sub
- :func-id
- (fn [db _]
-   (:func-id db)))
-
-(refx/reg-sub
  :views
  (fn [db _]
    (:views db)))
 
 (refx/reg-sub
- :view-split?
+ :split-orientation
  (fn [db _]
-   (:view-split? db)))
-
-(refx/reg-sub
- :view-orientation
- (fn [db _]
-   (:view-orientation db)))
-
+   (:split-orientation db)))
 
 ; (refx/reg-sub
 ;  :cache

@@ -1,9 +1,13 @@
 (ns form-tricorder.events
   (:require
-    [refx.alpha :as refx]
-    [formform.expr :as expr]
-    [formform.io :as io]))
+   [refx.alpha :as refx]
+   [formform.expr :as expr]
+   [formform.io :as io]
+   [form-tricorder.utils :as utils]))
 
+
+(defn make-view [func-id]
+  {:func-id func-id})
 
 ;; ---- Event handler -------------------------------------------
 
@@ -16,10 +20,8 @@
      {:input {:formula fml
               :expr expr
               :varorder varorder}
-      :views [{:func-id :vtable}
-              {:func-id :vmap}]
-      :view-orientation "Horizontal"
-      :view-split? true
+      :views [(make-view :vtable)]
+      :split-orientation :cols  ;; :cols | :rows
       :modes {:calc-config nil}})))
 
 (refx/reg-event-db
@@ -55,32 +57,38 @@
  :views/swap
  (fn [{:keys [views] :as db} _]
    (let [[a b] views]
-     (assoc db :views [b a]))))
+     (if (nil? b)
+       db
+       (assoc db :views [b a])))))
 
 (refx/reg-event-db
- :views/change-split
- (fn [db [_ {:keys [split?]}]]
-   {:pre [(boolean? split?)]}
-   (-> db
-       (assoc :view-split? split?))))
-
-(refx/reg-event-db
- :views/change-orientation
+ :views/set-split-orientation
  (fn [db [_ {:keys [next-orientation]}]]
-   {:pre [(#{"Horizontal" "Vertical"} next-orientation)]}
-   (-> db
-       (assoc :view-orientation next-orientation))))
-
+   {:pre [(#{:rows :cols} next-orientation)]}
+   (assoc db :split-orientation next-orientation)))
 
 (refx/reg-event-db
- :set-func-id
- (fn [db [_ {:keys [next-id view-id]}]]
-   (println next-id " " view-id)
-   (assoc-in db [:views view-id :func-id]
+ :views/split
+ (fn [{:keys [views] :as db} [_ _]]
+   (when (< (count views) 2)
+     (update db :views #(conj % (last %))))))
+
+(refx/reg-event-db
+ :views/set-func-id
+ (fn [db [_ {:keys [next-id view-index]}]]
+   (assoc-in db [:views view-index :func-id]
              (if (keyword? next-id) next-id (keyword next-id)))))
+
+(refx/reg-event-db
+ :views/remove
+ (fn [db [_ {:keys [view-index]}]]
+   (update db :views utils/dissocv view-index)))
+
 
 (refx/reg-event-db
  :update-cache
  (fn [db [_ {:keys [update-fn]}]]
    (update db :cache update-fn)))
+
+
 
