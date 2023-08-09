@@ -10,7 +10,7 @@
    [formform.io :as io]
    ["/form-svg$default" :as form-svg]
    [clojure.math]
-   [form-tricorder.mode-ui :as mode-ui]
+   [form-tricorder.components.mode-ui :as mode-ui]
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 

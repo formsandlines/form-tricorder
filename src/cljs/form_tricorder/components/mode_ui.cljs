@@ -1,4 +1,4 @@
-(ns form-tricorder.mode-ui
+(ns form-tricorder.components.mode-ui
   (:require
    [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
@@ -6,7 +6,6 @@
    [helix.dom :as d]
    [formform.calc :as calc]
    [formform.expr :as expr]
-   ; [formform.io :as io]
    [clojure.math]
    [clojure.edn :as edn]
    [form-tricorder.utils :as utils :refer [clj->js*]]))

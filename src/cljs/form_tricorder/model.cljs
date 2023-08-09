@@ -72,4 +72,4 @@
 
 
 (comment
-  (modes-map "calc"))
+  (modes-map :calc))
