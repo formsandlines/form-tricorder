@@ -12,7 +12,7 @@
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
    [form-tricorder.utils :refer [log clj->js*]]
-   [form-tricorder.components.header :refer [Header]]
+   [form-tricorder.components.app-toolbar :refer [AppToolbar]]
    [form-tricorder.components.formula-input :refer [FormulaInput]]
    [form-tricorder.components.function-menu :refer [FunctionMenu]]
    [form-tricorder.components.output-area :refer [OutputArea]]
@@ -25,8 +25,9 @@
         split-orientation (refx/use-sub [:split-orientation])]
     (d/div
      {:class "App"
-      :style {:margin "2rem 2rem"}}
-     ($ Header {:view-split? (> (count views) 1)})
+      :style {:margin "2rem 2rem"
+              :backgroundColor "grey"}}
+     ($ AppToolbar {:view-split? (> (count views) 1)})
      ($ FormulaInput {:apply-input
                       #(refx/dispatch [:changed-formula
                                        {:next-formula %}])})
