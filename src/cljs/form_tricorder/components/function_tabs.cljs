@@ -5,56 +5,51 @@
     [helix.hooks :as hooks]
     [form-tricorder.model :as model]
     [form-tricorder.functions :as func]
-    [form-tricorder.utils :refer [log clj->js*]]
-    ["@radix-ui/react-tabs" :as Tabs]
-    ["/stitches.config" :refer (styled css)]))
+    [form-tricorder.utils :refer [log style> css>]]
+    ["@radix-ui/react-tabs" :as Tabs]))
 
 
 
 (def Root
-  (styled (.-Root Tabs)
-          (clj->js*
-            {:display "flex"
-             :gap "10px"
-             :padding "6px"
-             })))
+  (style> (.-Root Tabs)
+          {:display "flex"
+           :gap "10px"
+           :padding "6px"
+           }))
 
 (def TabList
-  (styled (.-List Tabs)
-          (clj->js*
-            {:display "flex"
-             :flexDirection "column"
-             :gap "2px"
-             :flex "flex-none"
-             :boxSizing "border-box"})))
+  (style> (.-List Tabs)
+          {:display "flex"
+           :flexDirection "column"
+           :gap "2px"
+           :flex "flex-none"
+           :boxSizing "border-box"}))
 
 (def Trigger
-  (styled (.-Trigger Tabs)
-          (clj->js*
-           {:flex "flex-none"
-            :outline "none"
-            :border "none"
-            :borderRadius "4px"
-            :width "30px"
-            :height "30px"
-            "&[data-state=active]" {:backgroundColor "lightgray"}
-            "&:focus" {:border "1px solid black"}
-            :variants
-            {:type {:a {} :b {} :c {}}
-             :subtype {:a {} :b {} :c {}}}
-            :compoundVariants
-            (vec (for [{mode-id :id items :items} model/modes
-                       {func-id :id color :color} items]
-                   {:type (name mode-id)
-                    :subtype (name func-id)
-                    :css {:backgroundColor (:base color)}}))})))
+  (style> (.-Trigger Tabs)
+          {:flex "flex-none"
+           :outline "none"
+           :border "none"
+           :borderRadius "4px"
+           :width "30px"
+           :height "30px"
+           "&[data-state=active]" {:backgroundColor "lightgray"}
+           "&:focus" {:border "1px solid black"}
+           :variants
+           {:type {:a {} :b {} :c {}}
+            :subtype {:a {} :b {} :c {}}}
+           :compoundVariants
+           (vec (for [{mode-id :id items :items} model/modes
+                      {func-id :id color :color} items]
+                  {:type (name mode-id)
+                   :subtype (name func-id)
+                   :css {:backgroundColor (:base color)}}))}))
 
 (def Content
-  (styled (.-Content Tabs)
-          (clj->js*
-            {:flex "1 1 auto"
-             :border "1px solid lightgray"
-             })))
+  (style> (.-Content Tabs)
+          {:flex "1 1 auto"
+           :border "1px solid lightgray"
+           }))
 
 (defnc FunctionTabs
   [{:keys [view handle-change-view]}]

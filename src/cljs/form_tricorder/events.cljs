@@ -22,7 +22,9 @@
               :varorder varorder}
       :views [(make-view :vtable)]
       :split-orientation :cols  ;; :cols | :rows
-      :modes {:calc-config nil}})))
+      :modes {:calc-config nil}
+      :theme {:appearance :light}  ;; :dark | :light
+      })))
 
 (refx/reg-event-db
  :changed-formula
@@ -83,6 +85,11 @@
  :views/remove
  (fn [db [_ {:keys [view-index]}]]
    (update db :views utils/dissocv view-index)))
+
+(refx/reg-event-db
+ :theme/set-appearance
+ (fn [db [_ {:keys [next-appearance]}]]
+   (assoc-in db [:theme :appearance] next-appearance)))
 
 
 (refx/reg-event-db

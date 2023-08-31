@@ -5,29 +5,39 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    [form-tricorder.components.view-pane :refer [ViewPane]]
-   [form-tricorder.utils :refer [log clj->js*]]
-   ["@devbookhq/splitter$default" :as Splitter]
-   ["/stitches.config" :refer (css)]))
+   [form-tricorder.utils :refer [log style> css>]]
+   ["@devbookhq/splitter$default" :as Splitter]))
+
+(def styles
+  (css> {:padding 10
+         ; :border "1px solid lightgray"
+         :margin "6px 0"
+         :height "auto"
+         ; :height "600px" ;; ! must be fixed because gutter-style
+         :border-radius "$3"
+         :background-color "$colors$inner_bg"
+         ; "& > div"
+         ; {:align-items "stretch"}
+         }))
 
 (def gutter-styles
-  (-> {:position "relative"
-       "&:hover > *" {:backgroundColor "#333"}
-       "&::before" {:content ""
-                    :position "absolute"
-                    :width 1
-                    :height "100%"
-                    :backgroundColor "#888"}
-       "&[dir=Vertical]::before" {:width "100%"
-                                  :height 1}}
-      clj->js*
-      css))
+  (css> {:position "relative"
+         "&:hover > *"
+         {:background-color "#333"}
+         "&::before"
+         {:content ""
+          :position "absolute"
+          :width 1
+          :height "100%"
+          :background-color "#888"}
+         "&[dir=Vertical]::before"
+         {:width "100%"
+          :height 1}}))
 
 (def dragger-styles
-  (-> {:backgroundColor "#666"
-       :position "relative"
-       :z-index 999}
-      clj->js*
-      css))
+  (css> {:background-color "#666"
+         :position "relative"
+         :z-index 999}))
 
 (defnc OutputArea
   [{:keys [views split-orientation]}]
@@ -39,12 +49,7 @@
         remove-view-handler #(refx/dispatch
                               [:views/remove {:view-index %}])]
     (d/div
-     {:class "OutputArea"
-      :style {:border "1px solid lightgray"
-              :padding 10
-              :margin "10px 0"
-              :height "600px" ;; ! must be fixed because gutter-style
-              }}
+     {:class (str "OutputArea " (styles))}
      (case (count views)
        ;; single view
        1 ($ ViewPane {:id   0

@@ -1,6 +1,7 @@
 (ns form-tricorder.utils
   (:require
-    [helix.hooks :as hooks]))
+    [helix.hooks :as hooks]
+    ["/stitches.config" :refer (styled css darkTheme lightTheme)]))
 
 (defn splitv-at [i v]
   {:pre [(vector? v)]}
@@ -47,6 +48,18 @@
 
 ; (defn use-custom-compare-effect [effect deps eq?]
 ;   (react/useEffect effect (use-custom-compare-memoize deps eq?)))
+
+
+(def dark-theme darkTheme)
+(def light-theme lightTheme)
+
+(defn style>
+  [elem styles-map]
+  (styled elem (clj->js* styles-map)))
+
+(defn css>
+  [styles-map]
+  (-> styles-map clj->js* css))
 
 
 (comment

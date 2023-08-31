@@ -20,6 +20,11 @@
  (fn [db _]
    (:split-orientation db)))
 
+(refx/reg-sub
+ :appearance
+ (fn [db _]
+   (get-in db [:theme :appearance])))
+
 ; (refx/reg-sub
 ;  :cache
 ;  (fn [db]

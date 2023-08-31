@@ -40,24 +40,24 @@
 
 (def modes
   [{:id    :visu
-    :label "Visualize"
-    :color {:base  "$teal8"
-            :hover "$teal9"}
+    :label "visualize"
+    :color {:base  "$fmenu_visu"
+            :hover ""}
     :items visu-items}
    {:id    :calc
-    :label "Calculate"
-    :color {:base  "$violet8"
-            :hover "$violet9"}
+    :label "calculate"
+    :color {:base  "$fmenu_calc"
+            :hover ""}
     :items calc-items}
    #_{:id    :emul
-      :label "Emulate"
-      :color {:base  "$crimson8"
-              :hover "$crimson9"}
+      :label "emulate"
+      :color {:base  "$fmenu_emul"
+              :hover ""}
       :items emul-items}
    {:id    :misc
     :label "…"
-    :color {:base  "gray"
-            :hover "darkgrey"}
+    :color {:base  "$fmenu_emul"
+            :hover ""}
     :items misc-items}])
 
 

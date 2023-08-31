@@ -8,7 +8,7 @@
    [formform.expr :as expr]
    [clojure.math]
    [clojure.edn :as edn]
-   [form-tricorder.utils :as utils :refer [clj->js*]]))
+   [form-tricorder.utils :as utils :refer [style> css>]]))
 
 (defnc Calc
   [{:keys [current-varorder set-varorder debug-origin]}]

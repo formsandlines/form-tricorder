@@ -5,59 +5,62 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    [form-tricorder.model :as model :refer [modes]]
-   [form-tricorder.utils :refer [log clj->js*]]
-   ["@radix-ui/react-menubar" :as Menubar]
-   ["/stitches.config" :refer (styled css)]))
+   [form-tricorder.utils :refer [log style> css>]]
+   ["@radix-ui/react-menubar" :as Menubar]))
 
 
 (def Root
-  (styled (.-Root Menubar)
-          (clj->js*
-            {:display "flex"
-             :gap "4px"
-             :padding "6px"
-             :boxSizing "border-box"
-             :width "100%"})))
+  (style> (.-Root Menubar)
+          {:display "flex"
+           :gap "4px"
+           ; :padding "6px"
+           :margin-top "6px"
+           :boxSizing "border-box"
+           :width "100%"}))
 
 (def Menu
-  (styled (.-Menu Menubar)
-          (clj->js*
-            {})))
+  (style> (.-Menu Menubar)
+          {}))
 
 (def Trigger
-  (styled (.-Trigger Menubar)
-          (clj->js*
-           {:flex "1 1 auto"
-            :display "inline-block"
-            :outline "none"
-            :border "none"
-            :padding "20px 4px 4px 4px"
-            :textAlign "right"
-            :color "white"
-            :boxShadow "0 0.5px 1px 0.5px black"
-            :fontSize "15px"
-            "&:focus" {:boxShadow "0 0.5px 1px 0.5px red"}
-            :variants
-            {:type
-             (into {}
-                   (for [{:keys [id color]} modes]
-                     [id {:backgroundColor (:base color)
-                          "&:hover" {:backgroundColor (:hover color)}}]))}})))
+  (style> (.-Trigger Menubar)
+          (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
+            {:flex "1 1 auto"
+             :display "inline-block"
+             ; :outline "none"
+             :border "none"
+             :padding "22px 6px 4px 4px"
+             :fontFamily "$base"
+             :fontWeight "$normal"
+             :fontSize "$3"
+             :textAlign "right"
+             :color "$outer_fg"
+             :cursor "pointer"
+             :boxShadow (str "inset 0 -20px 20px -8px $colors$fmenu_base"
+                             ", " shadow)
+             :borderRadius "$2"
+             "&:focus"
+             {}
+             "&:hover"
+             {:boxShadow (str "inset 0 -20px 20px -8px $colors$fmenu_glow"
+                              ", " shadow)}
+             :variants
+             {:type
+              (into {}
+                    (for [{:keys [id color]} modes]
+                      [id {:backgroundColor (:base color)}]))}})))
 
 (def Portal
-  (styled (.-Portal Menubar)
-          (clj->js
-            {})))
+  (style> (.-Portal Menubar)
+          {}))
 
 (def Content
-  (styled (.-Content Menubar)
-          (clj->js
-            {})))
+  (style> (.-Content Menubar)
+          {}))
 
 (def Item
-  (styled (.-Item Menubar)
-          (clj->js
-            {})))
+  (style> (.-Item Menubar)
+          {}))
 
 
 (defnc FunctionMenu

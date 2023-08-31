@@ -1,9 +1,9 @@
 import { createStitches } from '@stitches/react';
-import {
-  teal,
-  violet,
-  crimson,
-} from '@radix-ui/colors';
+// import {
+//   teal,
+//   violet,
+//   crimson,
+// } from '@radix-ui/colors';
 
 export const {
   styled,
@@ -17,19 +17,100 @@ export const {
 } = createStitches({
   theme: {
     colors: {
-      ...teal,
-      ...violet,
-      ...crimson,
-      gray400: 'gainsboro',
-      gray500: 'lightgray',
-      lime: '#e6ff8d',
-      accent: '$teal7',
+      // ...teal,
+      // ...violet,
+      // ...crimson,
+      // gray400: 'gainsboro',
+      // gray500: 'lightgray',
+    },
+    fontSizes: {
+      1: '12px',
+      2: '14px',
+      3: '16px',
+      base: '$2',
+    },
+    fonts: {
+      base: '"IBM Plex Sans", arial, sans-serif',
+    },
+    fontWeights: {
+      light: '200',
+      normal: '400',
+    },
+    radii: {
+      1: '2px',
+      2: '4px',
+      3: '6px',
+      4: '10px',
+      round: '50%',
+      pill: '9999px',
     },
   },
   media: {
     bp1: '(min-width: 480px)',
   },
   utils: {
-    marginX: (value) => ({ marginLeft: value, marginRight: value }),
+    // marginX: (value) => ({ marginLeft: value, marginRight: value }),
+  },
+});
+
+export const lightTheme = createTheme('light-theme', {
+  colors: {
+    outer_bg: '#E6E3E1',
+    outer_fg: '#333231',
+    outer_n100: '#969493',
+    outer_n200: '#C2BEBE',
+    outer_m100: '#2F3347',
+    outer_m200: '#7A7E91',
+    outer_hl: '#9297B0',
+    outer_contrast: '#FFFBEB',
+
+    fmenu_visu: '#C4D1CC',
+    fmenu_calc: '#C8CAE0',
+    fmenu_emul: '#DDC2CD',
+    fmenu_base: '#D9D7D4',
+    fmenu_glow: '#EDEBE8',
+
+    inner_bg: '#FCFCFA',
+    inner_fg: '#4A4847',
+    inner_n100: '#ADABAA',
+    inner_n200: '#D9D4D4',
+    inner_m100: '#3E445E',
+    inner_m200: '#8D92A8',
+    inner_hl: '#FFFBEB',
+    inner_contrast: '#FFFBEB',
+    inner_visu: '#D8EBE2',
+    inner_calc: '#E8E8FF',
+    inner_emul: '#F5E1E8',
+  },
+});
+
+export const darkTheme = createTheme('dark-theme', {
+  colors: {
+    outer_bg: '#2F3347',
+    outer_fg: '#E1E4F0',
+    outer_n100: '#848AA3',
+    outer_n200: '#5D627A',
+    outer_m100: '#E6E3E1',
+    outer_m200: '#A5A3A2',
+    outer_hl: '#B6B9DB',
+    outer_contrast: '#B6B9DB',
+
+    fmenu_visu: '#516F6C',
+    fmenu_calc: '#51537E',
+    fmenu_emul: '#654E6A',
+    fmenu_base: '$outer_n200',
+    fmenu_glow: '$outer_n100',
+
+    inner_bg: '#14151F',
+    inner_fg: '#C5C7D1',
+    inner_n100: '#6B7085',
+    inner_n200: '#46495C',
+    inner_m100: '#C7C5C3',
+    inner_m200: '#878584',
+    inner_hl: '#9D9FBD',
+    inner_contrast: '#9D9FBD',
+    inner_visu: '#3B524F',
+    inner_calc: '#3C3E5E',
+    inner_emul: '#593447',
   },
 });
