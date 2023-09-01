@@ -3,40 +3,40 @@
 (def visu-items
   [{:id    :hooks
     :label "Hooks notation"
-    :color {:base "teal"}}
+    :color {:base "$inner_visu"}}
    {:id    :graphs
     :label "Graph notation"
-    :color {:base "green"}}
+    :color {:base "$inner_visu"}}
    {:id    :depthtree
     :label "Depth tree"
-    :color {:base "olive"}}])
+    :color {:base "$inner_visu"}}])
 
 (def calc-items
   [{:id    :vtable
     :label "Value table"
-    :color {:base "cyan"}}
+    :color {:base "$inner_calc"}}
    {:id    :vmap
     :label "vmap"
-    :color {:base "blue"}}])
+    :color {:base "$inner_calc"}}])
 
 (def emul-items
   [{:id    :selfi
     :label "SelFi"
-    :color {:base "orange"}}
+    :color {:base "$inner_emul"}}
    {:id    :mindform
     :label "mindFORM"
-    :color {:base "red"}}
+    :color {:base "$inner_emul"}}
    {:id    :lifeform
     :label "lifeFORM"
-    :color {:base "violet"}}])
+    :color {:base "$inner_emul"}}])
 
 (def misc-items
   [{:id    :edn
     :label "EDN"
-    :color {:base "grey"}}
+    :color {:base "$inner_emul"}}
    {:id    :json
     :label "JSON"
-    :color {:base "grey"}}])
+    :color {:base "$inner_emul"}}])
 
 (def modes
   [{:id    :visu

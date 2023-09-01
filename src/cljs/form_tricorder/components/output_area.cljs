@@ -9,10 +9,11 @@
    ["@devbookhq/splitter$default" :as Splitter]))
 
 (def styles
-  (css> {:padding 10
+  (css> {:height "100%"
+         :padding "0.2rem"
+         :box-sizing "border-box"
          ; :border "1px solid lightgray"
-         :margin "6px 0"
-         :height "auto"
+         ; :height "auto"
          ; :height "600px" ;; ! must be fixed because gutter-style
          :border-radius "$3"
          :background-color "$colors$inner_bg"

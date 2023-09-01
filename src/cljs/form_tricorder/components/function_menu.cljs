@@ -12,11 +12,8 @@
 (def Root
   (style> (.-Root Menubar)
           {:display "flex"
-           :gap "4px"
-           ; :padding "6px"
-           :margin-top "6px"
-           :boxSizing "border-box"
-           :width "100%"}))
+           :column-gap "4px"
+           :boxSizing "border-box"}))
 
 (def Menu
   (style> (.-Menu Menubar)
@@ -25,7 +22,7 @@
 (def Trigger
   (style> (.-Trigger Menubar)
           (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
-            {:flex "1 1 auto"
+            {:flex "1"
              :display "inline-block"
              ; :outline "none"
              :border "none"

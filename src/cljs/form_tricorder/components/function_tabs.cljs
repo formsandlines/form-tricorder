@@ -13,28 +13,30 @@
 (def Root
   (style> (.-Root Tabs)
           {:display "flex"
-           :gap "10px"
-           :padding "6px"
+           :gap "0.6rem"
+           :padding "0.4rem"
            }))
 
 (def TabList
   (style> (.-List Tabs)
           {:display "flex"
-           :flexDirection "column"
-           :gap "2px"
-           :flex "flex-none"
-           :boxSizing "border-box"}))
+           :flex-direction "column"
+           :gap "0.4rem"
+           :flex "flex-none"}))
 
 (def Trigger
   (style> (.-Trigger Tabs)
           {:flex "flex-none"
            :outline "none"
            :border "none"
-           :borderRadius "4px"
-           :width "30px"
-           :height "30px"
-           "&[data-state=active]" {:backgroundColor "lightgray"}
-           "&:focus" {:border "1px solid black"}
+           :border-radius "4px"
+           :width "2.2rem"
+           :height "2.2rem"
+           "&[data-state=active]"
+           {:background-color "$inner_n200"}
+           "&:focus"
+           {:border "1px solid black"}
+
            :variants
            {:type {:a {} :b {} :c {}}
             :subtype {:a {} :b {} :c {}}}
@@ -43,7 +45,7 @@
                       {func-id :id color :color} items]
                   {:type (name mode-id)
                    :subtype (name func-id)
-                   :css {:backgroundColor (:base color)}}))}))
+                   :css {:background-color (:base color)}}))}))
 
 (def Content
   (style> (.-Content Tabs)

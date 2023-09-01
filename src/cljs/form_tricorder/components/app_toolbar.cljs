@@ -7,46 +7,39 @@
     [form-tricorder.utils :refer [style> css>]]
     [form-tricorder.icons :refer [SunIcon MoonIcon SwapIcon
                                   ViewVerticalIcon
-                                  ViewHorizontalIcon]]
+                                  ViewHorizontalIcon
+                                  SourceIcon]]
     ["@radix-ui/react-radio-group" :as RadioGroup]
     ["@radix-ui/react-toolbar" :as Toolbar]
     #_["@radix-ui/react-icons" :refer []]))
 
-
 ;; Shared styles
 
 (def itemStyles
-  {:flex "0 0 auto"
-   :color "$colors$outer_fg"
-   :alignItems "center"
-   "&:focus"
-   {:outline "solid"}
-   "&:hover"
-   {}})
+  {:flex "0 0 auto"})
 
 (def linkStyles
-  {:display "inline-flex"})
+  {})
 
 (def buttonStyles
   {:outline "none"
    :cursor "pointer"
    :border "none"
    :padding "0.2rem"
+   :border-radius "2px"
    :background "none"
-   :borderRadius "2px"
-   "& svg"
-   {:fill "$colors$outer_m200"}
+   :color "$colors$outer_fg"
+
+   "&:focus"
+   {:outline "solid"}
+   "&:focus-visible"
+   {:outline "none"}
    "&:hover"
-   {:backgroundColor "$colors$inner_bg"
-    :color "$colors$outer_m200"
-    "& svg"
-    {:fill "$colors$outer_m200"}}
+   {:background-color "$colors$inner_bg"
+    :color "$colors$outer_m200"}
    "&:disabled"
    {:cursor "not-allowed"
-    :background "none"
-    ; :color "$colors$outer_bg"
-    "& svg"
-    {:fill "$colors$outer_n200"}}})
+    :background "none"}})
 
 
 ;; Styled Components
@@ -54,12 +47,20 @@
 (def Root
   (style> (.-Root Toolbar)
           {:display "flex"
-           :minWidth "max-content"
+           :min-width "max-content"
+           :height "100%"
            :column-gap "4px"
-           :padding "4px"
+           :align-items "stretch"
+           :color "$colors$outer_fg"
 
-           "& a"
-           {:textDecoration "none"}}))
+           "& .icon"
+           {:width "1.2rem" ; "auto"
+            :height "100%"
+            :fill "$colors$outer_m200"}
+           "& *:hover > .icon"
+           {:fill "$colors$outer_m200"}
+           "& *:disabled > .icon"
+           {:fill "$colors$outer_n200"}}))
 
 (def Button
   (style> (.-Button Toolbar)
@@ -75,29 +76,34 @@
 
 (def Separator
   (style> (.-Separator Toolbar)
-          {:width "1px"
-           :backgroundColor "$colors$outer_n200"
-           :margin "0 4px"}))
-
-(def Link
-  (style> (.-Link Toolbar)
           (merge itemStyles
-                 linkStyles)))
-
-(def AppLink
-  (style> (.-Link Toolbar)
-          (merge itemStyles
-                 linkStyles
-                 {:margin-right "auto"})))
+                 {:width "1px"
+                  :background-color "$colors$outer_n200"
+                  :margin "0 4px"})))
 
 (def ToggleGroup
   (style> (.-ToggleGroup Toolbar)
-          {}))
+          (merge itemStyles
+                 {:display "flex"
+                  :min-width "max-content"
+                  :column-gap "4px"})))
 
 (def ToggleItem
   (style> (.-ToggleItem Toolbar)
-          (merge buttonStyles
+          (merge itemStyles
+                 buttonStyles
                  {})))
+
+; (def Link
+;   (style> (.-Link Toolbar)
+;           (merge itemStyles
+;                  linkStyles)))
+
+(def SourceLink
+  (style> (.-Link Toolbar)
+          (merge itemStyles
+                 {:display "block"
+                  :padding "0.2rem 0"})))
 
 ;; Components
 
@@ -112,8 +118,6 @@
         #(refx/dispatch [:theme/set-appearance {:next-appearance %}])]
     ($d Root {:orientation "horizontal"
               :aria-label "App toolbar"}
-        ($d AppLink {:href "https://tricorder.formform.dev"}
-            "FORM tricorder")
         ($d Button-splitview
             {:disabled (not view-split?)
              :on-click (fn [_] (handle-split-orientation :cols))}
@@ -145,8 +149,8 @@
         ($d Button {:on-click (fn [_] (js/console.log "Clicked help"))}
             "help")
         ($d Separator)
-        ($d Link
+        ($d SourceLink
             {:href "https://github.com/formsandlines/form-tricorder"
              :target "_blank"}
-            "src"))))
+            ($ SourceIcon)))))
 
