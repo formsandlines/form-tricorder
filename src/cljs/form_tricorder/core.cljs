@@ -25,8 +25,8 @@
   (css> {:display "flex"
          :height "100vh"
          :flex-direction "column"
-         :padding "0.6rem"
-         :gap "0.4rem"
+         :padding "$3" ; "0.6rem"
+         :gap "$2" ; "0.4rem"
 
          :font-family "$base"
          :font-weight "$normal"
@@ -45,6 +45,27 @@
   (css> {"&:last-child"
          {:flex "1"
           }}))
+
+(defnc ScaleTest
+  [{:keys [scale n]}]
+  (let [rng (rest (range (inc n)))
+        test-styles (css> {:display "flex"
+                           :margin-bottom "10px"
+                           "> *"
+                           {:padding-right "6px"
+                            "> *"
+                            {:height "40px"
+                             :margin-bottom "2px"
+                             :background-color "black"}}})]
+    (d/div
+     {:class (test-styles)}
+     (for [i rng
+           :let [styles (css> {:width (str "$" scale "$" i)})]]
+       (d/div
+        {:key (str i)}
+        (d/div
+         {:class (styles)})
+        (str i))))))
 
 (defnc App
   []
@@ -83,6 +104,9 @@
                                               :view-index view-index}]))))}))
      (d/div
       {:class (item-styles)}
+      ; ($ ScaleTest {:scale "space" :n 11})
+      ; ($ ScaleTest {:scale "sizes" :n 3})
+      ; ($ ScaleTest {:scale "borderWidths" :n 3})
       ($ OutputArea {:views views
                      :split-orientation split-orientation})))))
 
@@ -92,5 +116,4 @@
 (defn ^:export init! []
   (refx/dispatch-sync [:initialize-db])
   (.render root ($ App)))
-
 

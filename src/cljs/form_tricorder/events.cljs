@@ -14,13 +14,14 @@
 (refx/reg-event-db
  :initialize-db
  (fn [_ _]
-   (let [fml  "(a :M) {@ a (b), {..@ :M, x}, :U} b"
+   (let [fml  "{L,E,R}{R,E,L}{L,R,E}" ; "(a :M) {@ a (b), {..@ :M, x}, :U} b"
          expr (io/read-expr fml)
-         varorder (expr/find-vars expr {:ordered? true})]
+         varorder ["L" "E" "R"] ; (expr/find-vars expr {:ordered? true})
+         ]
      {:input {:formula fml
               :expr expr
               :varorder varorder}
-      :views [(make-view :vtable)]
+      :views [(make-view :selfi)]
       :split-orientation :cols  ;; :cols | :rows
       :modes {:calc-config nil}
       :theme {:appearance :light}  ;; :dark | :light

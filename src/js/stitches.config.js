@@ -23,18 +23,56 @@ export const {
       // gray400: 'gainsboro',
       // gray500: 'lightgray',
     },
+    space: { // i * 3
+      1: '3px', // ~0.2rem
+      2: '6px', // ~0.4rem
+      3: '9px', // ~0.6rem
+      4: '12px', // ~0.8rem
+      5: '15px', // ~1rem
+      6: '18px',
+      7: '21px',
+      8: '24px',
+      9: '27px',
+      10: '30px',
+    },
     fontSizes: {
-      1: '12px',
-      2: '14px',
-      3: '16px',
-      base: '$2',
+      // double-stranded modular scale
+      // ratio: 1:√3 (1.732), bases: 16, 14
+      // https://www.modularscale.com/?16,14&px&1.732
+      1: '0.875rem', // 14px
+      2: '1rem',     // 16px
+      3: '1.516rem', // 24.248px
+      4: '1.732rem', // 27.712px
+      5: '2.625rem', // 41.998px
+      6: '3rem',     // 47.997px
+      7: '4.546rem', // 72.74px
+      8: '5.196rem', // 83.131px
+      medium: '16px',
+      base: '14px',
+      small: '12px',
     },
     fonts: {
       base: '"IBM Plex Sans", arial, sans-serif',
+      mono: '"IBM Plex Mono", courier, monospace',
+      // base: '"Berkeley Mono", "IBM Plex Sans", arial, sans-serif',
+      // mono: '"Berkeley Mono", "IBM Plex Mono", courier, monospace',
     },
     fontWeights: {
       light: '200',
       normal: '400',
+      medium: '600',
+      bold: '800',
+    },
+    sizes: {
+      toolbarIcon: '18px',
+      inputIcon: '30px',
+      tabIcon: '36px',
+      hairline: '1px',
+    },
+    borderWidths: {
+      1: '1px',
+      2: '2px',
+      3: '3px',
     },
     radii: {
       1: '2px',

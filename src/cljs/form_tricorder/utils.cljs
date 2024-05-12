@@ -61,6 +61,8 @@
   [styles-map]
   (-> styles-map clj->js* css))
 
+(defn pp-val [v] (-> (name v) .toLowerCase))
+(defn pp-var [s] (if (> (count s) 1) (str "'" s "'") s))
 
 (comment
   

@@ -12,8 +12,8 @@
 (def Root
   (style> (.-Root Menubar)
           {:display "flex"
-           :column-gap "4px"
-           :boxSizing "border-box"}))
+           :column-gap "$2" ; "4px"
+           :box-sizing "border-box"}))
 
 (def Menu
   (style> (.-Menu Menubar)
@@ -24,28 +24,28 @@
           (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
             {:flex "1"
              :display "inline-block"
-             ; :outline "none"
+                                        ; :outline "none"
              :border "none"
-             :padding "22px 6px 4px 4px"
-             :fontFamily "$base"
-             :fontWeight "$normal"
-             :fontSize "$3"
-             :textAlign "right"
+             :padding "$7 $2 calc($2 - 1px) $2"
+             :font-family "$base"
+             :font-weight "$normal"
+             :font-size "$2"
+             :text-align "right"
              :color "$outer_fg"
              :cursor "pointer"
-             :boxShadow (str "inset 0 -20px 20px -8px $colors$fmenu_base"
-                             ", " shadow)
-             :borderRadius "$2"
+             :box-shadow (str "inset 0 -20px 20px -8px $colors$fmenu_base"
+                              ", " shadow)
+             :border-radius "$2"
              "&:focus"
              {}
              "&:hover"
-             {:boxShadow (str "inset 0 -20px 20px -8px $colors$fmenu_glow"
-                              ", " shadow)}
+             {:box-shadow (str "inset 0 -20px 20px -8px $colors$fmenu_glow"
+                               ", " shadow)}
              :variants
              {:type
               (into {}
                     (for [{:keys [id color]} modes]
-                      [id {:backgroundColor (:base color)}]))}})))
+                      [id {:background-color (:base color)}]))}})))
 
 (def Portal
   (style> (.-Portal Menubar)
@@ -53,32 +53,77 @@
 
 (def Content
   (style> (.-Content Menubar)
-          {}))
+          (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
+            {
+             :display "flex"
+             :flex-direction "column"
+             :margin-left "$2"
+             :padding "0 0 $3 0"
+             :background "$outer_bg"
+             :box-shadow shadow
+             :border-bottom-left-radius "$2"
+             :border-bottom-right-radius "$2"
+             })))
 
 (def Item
   (style> (.-Item Menubar)
-          {}))
+          {
+           :display "flex"
+           :justify-content "space-between"
+           :margin "$1 0 0 0"
+           :padding "$2 $3"
+           :font-family "$base"
+           :font-size "$1"
+           :cursor "pointer"
+
+           "& > *:last-child"
+           {:margin-left "$10"}
+
+           ;; :variants
+           ;; {:type
+           ;;  (into {}
+           ;;        (for [{:keys [id color]} modes]
+           ;;          [id {:background-color (:base color)}]))}
+
+           :variants
+           {:type {:a {} :b {} :c {}}
+            :subtype {:a {} :b {} :c {}}}
+           :compoundVariants
+           (vec (for [{mode-id :id items :items} modes
+                      {func-id :id color :color} items]
+                  {:type (name mode-id)
+                   :subtype (name func-id)
+                   ;; color is actually always the same for one mode
+                   ;; so this is mostly obsolete, but more flexible for now
+                   :css {:background-color (:base color)}}))
+           }))
 
 
 (defnc FunctionMenu
   [{:keys [handle-click]}]
   ($d Root
-      {:class "FunctionMenu"}
-      (for [{:keys [id label items]} modes
-            :let [id-str (name id)]]
-        ($d Menu {:key id-str}
-            ($d Trigger {:type id-str} label)
-            ($d Portal
-                ($d Content
-                    (for [{:keys [id label]} items
-                          :let [id-str (name id)]]
-                      ($d Item
-                          {:key id-str
-                           :onSelect 
-                           (fn [e] (let [win-e  (.-event js/window)
-                                         shift? (if win-e
-                                                  (.-shiftKey win-e)
-                                                  false)]
-                                     (handle-click id shift?)))}
-                          label))))))))
+    {:class "FunctionMenu"}
+    (for [{mode-id :id label :label items :items} modes
+          :let [id-str (name mode-id)]]
+      ($d Menu
+        {:key id-str}
+        ($d Trigger
+          {:type id-str} label)
+        ($d Portal
+          ($d Content
+            (for [{:keys [id label]} items
+                  :let [id-str (name id)]]
+              ($d Item
+                {:key     id-str
+                 :type    (name mode-id)
+                 :subtype id-str
+                 :onSelect 
+                 (fn [e] (let [win-e  (.-event js/window)
+                              shift? (if win-e
+                                       (.-shiftKey win-e)
+                                       false)]
+                          (handle-click id shift?)))}
+                label
+                (d/span
+                  "X")))))))))
 

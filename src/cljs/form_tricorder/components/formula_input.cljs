@@ -15,13 +15,13 @@
          }))
 
 (def input-styles
-  (css> {:fontFamily "monospace"
+  (css> {:fontFamily "$mono"
          :color "$colors$inner_fg"
          :backgroundColor "transparent"
          :appearance "none"
          :width "100%"
          :border-width "0"
-         :padding "0.6rem"
+         :padding "$3" ; "0.6rem"
          :flex "1 1 auto"
          }))
 
@@ -30,7 +30,7 @@
 
 (def button-styles
   (css> {:height "100%"
-         :width "1.9rem"
+         :width "$inputIcon" ; "1.9rem"
          :outline "none"
          :border "none"
          :cursor "pointer"

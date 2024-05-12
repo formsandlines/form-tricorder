@@ -49,11 +49,11 @@
     :color {:base  "$fmenu_calc"
             :hover ""}
     :items calc-items}
-   #_{:id    :emul
-      :label "emulate"
-      :color {:base  "$fmenu_emul"
-              :hover ""}
-      :items emul-items}
+   {:id    :emul
+    :label "emulate"
+    :color {:base  "$fmenu_emul"
+            :hover ""}
+    :items emul-items}
    {:id    :misc
     :label "…"
     :color {:base  "$fmenu_emul"
@@ -72,4 +72,5 @@
 
 
 (comment
+  (prn func->mode)
   (modes-map :calc))

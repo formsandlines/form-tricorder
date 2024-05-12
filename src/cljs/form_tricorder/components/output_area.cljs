@@ -10,7 +10,7 @@
 
 (def styles
   (css> {:height "100%"
-         :padding "0.2rem"
+         :padding "0" ; "0.2rem"
          :box-sizing "border-box"
          ; :border "1px solid lightgray"
          ; :height "auto"
@@ -24,19 +24,19 @@
 (def gutter-styles
   (css> {:position "relative"
          "&:hover > *"
-         {:background-color "#333"}
+         {:background-color "$outer_hl"}
          "&::before"
          {:content ""
           :position "absolute"
           :width 1
           :height "100%"
-          :background-color "#888"}
+          :background-color "$outer_bg"}
          "&[dir=Vertical]::before"
          {:width "100%"
           :height 1}}))
 
 (def dragger-styles
-  (css> {:background-color "#666"
+  (css> {:background-color "$outer_m200"
          :position "relative"
          :z-index 999}))
 

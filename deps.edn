@@ -5,9 +5,16 @@
         com.fbeyer/refx {:mvn/version "0.0.49"}
         eu.formsandlines/formform {:local/root "../formform-project/formform"}}
  :aliases
- {:cljs
-  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.21.0"}
-                binaryage/devtools {:mvn/version "1.0.6"}
+ {:dev
+  ;; With CIDER:
+  ;; 1. M-x cider-jack-in-cljs
+  ;; 2. M-x cider-connect-cljs with port 8777
+  ;; open http://localhost:3000 in browser
+  {:extra-paths ["dev"]
+   :extra-deps {binaryage/devtools {:mvn/version "1.0.7"}
+                cider/cider-nrepl {:mvn/version "0.47.1"}
+                cider/piggieback {:mvn/version "0.5.3"} ;; needed?
+                thheller/shadow-cljs {:mvn/version "2.28.4"}
                 com.github.jpmonettas/flow-storm-inst {:mvn/version "3.6.10"}}}
 
   :flowstorm

@@ -1,6 +1,7 @@
-{:deps     {:aliases [:cljs]}
+{:deps     {:aliases [:dev]}
  :npm-deps {:install false}
- :nrepl    {:port 8777}
+ :nrepl    {:middleware [cider.nrepl/cider-middleware]
+            :port 8777}
  :builds   {:app {:target     :browser
                   :output-dir "public/js"
                   :asset-path "/js"

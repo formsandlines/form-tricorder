@@ -4,14 +4,16 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
-   ; ["react" :as react]
+                                        ; ["react" :as react]
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
    ["/form-svg$default" :as form-svg]
    [clojure.math]
+   [clojure.test.check.generators] ;; <- BAD
    [form-tricorder.components.mode-ui :as mode-ui]
-   [form-tricorder.utils :as utils :refer [clj->js*]]))
+   [form-tricorder.utils :as utils :refer [css> clj->js* pp-val pp-var]]
+   [clojure.edn :as edn]))
 
 
 (defn expr->json
@@ -32,8 +34,10 @@
 
 (defnc F-EDN
   [{:keys [expr]}]
-  (d/pre {:style {:font-family "monospace"}}
-         (d/code (prn-str expr))))
+  (let [styles (css> {:font-family "$mono"
+                      :background-color "$inner_hl"})]
+    (d/pre {:class (styles)}
+           (d/code (prn-str expr)))))
 
 (defnc F-EDN--init
   [args]
@@ -51,9 +55,12 @@
 
 (defnc F-JSON
   [{:keys [expr]}]
-  (d/pre {:style {:font-family "monospace"}}
-         (d/code (.stringify js/JSON (expr->json expr)
-                             js/undefined 2))))
+  (let [styles (css> {:font-family "$mono"
+                      :font-size "$1"
+                      :background-color "$inner_hl"})]
+    (d/pre {:class (styles)}
+           (d/code (.stringify js/JSON (expr->json expr)
+                               js/undefined 2)))))
 
 (defnc F-JSON--init
   [args]
@@ -69,21 +76,41 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Value table
 
+;; ? split to multiple columns
 (defnc F-Vtable
   [{:keys [results varorder]}]
-  (let [results (map (fn [[intpr res]]
+  (let [styles (css> {:font-family "$mono"
+                      :font-size "$1"
+                      "th"
+                      {:font-weight "$medium"
+                       :border-top "1px solid $inner_fg"
+                       :border-bottom "1px solid $inner_fg"}
+                      "th, td"
+                      {:text-align "left"
+                       :padding "0.4rem 0.2rem"}
+                      "th:first-child, td:first-child"
+                      {:padding-left "0"}
+                      "th:last-child, td:last-child"
+                      {:text-align "right"
+                       :padding-right "0"}
+                      "tr:hover td"
+                      {:background-color "$inner_hl"}
+                      "td"
+                      {:border-top "1px solid $inner_n200"}
+                      })
+        results (map (fn [[intpr res]]
                        {:id (random-uuid)
                         :intpr intpr
                         :result res})
                      results)]
     (d/table
-     {:style {:font-family "monospace"}}
+     {:class (styles)}
      (d/thead
       (d/tr
        (for [x varorder
-             :let [x (str x)]]
-         (d/th {:key x}
-               x))
+             :let [s (str x)]]
+         (d/th {:key s}
+               (pp-var s)))
        (d/th "Result")))
      (d/tbody
       (for [{:keys [id intpr result]} results]
@@ -91,8 +118,8 @@
          {:key id}
          (for [[i v] (map-indexed vector intpr)]
            (d/td {:key (str id "-" i)}
-                 (str v) "\u00a0"))
-         (d/td (str result))))))))
+                 (pp-val v) "\u00a0"))
+         (d/td (pp-val result))))))))
 
 (defnc F-Vtable--init
   [args]
@@ -313,4 +340,121 @@
   [_ args]
   ($ F-Hooks--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Hooks notation
+
+(defn sys-ini
+  [ini-ptn res]
+  (condp ini-ptn =
+    :random (vec (repeatedly res calc/rand-const))
+    (throw (ex-info "Unknown ini pattern" {}))))
+
+(defn sys-next
+  [gen-prev rules umwelt]
+  (let [p 0
+        q (dec (count gen-prev))]
+    (into []
+          (for [i (range (count gen-prev))]
+            (let [L (if (> i p) (- i 1) q)
+                  E i
+                  R (if (< i q) (+ i 1) p)]
+              (rules
+               (mapv gen-prev
+                     (condp = umwelt
+                       :lr  [L R]
+                       :ler [L E R]
+                       (throw (ex-info "Invalid cell neighbourhood" {}))))))))))
+
+(defnc CA-Render
+  [{:keys [history vis-limit res cell-size]}]
+  (let [canvas-ref (hooks/use-ref nil)]
+    (hooks/use-effect
+      :always
+      (let [canvas @canvas-ref
+            context (.getContext canvas "2d")
+            cw (.-width canvas)
+            ch (.-height canvas)]
+        (.clearRect context 0 0 cw ch)
+        (aset context "fillStyle" "black")
+        (.fillRect context 0 0 cw ch)
+        (doseq [[i gen] (map-indexed vector history)
+                [j val] (map-indexed vector gen)
+                :let [x (* j cell-size)
+                      y (* i cell-size)]]
+          (aset context "fillStyle" (KRGB val))
+          (.fillRect context x y cell-size cell-size))))
+    (d/canvas {:ref canvas-ref
+               :width  (* res cell-size)
+               :height (* vis-limit cell-size)})))
+
+(defnc Cellular-Automaton
+  [{:keys [res delay-ms vis-limit ini-ptn rules umwelt cell-size]}]
+  (let [[time set-time] (hooks/use-state 1)
+        [evolution set-evolution] (hooks/use-state nil)]
+    (hooks/use-effect
+      [rules]
+      (let [interval (js/setInterval (fn [] (set-time inc)) delay-ms)]
+        (fn [] (js/clearInterval interval))
+        (set-evolution #(vector (sys-ini ini-ptn res)))))
+    (hooks/use-effect
+      [time]
+      (when evolution
+        (let [next-gen (sys-next (last evolution) rules umwelt)]
+          (set-evolution #(conj % next-gen)))))
+    ($ CA-Render {:history evolution
+                  :vis-limit vis-limit
+                  :res res
+                  :cell-size cell-size})))
+
+;; copied from formform (not in interface)
+(defn consts->quaternary
+  [consts]
+  (if (seq consts)
+    (let [digits (map calc/const->digit consts)]
+      (apply str "4r" digits))
+    (throw (ex-info "Must contain at least one element." {:arg consts}))))
+
+(defnc F-Selfi
+  [{:keys [results varorder]}]
+  (let [styles (css> {})
+        res 200
+        ;; vdict (into {} results)
+        dna-rev (if (calc/dna? results)
+                  ((comp vec reverse) results)
+                  (mapv second results))
+        rules-fn (comp dna-rev edn/read-string consts->quaternary)
+        umwelt (condp = (count varorder)
+                 2 :lr
+                 3 :ler
+                 4 :-lr+
+                 5 :-ler+
+                 (throw (ex-info "Invalid variable count" {})))]
+    (d/div
+      {:class (styles)}
+      ($ Cellular-Automaton {:res res
+                             :rules rules-fn
+                             :ini-ptn :random
+                             :vis-limit 300
+                             :delay-ms 10
+                             :umwelt umwelt
+                             :cell-size 4}))))
+
+(defnc F-Selfi--init
+  [args]
+  (let [varorder (refx/use-sub [:varorder])
+        results  (refx/use-sub [:value])]
+    (d/div {:class "Selfi"}
+           ($ mode-ui/Calc {:current-varorder varorder
+                            :debug-origin "Selfi"
+                            :set-varorder
+                            #(refx/dispatch
+                              [:changed-varorder {:next-varorder %}])})
+           ($ F-Selfi {:results results
+                       :varorder varorder
+                       & args}))))
+
+(defmethod gen-component :selfi
+  [_ args]
+  ($ F-Selfi--init {& args}))
 

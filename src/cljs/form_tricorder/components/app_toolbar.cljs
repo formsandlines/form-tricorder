@@ -9,7 +9,6 @@
                                   ViewVerticalIcon
                                   ViewHorizontalIcon
                                   SourceIcon]]
-    ["@radix-ui/react-radio-group" :as RadioGroup]
     ["@radix-ui/react-toolbar" :as Toolbar]
     #_["@radix-ui/react-icons" :refer []]))
 
@@ -25,8 +24,8 @@
   {:outline "none"
    :cursor "pointer"
    :border "none"
-   :padding "0.2rem"
-   :border-radius "2px"
+   :padding "$1" ; "0.2rem"
+   :border-radius "$1"
    :background "none"
    :color "$colors$outer_fg"
 
@@ -49,12 +48,12 @@
           {:display "flex"
            :min-width "max-content"
            :height "100%"
-           :column-gap "4px"
+           :column-gap "$1" ; "4px"
            :align-items "stretch"
            :color "$colors$outer_fg"
 
            "& .icon"
-           {:width "1.2rem" ; "auto"
+           {:width "$toolbarIcon" ; "1.2rem" ; "auto"
             :height "100%"
             :fill "$colors$outer_m200"}
            "& *:hover > .icon"
@@ -77,16 +76,17 @@
 (def Separator
   (style> (.-Separator Toolbar)
           (merge itemStyles
-                 {:width "1px"
+                 {:width "$hairline"
                   :background-color "$colors$outer_n200"
-                  :margin "0 4px"})))
+                  :margin "0 $1"})))
 
 (def ToggleGroup
   (style> (.-ToggleGroup Toolbar)
           (merge itemStyles
                  {:display "flex"
                   :min-width "max-content"
-                  :column-gap "4px"})))
+                  :column-gap "$1" ; "4px"
+                  })))
 
 (def ToggleItem
   (style> (.-ToggleItem Toolbar)
@@ -103,7 +103,7 @@
   (style> (.-Link Toolbar)
           (merge itemStyles
                  {:display "block"
-                  :padding "0.2rem 0"})))
+                  :padding "$1 0"})))
 
 ;; Components
 

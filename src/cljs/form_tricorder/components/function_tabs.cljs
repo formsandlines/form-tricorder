@@ -13,15 +13,15 @@
 (def Root
   (style> (.-Root Tabs)
           {:display "flex"
-           :gap "0.6rem"
-           :padding "0.4rem"
+           :gap "$6" ; "0.6rem"
+           :padding "$4" ; "0.4rem"
            }))
 
 (def TabList
   (style> (.-List Tabs)
           {:display "flex"
            :flex-direction "column"
-           :gap "0.4rem"
+           :gap "$2" ; "0.4rem"
            :flex "flex-none"}))
 
 (def Trigger
@@ -29,9 +29,11 @@
           {:flex "flex-none"
            :outline "none"
            :border "none"
-           :border-radius "4px"
-           :width "2.2rem"
-           :height "2.2rem"
+           :border-radius "$2"
+           :width "$tabIcon" ; "2.2rem"
+           :height "$tabIcon" ; "2.2rem"
+           :color "$inner_fg"
+           :cursor "pointer"
            "&[data-state=active]"
            {:background-color "$inner_n200"}
            "&:focus"
@@ -45,13 +47,13 @@
                       {func-id :id color :color} items]
                   {:type (name mode-id)
                    :subtype (name func-id)
+                   ;; color is actually always the same for one mode
+                   ;; so this is mostly obsolete, but more flexible for now
                    :css {:background-color (:base color)}}))}))
 
 (def Content
   (style> (.-Content Tabs)
-          {:flex "1 1 auto"
-           :border "1px solid lightgray"
-           }))
+          {:flex "1 1 auto"}))
 
 (defnc FunctionTabs
   [{:keys [view handle-change-view]}]

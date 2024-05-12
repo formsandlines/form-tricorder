@@ -15,6 +15,11 @@
          :position "relative"
          :display "flex"}))
 
+(def close-button-styles
+  (css> {:position "absolute"
+         :top "$4"
+         :right "$4"}))
+
 (defnc ViewPane
   [{:keys [id view handle-change-view handle-remove-view]}]
   (let [{:keys [func-id]} view]
@@ -24,10 +29,8 @@
       {:class "ViewPaneControls"}
       (when handle-remove-view
         (d/button
-         {:on-click (fn [_] (handle-remove-view id))
-          :style {:position "absolute"
-                  :top 0
-                  :right 0}}
+         {:class (close-button-styles)
+          :on-click (fn [_] (handle-remove-view id))}
          "[x]"))
       ($ FunctionTabs
          {:view view

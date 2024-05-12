@@ -8,7 +8,11 @@
    [formform.expr :as expr]
    [clojure.math]
    [clojure.edn :as edn]
-   [form-tricorder.utils :as utils :refer [style> css>]]))
+   [form-tricorder.utils :as utils :refer [style> css> pp-var]]
+   [form-tricorder.components.varorder-select :refer [VarorderSelect]]))
+
+(def styles
+  (css> {:margin-bottom "$6"}))
 
 (defnc Calc
   [{:keys [current-varorder set-varorder debug-origin]}]
@@ -20,20 +24,27 @@
         permutations (refx/use-sub
                       [:varorder-permutations]
                        ; [:varorder-permutations sorted-varorder]
-                      )]
+                      )
+        pp-varorder #(str %1 " " (pp-var %2))]
     (when current-varorder
       (d/div
-       (d/label "Variable interpretation order:")
-       (d/select
-        {:value current-varorder
+       {:class (styles)}
+       ; (d/label "Variable interpretation order:")
+       ($ VarorderSelect
+          {:current-varorder current-varorder
+           :permutations permutations
+           :display (fn [varorder] (reduce pp-varorder "" varorder))
+           :value-change-handler (fn [v] (set-varorder v))})
+       #_(d/select
+          {:value current-varorder
          ; :default-value current-varorder
-         :on-change (fn [e]
-                      (set-varorder (edn/read-string (.. e -target -value))))}
-        (for [varorder permutations
-              :let [label (reduce #(str %1 " " %2) varorder)]]
-          (d/option {:key label
-                     :value varorder}
-                    label)))))))
+           :on-change (fn [e]
+                        (set-varorder (edn/read-string (.. e -target -value))))}
+          (for [varorder permutations
+                :let [label (reduce pp-varorder "" varorder)]]
+            (d/option {:key label
+                       :value varorder}
+                      label)))))))
 
 
 
