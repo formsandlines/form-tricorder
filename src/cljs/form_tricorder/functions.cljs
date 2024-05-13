@@ -366,11 +366,20 @@
                        :ler [L E R]
                        (throw (ex-info "Invalid cell neighbourhood" {}))))))))))
 
-(defnc CA-Render
-  [{:keys [history vis-limit res cell-size]}]
-  (let [canvas-ref (hooks/use-ref nil)]
+(defn emulate
+  [rules umwelt num evolution]
+  (let [prev-gen (last evolution)
+        next-gen (sys-next prev-gen rules umwelt)]
+    (if (<= num 1)
+      evolution
+      (recur rules umwelt (dec num) (conj evolution next-gen)))))
+
+(defnc Cellular-Automaton
+  [{:keys [res vis-limit ini-ptn rules umwelt cell-size]}]
+  (let [evolution (emulate rules umwelt vis-limit [(sys-ini ini-ptn res)])
+        canvas-ref (hooks/use-ref nil)]
     (hooks/use-effect
-      :always
+      [rules]
       (let [canvas @canvas-ref
             context (.getContext canvas "2d")
             cw (.-width canvas)
@@ -378,7 +387,7 @@
         (.clearRect context 0 0 cw ch)
         (aset context "fillStyle" "black")
         (.fillRect context 0 0 cw ch)
-        (doseq [[i gen] (map-indexed vector history)
+        (doseq [[i gen] (map-indexed vector evolution)
                 [j val] (map-indexed vector gen)
                 :let [x (* j cell-size)
                       y (* i cell-size)]]
@@ -388,42 +397,10 @@
                :width  (* res cell-size)
                :height (* vis-limit cell-size)})))
 
-(defnc Cellular-Automaton
-  [{:keys [res delay-ms vis-limit ini-ptn rules umwelt cell-size]}]
-  (let [[time set-time] (hooks/use-state 1)
-        [evolution set-evolution] (hooks/use-state nil)]
-    (hooks/use-effect
-      [rules]
-      (let [interval (js/setInterval (fn [] (set-time inc)) delay-ms)]
-        (fn [] (js/clearInterval interval))
-        (set-evolution #(vector (sys-ini ini-ptn res)))))
-    (hooks/use-effect
-      [time]
-      (when evolution
-        (let [next-gen (sys-next (last evolution) rules umwelt)]
-          (set-evolution #(conj % next-gen)))))
-    ($ CA-Render {:history evolution
-                  :vis-limit vis-limit
-                  :res res
-                  :cell-size cell-size})))
-
-;; copied from formform (not in interface)
-(defn consts->quaternary
-  [consts]
-  (if (seq consts)
-    (let [digits (map calc/const->digit consts)]
-      (apply str "4r" digits))
-    (throw (ex-info "Must contain at least one element." {:arg consts}))))
-
 (defnc F-Selfi
-  [{:keys [results varorder]}]
+  [{:keys [dna varorder]}]
   (let [styles (css> {})
-        res 200
-        ;; vdict (into {} results)
-        dna-rev (if (calc/dna? results)
-                  ((comp vec reverse) results)
-                  (mapv second results))
-        rules-fn (comp dna-rev edn/read-string consts->quaternary)
+        rules-fn (partial calc/dna-get dna)
         umwelt (condp = (count varorder)
                  2 :lr
                  3 :ler
@@ -432,25 +409,24 @@
                  (throw (ex-info "Invalid variable count" {})))]
     (d/div
       {:class (styles)}
-      ($ Cellular-Automaton {:res res
+      ($ Cellular-Automaton {:res 100
                              :rules rules-fn
                              :ini-ptn :random
-                             :vis-limit 300
-                             :delay-ms 10
+                             :vis-limit 200
                              :umwelt umwelt
                              :cell-size 4}))))
 
 (defnc F-Selfi--init
   [args]
   (let [varorder (refx/use-sub [:varorder])
-        results  (refx/use-sub [:value])]
+        dna      (refx/use-sub [:dna])]
     (d/div {:class "Selfi"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Selfi"
                             :set-varorder
                             #(refx/dispatch
                               [:changed-varorder {:next-varorder %}])})
-           ($ F-Selfi {:results results
+           ($ F-Selfi {:dna dna
                        :varorder varorder
                        & args}))))
 

@@ -66,6 +66,7 @@
    (let [permutations (expr/permute-vars sorted-varorder)]
      permutations)))
 
+;; ? maybe replace with :dna sub
 (refx/reg-sub
  :value
  :<- [:expr-data]
@@ -77,6 +78,20 @@
    (let [value (expr/eval-all {:varorder varorder} expr {})]
      (println "computing value")
      (:results value))))
+
+(refx/reg-sub
+ :dna
+ :<- [:expr-data]
+ (fn [[expr varorder] _]
+   (when (= :not-found expr)
+     (throw (ex-info "Expression data missing!" {})))
+   (when (nil? varorder)
+     (throw (ex-info "Unknown variable ordering!" {})))
+   (let [formDNA (if (expr/formDNA? expr)
+                   expr
+                   (expr/eval->expr-all {:varorder varorder} expr {}))]
+     (println "computing value")
+     (expr/op-get formDNA :dna))))
 
 (refx/reg-sub
  :vmap
@@ -91,5 +106,6 @@
 (comment
   
   (expr/eval-all {:varorder ['b 'a]} [['a] 'b] {})
+  (expr/op-get (expr/eval->expr-all {:varorder ['b 'a]} [['a] 'b] {}) :dna)
   
   )
