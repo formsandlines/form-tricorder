@@ -66,13 +66,13 @@
               :activationMode "manual"
               :orientation "vertical"}
         ($d TabList
-            (for [{:keys [id label]} (:items mode)
-                  :let [id-str (name id)]]
-              ($d Trigger {:key     id-str
-                           :type    (name mode-id)
-                           :subtype id-str
-                           :value   id-str}
-                  label)))
+          (for [{:keys [id label]} (:items mode)
+                :let [id-str (name id)]]
+            ($d Trigger {:key     id-str
+                         :type    (name mode-id)
+                         :subtype id-str
+                         :value   id-str}
+                label)))
         (for [{:keys [id]} (:items mode)
               :let [id-str (name id)]]
           ($d Content {:key   id-str

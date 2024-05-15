@@ -24,14 +24,14 @@
   [{:keys [id view handle-change-view handle-remove-view]}]
   (let [{:keys [func-id]} view]
     (d/div
-     {:class (str "ViewPane " (styles))}
-     (d/div
-      {:class "ViewPaneControls"}
-      (when handle-remove-view
-        (d/button
-         {:class (close-button-styles)
-          :on-click (fn [_] (handle-remove-view id))}
-         "[x]"))
-      ($ FunctionTabs
-         {:view view
-          :handle-change-view handle-change-view})))))
+      {:class (str "ViewPane " (styles))}
+      (d/div
+        {:class "ViewPaneControls"}
+        (when handle-remove-view
+          (d/button
+            {:class (close-button-styles)
+             :on-click (fn [_] (handle-remove-view id))}
+            "[x]"))
+        ($ FunctionTabs
+          {:view view
+           :handle-change-view handle-change-view})))))

@@ -376,11 +376,11 @@
 
 (defnc Cellular-Automaton
   [{:keys [res vis-limit ini-ptn rules umwelt cell-size]}]
-  (let [evolution (emulate rules umwelt vis-limit [(sys-ini ini-ptn res)])
-        canvas-ref (hooks/use-ref nil)]
+  (let [canvas-ref (hooks/use-ref nil)]
     (hooks/use-effect
       [rules]
-      (let [canvas @canvas-ref
+      (let [evolution (emulate rules umwelt vis-limit [(sys-ini ini-ptn res)])
+            canvas @canvas-ref
             context (.getContext canvas "2d")
             cw (.-width canvas)
             ch (.-height canvas)]

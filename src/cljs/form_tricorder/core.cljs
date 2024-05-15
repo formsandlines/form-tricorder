@@ -16,7 +16,22 @@
    [form-tricorder.components.formula-input :refer [FormulaInput]]
    [form-tricorder.components.function-menu :refer [FunctionMenu]]
    [form-tricorder.components.output-area :refer [OutputArea]]
-   ["react-dom/client" :as rdom]))
+   ["react" :refer [StrictMode]]
+   ["react-dom/client" :as rdom]
+   ["react-router-dom"
+    :refer (createBrowserRouter RouterProvider useSearchParams Outlet
+                                useRouteError Link Form useSubmit)]))
+
+(defnc ErrorPage
+  []
+  (let [error (useRouteError)]
+    (js/console.error error)
+    (d/div {:id "error-page"}
+      (d/h1 "Oops!")
+      (d/p "There was an error.")
+      (d/p (d/i (or (.-statusText error)
+                    (.-message error)))))))
+
 
 (def body-styles
   (css> {:background-color "$colors$outer_bg"}))
@@ -91,7 +106,8 @@
       {:class (item-styles)}
       ($ FormulaInput {:apply-input
                        #(refx/dispatch [:changed-formula
-                                        {:next-formula %}])}))
+                                        {:next-formula %}])})
+      ($ Outlet))
      (d/div
       {:class (item-styles)}
       ($ FunctionMenu {:handle-click
@@ -110,10 +126,17 @@
       ($ OutputArea {:views views
                      :split-orientation split-orientation})))))
 
+(def router
+  (createBrowserRouter
+   #js [#js {:path "/"
+             :element ($ App)
+             :errorElement ($ ErrorPage)
+             :children #js [#js {:errorElement ($ ErrorPage)}]}]))
+
 (defonce root
   (rdom/createRoot (js/document.getElementById "root")))
 
 (defn ^:export init! []
   (refx/dispatch-sync [:initialize-db])
-  (.render root ($ App)))
+  (.render root ($ StrictMode ($ RouterProvider {:router router}))))
 

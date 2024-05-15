@@ -50,34 +50,34 @@
         remove-view-handler #(refx/dispatch
                               [:views/remove {:view-index %}])]
     (d/div
-     {:class (str "OutputArea " (styles))}
-     (case (count views)
-       ;; single view
-       1 ($ ViewPane {:id   0
-                      :view (first views)
-                      :handle-change-view (partial change-view-handler 0)
-                      :handle-remove-view nil})
-       ;; split views
-       2 ($d Splitter
-             {:gutterClassName (gutter-styles)
-              :draggerClassName (dragger-styles)
-              :minWidths (array 100 100)
-              :minHeights (array 100 100)
-              :initialSizes @*sizes
-              :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
-              :direction (case split-orientation
-                           :cols "Horizontal"
-                           :rows "Vertical"
-                           (throw (ex-info "Invalid split orientation"
-                                           {:split-orientation
-                                            split-orientation})))}
-             ($ ViewPane {:id   0
-                          :view (first views)
-                          :handle-change-view (partial change-view-handler 0)
-                          :handle-remove-view remove-view-handler})
-             ($ ViewPane {:id   1
-                          :view (second views)
-                          :handle-change-view (partial change-view-handler 1)
-                          :handle-remove-view remove-view-handler}))
-       (throw (ex-info "Invalid view count" {:views views}))))))
+      {:class (str "OutputArea " (styles))}
+      (case (count views)
+        ;; single view
+        1 ($ ViewPane {:id   0
+                       :view (first views)
+                       :handle-change-view (partial change-view-handler 0)
+                       :handle-remove-view nil})
+        ;; split views
+        2 ($d Splitter
+            {:gutterClassName (gutter-styles)
+             :draggerClassName (dragger-styles)
+             :minWidths (array 100 100)
+             :minHeights (array 100 100)
+             :initialSizes @*sizes
+             :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
+             :direction (case split-orientation
+                          :cols "Horizontal"
+                          :rows "Vertical"
+                          (throw (ex-info "Invalid split orientation"
+                                          {:split-orientation
+                                           split-orientation})))}
+            ($ ViewPane {:id   0
+                         :view (first views)
+                         :handle-change-view (partial change-view-handler 0)
+                         :handle-remove-view remove-view-handler})
+            ($ ViewPane {:id   1
+                         :view (second views)
+                         :handle-change-view (partial change-view-handler 1)
+                         :handle-remove-view remove-view-handler}))
+        (throw (ex-info "Invalid view count" {:views views}))))))
 
