@@ -3,7 +3,7 @@
     [helix.hooks :as hooks]
     ["/stitches.config" :refer (styled css darkTheme lightTheme)]))
 
-(defn splitv-at [i v]
+(defn splitv-atv [i v]
   {:pre [(vector? v)]}
   (vector (into [] (subvec v 0 i))
           (into [] (subvec v i (count v)))))
