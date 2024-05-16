@@ -6,7 +6,9 @@
    [form-tricorder.utils :as utils]))
 
 
-;; ---- Event handler -------------------------------------------
+;; Conventions for clarity:
+;; - qualify keys with by the app-db entry the event is involved with
+
 
 (refx/reg-event-db
  :initialize-db

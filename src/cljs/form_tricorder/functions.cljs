@@ -41,7 +41,7 @@
 
 (defnc F-EDN--init
   [args]
-  (let [expr (refx/use-sub [:expr])]
+  (let [expr (refx/use-sub [:input/expr])]
     ($ F-EDN {:expr expr
               & args})))
 
@@ -64,7 +64,7 @@
 
 (defnc F-JSON--init
   [args]
-  (let [expr (refx/use-sub [:expr])]
+  (let [expr (refx/use-sub [:input/expr])]
     ($ F-JSON {:expr expr
                & args})))
 
@@ -123,8 +123,8 @@
 
 (defnc F-Vtable--init
   [args]
-  (let [varorder (refx/use-sub [:varorder])
-        results  (refx/use-sub [:value])]
+  (let [varorder (refx/use-sub [:input/varorder])
+        results  (refx/use-sub [:input/->value])]
     (d/div {:class "Vtable"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Vtable"
@@ -234,8 +234,8 @@
 
 (defnc F-Vmap--init
   [args]
-  (let [varorder (refx/use-sub [:varorder])
-        vmap     (refx/use-sub [:vmap])]
+  (let [varorder (refx/use-sub [:input/varorder])
+        vmap     (refx/use-sub [:input/vmap])]
     (d/div {:class "Vmap"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Vmap"
@@ -276,7 +276,7 @@
 
 (defnc F-Depthtree--init
   [args]
-  (let [expr (refx/use-sub [:expr])]
+  (let [expr (refx/use-sub [:input/expr])]
     ($ F-Depthtree {:expr expr
                     & args})))
 
@@ -304,7 +304,7 @@
 
 (defnc F-Graphs--init
   [args]
-  (let [expr (refx/use-sub [:expr])]
+  (let [expr (refx/use-sub [:input/expr])]
     ($ F-Graphs {:expr expr
                  & args})))
 
@@ -332,7 +332,7 @@
 
 (defnc F-Hooks--init
   [args]
-  (let [expr (refx/use-sub [:expr])]
+  (let [expr (refx/use-sub [:input/expr])]
     ($ F-Hooks {:expr expr
                 & args})))
 
@@ -420,8 +420,8 @@
 
 (defnc F-Selfi--init
   [args]
-  (let [varorder (refx/use-sub [:varorder])
-        dna      (refx/use-sub [:dna])]
+  (let [varorder (refx/use-sub [:input/varorder])
+        dna      (refx/use-sub [:input/->dna])]
     (d/div {:class "Selfi"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Selfi"

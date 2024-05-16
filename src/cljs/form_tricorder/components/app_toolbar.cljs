@@ -67,12 +67,6 @@
                  buttonStyles
                  {})))
 
-(def Button-splitview
-  (style> (.-Button Toolbar)
-          (merge itemStyles
-                 buttonStyles
-                 {})))
-
 (def Separator
   (style> (.-Separator Toolbar)
           (merge itemStyles
@@ -109,9 +103,9 @@
 
 (defnc AppToolbar
   []
-  (let [{:keys [windows]} (refx/use-sub [:frame])
-        view-split? (> windows 1)
-        appearance (refx/use-sub [:appearance])
+  (let [view-split? (> (refx/use-sub [:frame/windows]) 1)
+        appearance (refx/use-sub [:theme/appearance])
+        frame-orientation (refx/use-sub [:frame/orientation])
         handle-frame-orientation
         #(refx/dispatch [:frame/set-orientation {:next-orientation %}])
         handle-swap
@@ -120,31 +114,35 @@
         #(refx/dispatch [:theme/set-appearance {:next-appearance %}])]
     ($d Root {:orientation "horizontal"
               :aria-label "App toolbar"}
-        ($d Button-splitview
-            {:disabled (not view-split?)
-             :on-click (fn [_] (handle-frame-orientation :cols))}
+        ($d ToggleGroup
+          {:type "single"
+           :value (name frame-orientation)
+           :on-value-change #(handle-frame-orientation (keyword %))}
+          ($d ToggleItem
+            {:value "cols"
+             :disabled (= frame-orientation :cols)}
             ($ ViewVerticalIcon))
-        ($d Button-splitview
-            {:disabled (not view-split?)
-             :on-click (fn [_] (handle-frame-orientation :rows))}
-            ($ ViewHorizontalIcon))
-        ($d Button-splitview
-            {:disabled (not view-split?)
-             :on-click (fn [_] (handle-swap))}
-            ($ SwapIcon))
+          ($d ToggleItem
+            {:value "rows"
+             :disabled (= frame-orientation :rows)}
+            ($ ViewHorizontalIcon)))
+        ($d Button
+          {:disabled (not view-split?)
+           :on-click (fn [_] (handle-swap))}
+          ($ SwapIcon))
         ($d Separator)
         ($d ToggleGroup
-            {:type "single"
-             :value (name appearance)
-             :on-value-change #(handle-toggle-appearance (keyword %))}
-            ($d ToggleItem
-                {:value "light"
-                 :disabled (= appearance :light)}
-                ($ SunIcon))
-            ($d ToggleItem
-                {:value "dark"
-                 :disabled (= appearance :dark)}
-                ($ MoonIcon)))
+          {:type "single"
+           :value (name appearance)
+           :on-value-change #(handle-toggle-appearance (keyword %))}
+          ($d ToggleItem
+            {:value "light"
+             :disabled (= appearance :light)}
+            ($ SunIcon))
+          ($d ToggleItem
+            {:value "dark"
+             :disabled (= appearance :dark)}
+            ($ MoonIcon)))
         ($d Separator)
         ($d Button {:on-click (fn [_] (js/console.log "Clicked about"))}
             "about")
@@ -152,7 +150,7 @@
             "help")
         ($d Separator)
         ($d SourceLink
-            {:href "https://github.com/formsandlines/form-tricorder"
-             :target "_blank"}
-            ($ SourceIcon)))))
+          {:href "https://github.com/formsandlines/form-tricorder"
+           :target "_blank"}
+          ($ SourceIcon)))))
 

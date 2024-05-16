@@ -5,32 +5,34 @@
    [refx.alpha :as refx]))
 
 
-(refx/reg-sub
- :test/subs
- (fn [db _]
-   (:test/answer db)))
+;; Conventions for clarity:
+;; - qualify keys with by the app-db entry the sub depends on
+;; - prepend `->` to sub key when the sub computes derived data
 
 (refx/reg-sub
- :views
- (fn [db _]
-   (:views db)))
-
-(refx/reg-sub
- :view
+ :views/->view
  (fn [db [_ index]]
    ;; {:pre [(< index (count (:views db)))]}
    ;; fails silently (sometimes views update doesn’t catch on after remove)
    (get (:views db) index)))
 
-(refx/reg-sub
- :frame
- (fn [db _]
-   (:frame db)))
 
 (refx/reg-sub
- :appearance
+ :frame/orientation
+ (fn [db _]
+   (get-in db [:frame :orientation])))
+
+(refx/reg-sub
+ :frame/windows
+ (fn [db _]
+   (get-in db [:frame :windows])))
+
+
+(refx/reg-sub
+ :theme/appearance
  (fn [db _]
    (get-in db [:theme :appearance])))
+
 
 ; (refx/reg-sub
 ;  :cache
@@ -39,35 +41,32 @@
 
 
 (refx/reg-sub
- :expr
+ :input/expr
  (fn [db _]
    (get-in db [:input :expr] :not-found)))
 
 (refx/reg-sub
- :varorder
+ :input/varorder
  (fn [db _]
    (get-in db [:input :varorder] nil)))
 
 (refx/reg-sub
- :expr-data
+ :input/->expr-data
  (fn [db _]
    (let [input (:input db)]
      [(get input :expr :not-found)
       (get input :varorder nil)])))
 
-
-;; Computations
-
 (refx/reg-sub
- :sorted-varorder
- :<- [:expr-data]
+ :input/->sorted-varorder
+ :<- [:input/->expr-data]
  (fn [[_ varorder] _]
    (println "sorting: " varorder)
    (sort varorder)))
 
 (refx/reg-sub
- :varorder-permutations
- :<- [:sorted-varorder]
+ :input/->varorder-permutations
+ :<- [:input/->sorted-varorder]
  (fn [sorted-varorder _]
    (println "computing permutations")
    (let [permutations (expr/permute-vars sorted-varorder)]
@@ -75,8 +74,8 @@
 
 ;; ? maybe replace with :dna sub
 (refx/reg-sub
- :value
- :<- [:expr-data]
+ :input/->value
+ :<- [:input/->expr-data]
  (fn [[expr varorder] _]
    (when (= :not-found expr)
      (throw (ex-info "Expression data missing!" {})))
@@ -87,8 +86,8 @@
      (:results value))))
 
 (refx/reg-sub
- :dna
- :<- [:expr-data]
+ :input/->dna
+ :<- [:input/->expr-data]
  (fn [[expr varorder] _]
    (when (= :not-found expr)
      (throw (ex-info "Expression data missing!" {})))
@@ -101,18 +100,11 @@
      (expr/op-get formDNA :dna))))
 
 (refx/reg-sub
- :vmap
- :<- [:value]
+ :input/vmap
+ :<- [:input/->value]
  (fn [value _]
    (println "computing vmap")
    (cond
      (nil? value) (throw (ex-info "Unknown expression value!" {}))
      :else (->> value (into {}) calc/vdict->vmap))))
 
-
-(comment
-  
-  (expr/eval-all {:varorder ['b 'a]} [['a] 'b] {})
-  (expr/op-get (expr/eval->expr-all {:varorder ['b 'a]} [['a] 'b] {}) :dna)
-  
-  )

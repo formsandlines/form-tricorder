@@ -20,7 +20,7 @@
 
 (defnc ViewPane
   [{:keys [id only-child?]}]
-  (let [{:keys [func-id]} (refx/use-sub [:view id])
+  (let [{:keys [func-id]} (refx/use-sub [:views/->view id])
         handle-change-view #(refx/dispatch
                              [:views/set-func-id {:next-id %
                                                   :view-index id}])

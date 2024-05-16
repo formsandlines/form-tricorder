@@ -21,9 +21,8 @@
   ; (println "Current varorder: " current-varorder)
   ; (println "---")
   (let [sorted-varorder (sort current-varorder)
-        permutations (refx/use-sub
-                      [:varorder-permutations]
-                       ; [:varorder-permutations sorted-varorder]
+        permutations (refx/use-sub [:input/->varorder-permutations]
+                       ; [:input/->varorder-permutations sorted-varorder]
                       )
         pp-varorder #(str %1 " " (pp-var %2))]
     (when current-varorder

@@ -84,7 +84,7 @@
 
 (defnc App
   []
-  (let [appearance (refx/use-sub [:appearance])]
+  (let [appearance (refx/use-sub [:theme/appearance])]
     (hooks/use-effect
      :once
      (.add js/document.body.classList body-styles))

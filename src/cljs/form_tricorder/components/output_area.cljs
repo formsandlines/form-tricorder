@@ -51,7 +51,8 @@
 (defnc OutputArea
   []
   ;; ? cache component in state
-  (let [{:keys [orientation windows]} (refx/use-sub [:frame])
+  (let [orientation (refx/use-sub [:frame/orientation])
+        windows (refx/use-sub [:frame/windows])
         *sizes (hooks/use-ref (array 50 50))]
     (d/div
       {:class (str "OutputArea " (styles))}
