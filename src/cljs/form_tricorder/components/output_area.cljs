@@ -10,6 +10,7 @@
 
 (def styles
   (css> {:height "100%"
+         ;; :overflow-y "auto"
          :padding "0" ; "0.2rem"
          :box-sizing "border-box"
          ; :border "1px solid lightgray"
@@ -40,23 +41,25 @@
          :position "relative"
          :z-index 999}))
 
+(def item-styles
+  (css> {:height "100%"
+         :width "100%"
+         :overflow-y "auto"
+         }))
+
+
 (defnc OutputArea
-  [{:keys [views split-orientation]}]
+  []
   ;; ? cache component in state
-  (let [*sizes (hooks/use-ref (array 50 50))
-        change-view-handler #(refx/dispatch
-                              [:views/set-func-id {:next-id %2
-                                                   :view-index %1}])
-        remove-view-handler #(refx/dispatch
-                              [:views/remove {:view-index %}])]
+  (let [{:keys [orientation windows]} (refx/use-sub [:frame])
+        *sizes (hooks/use-ref (array 50 50))]
     (d/div
       {:class (str "OutputArea " (styles))}
-      (case (count views)
+      (case windows
         ;; single view
-        1 ($ ViewPane {:id   0
-                       :view (first views)
-                       :handle-change-view (partial change-view-handler 0)
-                       :handle-remove-view nil})
+        1 (d/div {:class (item-styles)}
+                 ($ ViewPane {:id 0
+                              :only-child? true}))
         ;; split views
         2 ($d Splitter
             {:gutterClassName (gutter-styles)
@@ -65,19 +68,15 @@
              :minHeights (array 100 100)
              :initialSizes @*sizes
              :onResizeFinished (fn [_ newSizes] (reset! *sizes newSizes))
-             :direction (case split-orientation
+             :direction (case orientation
                           :cols "Horizontal"
                           :rows "Vertical"
-                          (throw (ex-info "Invalid split orientation"
-                                          {:split-orientation
-                                           split-orientation})))}
-            ($ ViewPane {:id   0
-                         :view (first views)
-                         :handle-change-view (partial change-view-handler 0)
-                         :handle-remove-view remove-view-handler})
-            ($ ViewPane {:id   1
-                         :view (second views)
-                         :handle-change-view (partial change-view-handler 1)
-                         :handle-remove-view remove-view-handler}))
-        (throw (ex-info "Invalid view count" {:views views}))))))
+                          (throw (ex-info "Invalid frame orientation"
+                                          {:split-orientation orientation})))}
+            (d/div {:class (item-styles)}
+                   ($ ViewPane {:id 0}))
+            (d/div {:class (item-styles)}
+                   ($ ViewPane {:id 1})))
+        (throw (ex-info "Invalid view count" {:view-count windows})))
+      )))
 

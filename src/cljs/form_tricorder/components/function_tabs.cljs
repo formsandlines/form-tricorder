@@ -1,5 +1,6 @@
 (ns form-tricorder.components.function-tabs
   (:require
+    [refx.alpha :as refx]
     [helix.core :refer [defnc fnc $ <>]]
     [helix.dom :as d :refer [$d]]
     [helix.hooks :as hooks]
@@ -56,9 +57,8 @@
           {:flex "1 1 auto"}))
 
 (defnc FunctionTabs
-  [{:keys [view handle-change-view]}]
-  (let [{:keys [func-id]} view
-        mode-id (model/func->mode func-id)
+  [{:keys [func-id handle-change-view]}]
+  (let [mode-id (model/func->mode func-id)
         mode    (model/modes-map mode-id)]
     ($d Root {:class "ModeFunctionTabs"
               :value (name func-id)

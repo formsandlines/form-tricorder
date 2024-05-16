@@ -84,9 +84,7 @@
 
 (defnc App
   []
-  (let [appearance        (refx/use-sub [:appearance])
-        views             (refx/use-sub [:views])
-        split-orientation (refx/use-sub [:split-orientation])]
+  (let [appearance (refx/use-sub [:appearance])]
     (hooks/use-effect
      :once
      (.add js/document.body.classList body-styles))
@@ -101,11 +99,11 @@
      {:class (str "App " (styles))}
      (d/div
       {:class (item-styles)}
-      ($ Header {:view-split? (> (count views) 1)}))
+      ($ Header))
      (d/div
       {:class (item-styles)}
       ($ FormulaInput {:apply-input
-                       #(refx/dispatch [:changed-formula
+                       #(refx/dispatch [:input/changed-formula
                                         {:next-formula %}])})
       ($ Outlet))
      (d/div
@@ -119,12 +117,12 @@
                                              {:next-id    func-id
                                               :view-index view-index}]))))}))
      (d/div
-      {:class (item-styles)}
+       {:class (item-styles)
+        :style {:overflow-y "auto"}}
       ; ($ ScaleTest {:scale "space" :n 11})
       ; ($ ScaleTest {:scale "sizes" :n 3})
       ; ($ ScaleTest {:scale "borderWidths" :n 3})
-      ($ OutputArea {:views views
-                     :split-orientation split-orientation})))))
+      ($ OutputArea)))))
 
 (def router
   (createBrowserRouter

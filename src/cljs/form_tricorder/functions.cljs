@@ -130,7 +130,7 @@
                             :debug-origin "Vtable"
                             :set-varorder
                             #(refx/dispatch
-                              [:changed-varorder {:next-varorder %}])})
+                              [:input/changed-varorder {:next-varorder %}])})
            ($ F-Vtable {:results results
                         :varorder varorder
                         & args}))))
@@ -241,7 +241,7 @@
                             :debug-origin "Vmap"
                             :set-varorder
                             #(refx/dispatch
-                              [:changed-varorder {:next-varorder %}])})
+                              [:input/changed-varorder {:next-varorder %}])})
            ($ F-Vmap {:vmap vmap
                       & args}))))
 
@@ -362,6 +362,7 @@
               (rules
                (mapv gen-prev
                      (condp = umwelt
+                       :e   [E]
                        :lr  [L R]
                        :ler [L E R]
                        (throw (ex-info "Invalid cell neighbourhood" {}))))))))))
@@ -402,6 +403,7 @@
   (let [styles (css> {})
         rules-fn (partial calc/dna-get dna)
         umwelt (condp = (count varorder)
+                 1 :e
                  2 :lr
                  3 :ler
                  4 :-lr+
@@ -425,7 +427,7 @@
                             :debug-origin "Selfi"
                             :set-varorder
                             #(refx/dispatch
-                              [:changed-varorder {:next-varorder %}])})
+                              [:input/changed-varorder {:next-varorder %}])})
            ($ F-Selfi {:dna dna
                        :varorder varorder
                        & args}))))

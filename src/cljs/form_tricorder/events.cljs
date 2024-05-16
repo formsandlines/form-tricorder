@@ -6,9 +6,6 @@
    [form-tricorder.utils :as utils]))
 
 
-(defn make-view [func-id]
-  {:func-id func-id})
-
 ;; ---- Event handler -------------------------------------------
 
 (refx/reg-event-db
@@ -21,14 +18,16 @@
      {:input {:formula fml
               :expr expr
               :varorder varorder}
-      :views [(make-view :selfi)]
-      :split-orientation :cols  ;; :cols | :rows
+      :frame {:orientation :cols  ;; :cols | :rows
+              :windows 2} ;; 1 or 2
+      :views [{:func-id :selfi} {:func-id :vtable}] ;; 1 or 2 of functions
       :modes {:calc-config nil}
       :theme {:appearance :light}  ;; :dark | :light
       })))
 
+
 (refx/reg-event-db
- :changed-formula
+ :input/changed-formula
  (fn [db [_ {:keys [next-formula]}]]
    (-> db
        (update :input
@@ -48,12 +47,19 @@
                    m))))))
 
 (refx/reg-event-db
- :changed-varorder
+ :input/changed-varorder
  (fn [db [_ {:keys [next-varorder]}]]
    (update db :input
            #(if-not (= (:varorder %) next-varorder)
               (assoc % :varorder next-varorder)
               %))))
+
+
+(refx/reg-event-db
+ :frame/set-orientation
+ (fn [db [_ {:keys [next-orientation]}]]
+   {:pre [(#{:rows :cols} next-orientation)]}
+   (assoc-in db [:frame :orientation] next-orientation)))
 
 
 (refx/reg-event-db
@@ -65,16 +71,13 @@
        (assoc db :views [b a])))))
 
 (refx/reg-event-db
- :views/set-split-orientation
- (fn [db [_ {:keys [next-orientation]}]]
-   {:pre [(#{:rows :cols} next-orientation)]}
-   (assoc db :split-orientation next-orientation)))
-
-(refx/reg-event-db
  :views/split
- (fn [{:keys [views] :as db} [_ _]]
+ (fn [{:keys [views frame] :as db} [_ _]]
+   {:pre [(= (count views) (:windows frame))]}
    (when (< (count views) 2)
-     (update db :views #(conj % (last %))))))
+     (-> db
+         (update-in [:frame :windows] inc)
+         (update :views #(conj % (last %)))))))
 
 (refx/reg-event-db
  :views/set-func-id
@@ -84,8 +87,12 @@
 
 (refx/reg-event-db
  :views/remove
- (fn [db [_ {:keys [view-index]}]]
-   (update db :views utils/dissocv view-index)))
+ (fn [{:keys [views frame] :as db} [_ {:keys [view-index]}]]
+   {:pre [(= (count views) (:windows frame))]}
+   (-> db
+       (update-in [:frame :windows] dec)
+       (update :views utils/dissocv view-index))))
+
 
 (refx/reg-event-db
  :theme/set-appearance
@@ -93,10 +100,9 @@
    (assoc-in db [:theme :appearance] next-appearance)))
 
 
+;; ? where is this used or throw away
 (refx/reg-event-db
  :update-cache
  (fn [db [_ {:keys [update-fn]}]]
    (update db :cache update-fn)))
-
-
 

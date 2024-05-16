@@ -108,10 +108,12 @@
 ;; Components
 
 (defnc AppToolbar
-  [{:keys [view-split?]}]
-  (let [appearance (refx/use-sub [:appearance])
-        handle-split-orientation
-        #(refx/dispatch [:views/set-split-orientation {:next-orientation %}])
+  []
+  (let [{:keys [windows]} (refx/use-sub [:frame])
+        view-split? (> windows 1)
+        appearance (refx/use-sub [:appearance])
+        handle-frame-orientation
+        #(refx/dispatch [:frame/set-orientation {:next-orientation %}])
         handle-swap
         #(refx/dispatch [:views/swap])
         handle-toggle-appearance
@@ -120,11 +122,11 @@
               :aria-label "App toolbar"}
         ($d Button-splitview
             {:disabled (not view-split?)
-             :on-click (fn [_] (handle-split-orientation :cols))}
+             :on-click (fn [_] (handle-frame-orientation :cols))}
             ($ ViewVerticalIcon))
         ($d Button-splitview
             {:disabled (not view-split?)
-             :on-click (fn [_] (handle-split-orientation :rows))}
+             :on-click (fn [_] (handle-frame-orientation :rows))}
             ($ ViewHorizontalIcon))
         ($d Button-splitview
             {:disabled (not view-split?)

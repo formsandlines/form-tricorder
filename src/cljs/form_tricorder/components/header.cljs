@@ -32,7 +32,7 @@
   (css> {}))
 
 (defnc Header
-  [args]
+  []
   (d/div
    {:class (str "Header " (styles))}
    (d/a
@@ -41,4 +41,4 @@
     "FORM tricorder")
    (d/div
     {:class (str (item-styles) " " (toolbar-styles))}
-    ($ AppToolbar {& args}))))
+    ($ AppToolbar))))

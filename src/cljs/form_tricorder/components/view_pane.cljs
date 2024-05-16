@@ -9,10 +9,8 @@
    ))
 
 (def styles
-  (css> {:height "100%"
-         :width "100%"
+  (css> {:position "relative"
          :overflow-y "auto"
-         :position "relative"
          :display "flex"}))
 
 (def close-button-styles
@@ -21,17 +19,22 @@
          :right "$4"}))
 
 (defnc ViewPane
-  [{:keys [id view handle-change-view handle-remove-view]}]
-  (let [{:keys [func-id]} view]
+  [{:keys [id only-child?]}]
+  (let [{:keys [func-id]} (refx/use-sub [:view id])
+        handle-change-view #(refx/dispatch
+                             [:views/set-func-id {:next-id %
+                                                  :view-index id}])
+        handle-remove-view #(refx/dispatch
+                             [:views/remove {:view-index id}])]
     (d/div
       {:class (str "ViewPane " (styles))}
       (d/div
         {:class "ViewPaneControls"}
-        (when handle-remove-view
+        (when-not only-child?
           (d/button
             {:class (close-button-styles)
-             :on-click (fn [_] (handle-remove-view id))}
+             :on-click handle-remove-view}
             "[x]"))
         ($ FunctionTabs
-          {:view view
+          {:func-id func-id
            :handle-change-view handle-change-view})))))

@@ -16,9 +16,16 @@
    (:views db)))
 
 (refx/reg-sub
- :split-orientation
+ :view
+ (fn [db [_ index]]
+   ;; {:pre [(< index (count (:views db)))]}
+   ;; fails silently (sometimes views update doesn’t catch on after remove)
+   (get (:views db) index)))
+
+(refx/reg-sub
+ :frame
  (fn [db _]
-   (:split-orientation db)))
+   (:frame db)))
 
 (refx/reg-sub
  :appearance
