@@ -77,7 +77,6 @@
               :let [id-str (name id)]]
           ($d Content {:key   id-str
                        :value id-str}
-              ;; ! hidden components should be generated on first display
               (func/gen-component func-id {}))))))
 
 

@@ -34,10 +34,10 @@
    (get-in db [:theme :appearance])))
 
 
-; (refx/reg-sub
-;  :cache
-;  (fn [db]
-;    (:cache db)))
+(refx/reg-sub
+ :cache/retrieve
+ (fn [db [_ key]]
+   (get-in db [:cache key :val])))
 
 
 (refx/reg-sub
@@ -72,6 +72,7 @@
    (let [permutations (expr/permute-vars sorted-varorder)]
      permutations)))
 
+
 ;; ? maybe replace with :dna sub
 (refx/reg-sub
  :input/->value
@@ -99,8 +100,9 @@
      (println "computing value")
      (expr/op-get formDNA :dna))))
 
+
 (refx/reg-sub
- :input/vmap
+ :input/->vmap
  :<- [:input/->value]
  (fn [value _]
    (println "computing vmap")
@@ -108,3 +110,27 @@
      (nil? value) (throw (ex-info "Unknown expression value!" {}))
      :else (->> value (into {}) calc/vdict->vmap))))
 
+
+(refx/reg-sub
+ :input/->selfi-rules-fn
+ :<- [:input/->dna]
+ (fn [dna _]
+   (println "computing ca rules function")
+   (cond
+     (nil? dna) (throw (ex-info "Invalid formDNA" {}))
+     :else (partial calc/dna-get dna))))
+
+(refx/reg-sub
+ :input/->selfi-umwelt
+ :<- [:input/varorder]
+ (fn [varorder _]
+   (println "computing ca umwelt")
+   (cond
+     (nil? varorder) (throw (ex-info "Invalid variable ordering" {}))
+     :else (condp = (count varorder)
+             1 :e
+             2 :lr
+             3 :ler
+             4 :-lr+
+             5 :-ler+
+             (throw (ex-info "Invalid variable count" {}))))))

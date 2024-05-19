@@ -235,7 +235,7 @@
 (defnc F-Vmap--init
   [args]
   (let [varorder (refx/use-sub [:input/varorder])
-        vmap     (refx/use-sub [:input/vmap])]
+        vmap     (refx/use-sub [:input/->vmap])]
     (d/div {:class "Vmap"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Vmap"
@@ -375,64 +375,64 @@
       evolution
       (recur rules umwelt (dec num) (conj evolution next-gen)))))
 
-(defnc Cellular-Automaton
+(defnc F-Selfi
   [{:keys [res vis-limit ini-ptn rules umwelt cell-size]}]
-  (let [canvas-ref (hooks/use-ref nil)]
+  (let [canvas-ref (hooks/use-ref nil)
+        ;; evolution is cached in app-db to prevent long delays when
+        ;; component gets remounted (cannot use-memo here)
+        evol-cache (refx/use-sub [:cache/retrieve :selfi-evolution])
+        evolution (if evol-cache
+                    evol-cache
+                    (refx/dispatch
+                     [:cache/update
+                      {:key :selfi-evolution
+                       :update-fn #(emulate rules umwelt vis-limit
+                                            [(sys-ini ini-ptn res)])}]))
+        draw (hooks/use-callback
+               :auto-deps
+               (fn [context cw ch]
+                 (.clearRect context 0 0 cw ch)
+                 (aset context "fillStyle" "black")
+                 (.fillRect context 0 0 cw ch)
+                 (doseq [[i gen] (map-indexed vector evolution)
+                         [j val] (map-indexed vector gen)
+                         :let [x (* j cell-size)
+                               y (* i cell-size)]]
+                   (aset context "fillStyle" (KRGB val))
+                   (.fillRect context x y cell-size cell-size))))]
     (hooks/use-effect
-      [rules]
-      (let [evolution (emulate rules umwelt vis-limit [(sys-ini ini-ptn res)])
-            canvas @canvas-ref
-            context (.getContext canvas "2d")
+      [draw]
+      (let [canvas @canvas-ref
             cw (.-width canvas)
-            ch (.-height canvas)]
-        (.clearRect context 0 0 cw ch)
-        (aset context "fillStyle" "black")
-        (.fillRect context 0 0 cw ch)
-        (doseq [[i gen] (map-indexed vector evolution)
-                [j val] (map-indexed vector gen)
-                :let [x (* j cell-size)
-                      y (* i cell-size)]]
-          (aset context "fillStyle" (KRGB val))
-          (.fillRect context x y cell-size cell-size))))
+            ch (.-height canvas)
+            context (.getContext canvas "2d")]
+        (draw context cw ch)))
     (d/canvas {:ref canvas-ref
                :width  (* res cell-size)
                :height (* vis-limit cell-size)})))
 
-(defnc F-Selfi
-  [{:keys [dna varorder]}]
-  (let [styles (css> {})
-        rules-fn (partial calc/dna-get dna)
-        umwelt (condp = (count varorder)
-                 1 :e
-                 2 :lr
-                 3 :ler
-                 4 :-lr+
-                 5 :-ler+
-                 (throw (ex-info "Invalid variable count" {})))]
-    (d/div
-      {:class (styles)}
-      ($ Cellular-Automaton {:res 100
-                             :rules rules-fn
-                             :ini-ptn :random
-                             :vis-limit 200
-                             :umwelt umwelt
-                             :cell-size 4}))))
-
 (defnc F-Selfi--init
   [args]
-  (let [varorder (refx/use-sub [:input/varorder])
-        dna      (refx/use-sub [:input/->dna])]
-    (d/div {:class "Selfi"}
-           ($ mode-ui/Calc {:current-varorder varorder
-                            :debug-origin "Selfi"
-                            :set-varorder
-                            #(refx/dispatch
-                              [:input/changed-varorder {:next-varorder %}])})
-           ($ F-Selfi {:dna dna
-                       :varorder varorder
-                       & args}))))
+  (let [rules-fn (refx/use-sub [:input/->selfi-rules-fn])
+        umwelt   (refx/use-sub [:input/->selfi-umwelt])
+        varorder (refx/use-sub [:input/varorder])
+        styles (css> {})
+        ;; dna      (refx/use-sub [:input/->dna])
+        ]
+    (d/div {:class (str "Selfi " styles)}
+      ($ mode-ui/Calc {:current-varorder varorder
+                       :debug-origin "Selfi"
+                       :set-varorder
+                       #(refx/dispatch
+                         [:input/changed-varorder {:next-varorder %}])})
+      ($ F-Selfi {:rules rules-fn
+                  :umwelt umwelt
+                  :res 100
+                  :ini-ptn :random
+                  :vis-limit 200
+                  :cell-size 4
+                  & args}))))
 
 (defmethod gen-component :selfi
   [_ args]
   ($ F-Selfi--init {& args}))
-
