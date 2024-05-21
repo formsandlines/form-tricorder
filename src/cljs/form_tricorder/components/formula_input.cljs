@@ -6,8 +6,7 @@
    [helix.dom :as d :refer [$d]]
    ; [form-tricorder.icons :refer [InputHelpIcon]]
    [form-tricorder.utils :refer [log style> css>]]
-   ["@radix-ui/react-icons" :refer [QuestionMarkCircledIcon]]
-   ["react-router-dom" :refer (useSearchParams Form)]))
+   ["@radix-ui/react-icons" :refer [QuestionMarkCircledIcon]]))
 
 (def styles
   (css> {:display "flex"
@@ -45,30 +44,21 @@
           {:stroke "$inner_n100"}}}))
 
 (defnc FormulaInput
-  [{:keys [apply-input]}]
-  (let [[input set-input] (hooks/use-state "")
-        [search-params set-search-params] (useSearchParams)
-        f (.get search-params "f")]
-    (hooks/use-effect
-     :once
-     ;; At startup, if there are search-params for the formula in the URL,
-     ;; fill the input field with them and directly store them in app-db
-     (when f (apply-input f) (set-input f)))
-    ($ Form ;; allows for form submit without page reload
-       (d/div
-        {:class (str "FormulaInput " (styles))}
-        (d/input
-         {:class (input-styles)
-          :name "f" ;; search-param query, gets inserted in url on submit
-          :value input
-          :placeholder "((a) b)"
-          :on-change (fn [e] (do (.preventDefault e)
-                                (set-input (.. e -target -value))))
-          :on-key-press (fn [e] (when (= "Enter" (.-key e))
-                                 (apply-input input)))})
-        (d/div
-         {:class (button-wrapper-styles)}
-         (d/button
+  [{:keys [current-formula apply-input]}]
+  (let [[input set-input] (hooks/use-state current-formula)]
+    (d/div
+      {:class (str "FormulaInput " (styles))}
+      (d/input
+        {:class (input-styles)
+         :value input
+         :placeholder "((a) b)"
+         :on-change (fn [e] (do (.preventDefault e)
+                               (set-input (.. e -target -value))))
+         :on-key-press (fn [e] (when (= "Enter" (.-key e))
+                                (apply-input input)))})
+      (d/div
+        {:class (button-wrapper-styles)}
+        (d/button
           {:class (button-styles)
            :on-click (fn [e] (apply-input input))}
-          ($d QuestionMarkCircledIcon)))))))
+          ($d QuestionMarkCircledIcon))))))

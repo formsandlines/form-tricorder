@@ -64,6 +64,8 @@
 (def modes-map
   (update-vals (group-by :id modes) first))
 
+(def func-ids (set (mapcat (comp (partial map :id) :items) (vals modes-map))))
+
 (def func->mode
   (into {}
         (for [{:keys [id items]} modes

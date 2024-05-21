@@ -41,6 +41,11 @@
 
 
 (refx/reg-sub
+ :input/formula
+ (fn [db _]
+   (get-in db [:input :formula] :not-found)))
+
+(refx/reg-sub
  :input/expr
  (fn [db _]
    (get-in db [:input :expr] :not-found)))

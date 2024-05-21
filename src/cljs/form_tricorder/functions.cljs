@@ -4,7 +4,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
-                                        ; ["react" :as react]
+   ;; ["react" :as react]
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]

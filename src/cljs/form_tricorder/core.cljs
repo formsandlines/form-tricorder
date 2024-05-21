@@ -17,20 +17,7 @@
    [form-tricorder.components.function-menu :refer [FunctionMenu]]
    [form-tricorder.components.output-area :refer [OutputArea]]
    ["react" :refer [StrictMode]]
-   ["react-dom/client" :as rdom]
-   ["react-router-dom"
-    :refer (createBrowserRouter RouterProvider useSearchParams Outlet
-                                useRouteError Link Form useSubmit)]))
-
-(defnc ErrorPage
-  []
-  (let [error (useRouteError)]
-    (js/console.error error)
-    (d/div {:id "error-page"}
-      (d/h1 "Oops!")
-      (d/p "There was an error.")
-      (d/p (d/i (or (.-statusText error)
-                    (.-message error)))))))
+   ["react-dom/client" :as rdom]))
 
 
 (def body-styles
@@ -84,10 +71,11 @@
 
 (defnc App
   []
-  (let [appearance (refx/use-sub [:theme/appearance])]
+  (let [formula (refx/use-sub [:input/formula])
+        appearance (refx/use-sub [:theme/appearance])]
     (hooks/use-effect
-     :once
-     (.add js/document.body.classList body-styles))
+      :once
+      (.add js/document.body.classList body-styles))
     (hooks/use-effect
      [appearance]
      (if (= appearance :dark)
@@ -102,10 +90,10 @@
       ($ Header))
      (d/div
       {:class (item-styles)}
-      ($ FormulaInput {:apply-input
-                       #(refx/dispatch [:input/changed-formula
-                                        {:next-formula %}])})
-      ($ Outlet))
+       ($ FormulaInput
+          {:current-formula formula
+           :apply-input #(refx/dispatch [:input/changed-formula
+                                         {:next-formula %}])}))
      (d/div
       {:class (item-styles)}
       ($ FunctionMenu {:handle-click
@@ -124,17 +112,11 @@
       ; ($ ScaleTest {:scale "borderWidths" :n 3})
       ($ OutputArea)))))
 
-(def router
-  (createBrowserRouter
-   #js [#js {:path "/"
-             :element ($ App)
-             :errorElement ($ ErrorPage)
-             :children #js [#js {:errorElement ($ ErrorPage)}]}]))
 
 (defonce root
   (rdom/createRoot (js/document.getElementById "root")))
 
 (defn ^:export init! []
   (refx/dispatch-sync [:initialize-db])
-  (.render root ($ StrictMode ($ RouterProvider {:router router}))))
+  (.render root ($ StrictMode ($ App))))
 
