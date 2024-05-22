@@ -3,9 +3,10 @@
    [clojure.string :as string]
    [clojure.set :as set]
    [instaparse.core :as insta]   
-   [refx.alpha :as refx]
+   [re-frame.core :as rf]
    [formform.expr :as expr]
    [formform.io :as io]
+   [form-tricorder.effects]
    [form-tricorder.model :refer [func-ids]]
    [form-tricorder.utils :as utils]))
 
@@ -13,7 +14,7 @@
 ;; Conventions for clarity:
 ;; - qualify keys with by the app-db entry the event is involved with
 
-;; (refx/reg-event-error-handler)
+;; (rf/reg-event-error-handler)
 
 (defn parse-formula
   [formula]
@@ -35,7 +36,7 @@
                              :expr-vars vars})))))
 
 (def fetch-search-params
-  (refx/->interceptor
+  (rf/->interceptor
    :id     :fetch-search-params
    :before (fn [context]
              (let [s (.. js/window -location -search)
@@ -43,19 +44,7 @@
                (assoc-in context [:coeffects :search-params]
                          search-params)))))
 
-(refx/reg-fx
- :set-search-params
- (fn [kvs]
-   (let [s (.. js/window -location -search)
-         search-params ^js (new js/URLSearchParams s)]
-     (doseq [[k v] kvs]
-       (.set search-params k v))
-     (let [path (str (.-pathname js/location) "?" (.toString search-params))]
-       ;; (js/console.log path)
-       ;; (js/console.log search-params)
-       (.. js/window -history (replaceState (js-obj) "" path))))))
-
-(refx/reg-event-fx
+(rf/reg-event-fx
  :initialize-db
  [fetch-search-params]
  (fn [{:keys [search-params]} _]
@@ -102,7 +91,7 @@
 
 
 ;; (def update-expr
-;;   (refx/->interceptor
+;;   (rf/->interceptor
 ;;    :id     :update-expr
 ;;    :before nil
 ;;    :after  (fn [context]
@@ -124,7 +113,7 @@
   (string/join "," varorder))
 
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :input/changed-formula
  (fn [{:keys [db]} [_ {:keys [next-formula]}]]
    (let [db-next
@@ -153,7 +142,7 @@
            [:set-search-params [["f" formula-next]]]
            [:set-search-params [["vars" (varorder->str varorder-next)]]]]})))
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :input/changed-varorder
  (fn [{:keys [db]} [_ {:keys [next-varorder]}]]
    (let [next-db (update db :input
@@ -165,7 +154,7 @@
                        {:has-deps #{:varorder}}]]
            [:set-search-params [["vars" (varorder->str next-varorder)]]]]})))
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :frame/set-orientation
  (fn [{:keys [db]} [_ {:keys [next-orientation]}]]
    {:pre [(#{:rows :cols} next-orientation)]}
@@ -173,7 +162,7 @@
     :fx [[:set-search-params [["layout" (name next-orientation)]]]]}))
 
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :views/swap
  (fn [{{:keys [views] :as db} :db} _]
    (let [[a b] views
@@ -183,7 +172,7 @@
             (assoc db :views views-next))
       :fx [[:set-search-params [["views" (views->str views-next)]]]]})))
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :views/split
  (fn [{{:keys [views frame] :as db} :db} _]
    {:pre [(= (count views) (:windows frame))]}
@@ -194,7 +183,7 @@
                 (assoc :views views-next))
         :fx [[:set-search-params [["views" (views->str views-next)]]]]}))))
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :views/set-func-id
  (fn [{{:keys [views] :as db} :db} [_ {:keys [next-id view-index]}]]
    (let [views-next (assoc-in views [view-index :func-id]
@@ -204,7 +193,7 @@
      {:db (assoc db :views views-next)
       :fx [[:set-search-params [["views" (views->str views-next)]]]]})))
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :views/remove
  (fn [{{:keys [views frame] :as db} :db} [_ {:keys [view-index]}]]
    {:pre [(= (count views) (:windows frame))]}
@@ -215,7 +204,7 @@
       :fx [[:set-search-params [["views" (views->str views-next)]]]]})))
 
 
-(refx/reg-event-fx
+(rf/reg-event-fx
  :theme/set-appearance
  (fn [{db :db} [_ {:keys [next-appearance]}]]
    {:db (assoc-in db [:theme :appearance] next-appearance)
@@ -226,13 +215,13 @@
 ;; for manual caching obsolete, see https://day8.github.io/re-frame/Flows/
 
 ;; ? where is this used or throw away
-(refx/reg-event-db
+(rf/reg-event-db
  :cache/update
  (fn [db [_ {:keys [key update-fn]}]]
    (js/console.log (str "Caching: " key))
    (update-in db [:cache key :val] update-fn)))
 
-(refx/reg-event-db
+(rf/reg-event-db
  :cache/invalidate
  (fn [db [_ {:keys [has-deps]}]]
    (js/console.log (str "Invalidating: " has-deps))

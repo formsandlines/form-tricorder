@@ -1,6 +1,6 @@
 (ns form-tricorder.components.error-boundary
   (:require
-   ;; [refx.alpha :as refx]
+   ;; [form-tricorder.re-frame-adapter :as rf]
    [helix.core :refer [defnc fnc $ <> provider defcomponent]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]))

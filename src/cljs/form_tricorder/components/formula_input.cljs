@@ -1,9 +1,9 @@
 (ns form-tricorder.components.formula-input
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   ;; [form-tricorder.re-frame-adapter :as rf]
    ; [form-tricorder.icons :refer [InputHelpIcon]]
    [form-tricorder.utils :refer [log style> css>]]
    ["@radix-ui/react-icons" :refer [QuestionMarkCircledIcon]]))

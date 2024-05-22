@@ -1,9 +1,9 @@
 (ns form-tricorder.components.function-tabs
   (:require
-    [refx.alpha :as refx]
     [helix.core :refer [defnc fnc $ <>]]
     [helix.dom :as d :refer [$d]]
     [helix.hooks :as hooks]
+    ;; [form-tricorder.re-frame-adapter :as rf]
     [form-tricorder.model :as model]
     [form-tricorder.functions :as func]
     [form-tricorder.utils :refer [log style> css>]]

@@ -1,12 +1,12 @@
 (ns form-tricorder.core
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
-   [formform.calc :as calc]
-   [formform.expr :as expr]
-   [formform.io :as io]
+   ;; [formform.calc :as calc]
+   ;; [formform.expr :as expr]
+   ;; [formform.io :as io]
+   [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.events :as events]
    [form-tricorder.subs :as subs]
    [form-tricorder.effects :as effects]
@@ -72,8 +72,8 @@
 
 (defnc App
   []
-  (let [formula (refx/use-sub [:input/formula])
-        appearance (refx/use-sub [:theme/appearance])]
+  (let [formula (rf/subscribe [:input/formula])
+        appearance (rf/subscribe [:theme/appearance])]
     (hooks/use-effect
       :once
       (.add js/document.body.classList body-styles))
@@ -94,7 +94,7 @@
            {:class (item-styles)}
            ($ FormulaInput
               {:current-formula formula
-               :apply-input #(refx/dispatch [:input/changed-formula
+               :apply-input #(rf/dispatch [:input/changed-formula
                                              {:next-formula %}])}))
          (d/div
            {:class (item-styles)}
@@ -103,8 +103,8 @@
                (fn [func-id alt-view?]
                  (let [view-index (if alt-view? 1 0)]
                    (do
-                     (when alt-view? (refx/dispatch [:views/split]))
-                     (refx/dispatch [:views/set-func-id
+                     (when alt-view? (rf/dispatch [:views/split]))
+                     (rf/dispatch [:views/set-func-id
                                      {:next-id    func-id
                                       :view-index view-index}]))))}))
          (d/div
@@ -120,6 +120,6 @@
   (rdom/createRoot (js/document.getElementById "root")))
 
 (defn ^:export init! []
-  (refx/dispatch-sync [:initialize-db])
+  (rf/dispatch-sync [:initialize-db])
   (.render root ($ StrictMode ($ App))))
 

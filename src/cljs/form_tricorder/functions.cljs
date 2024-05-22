@@ -1,6 +1,5 @@
 (ns form-tricorder.functions
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
@@ -11,6 +10,7 @@
    ["/form-svg$default" :as form-svg]
    [clojure.math]
    [clojure.test.check.generators] ;; <- BAD
+   [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.mode-ui :as mode-ui]
    [form-tricorder.utils :as utils :refer [css> clj->js* pp-val pp-var]]
    [clojure.edn :as edn]))
@@ -41,7 +41,7 @@
 
 (defnc F-EDN--init
   [args]
-  (let [expr (refx/use-sub [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])]
     ($ F-EDN {:expr expr
               & args})))
 
@@ -64,7 +64,7 @@
 
 (defnc F-JSON--init
   [args]
-  (let [expr (refx/use-sub [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])]
     ($ F-JSON {:expr expr
                & args})))
 
@@ -123,13 +123,13 @@
 
 (defnc F-Vtable--init
   [args]
-  (let [varorder (refx/use-sub [:input/varorder])
-        results  (refx/use-sub [:input/->value])]
+  (let [varorder (rf/subscribe [:input/varorder])
+        results  (rf/subscribe [:input/->value])]
     (d/div {:class "Vtable"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Vtable"
                             :set-varorder
-                            #(refx/dispatch
+                            #(rf/dispatch
                               [:input/changed-varorder {:next-varorder %}])})
            ($ F-Vtable {:results results
                         :varorder varorder
@@ -234,13 +234,13 @@
 
 (defnc F-Vmap--init
   [args]
-  (let [varorder (refx/use-sub [:input/varorder])
-        vmap     (refx/use-sub [:input/->vmap])]
+  (let [varorder (rf/subscribe [:input/varorder])
+        vmap     (rf/subscribe [:input/->vmap])]
     (d/div {:class "Vmap"}
            ($ mode-ui/Calc {:current-varorder varorder
                             :debug-origin "Vmap"
                             :set-varorder
-                            #(refx/dispatch
+                            #(rf/dispatch
                               [:input/changed-varorder {:next-varorder %}])})
            ($ F-Vmap {:vmap vmap
                       & args}))))
@@ -276,7 +276,7 @@
 
 (defnc F-Depthtree--init
   [args]
-  (let [expr (refx/use-sub [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])]
     ($ F-Depthtree {:expr expr
                     & args})))
 
@@ -304,7 +304,7 @@
 
 (defnc F-Graphs--init
   [args]
-  (let [expr (refx/use-sub [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])]
     ($ F-Graphs {:expr expr
                  & args})))
 
@@ -332,7 +332,7 @@
 
 (defnc F-Hooks--init
   [args]
-  (let [expr (refx/use-sub [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])]
     ($ F-Hooks {:expr expr
                 & args})))
 
@@ -380,10 +380,10 @@
   (let [canvas-ref (hooks/use-ref nil)
         ;; evolution is cached in app-db to prevent long delays when
         ;; component gets remounted (cannot use-memo here)
-        evol-cache (refx/use-sub [:cache/retrieve :selfi-evolution])
+        evol-cache (rf/subscribe [:cache/retrieve :selfi-evolution])
         evolution (if evol-cache
                     evol-cache
-                    (refx/dispatch
+                    (rf/dispatch
                      [:cache/update
                       {:key :selfi-evolution
                        :update-fn #(emulate rules umwelt vis-limit
@@ -413,17 +413,17 @@
 
 (defnc F-Selfi--init
   [args]
-  (let [rules-fn (refx/use-sub [:input/->selfi-rules-fn])
-        umwelt   (refx/use-sub [:input/->selfi-umwelt])
-        varorder (refx/use-sub [:input/varorder])
+  (let [rules-fn (rf/subscribe [:input/->selfi-rules-fn])
+        umwelt   (rf/subscribe [:input/->selfi-umwelt])
+        varorder (rf/subscribe [:input/varorder])
         styles (css> {})
-        ;; dna      (refx/use-sub [:input/->dna])
+        ;; dna      (rf/subscribe [:input/->dna])
         ]
     (d/div {:class (str "Selfi " styles)}
       ($ mode-ui/Calc {:current-varorder varorder
                        :debug-origin "Selfi"
                        :set-varorder
-                       #(refx/dispatch
+                       #(rf/dispatch
                          [:input/changed-varorder {:next-varorder %}])})
       ($ F-Selfi {:rules rules-fn
                   :umwelt umwelt

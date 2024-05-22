@@ -1,16 +1,16 @@
 (ns form-tricorder.components.app-toolbar
   (:require
-    [refx.alpha :as refx]
-    [helix.core :refer [defnc fnc $ <> provider]]
-    [helix.hooks :as hooks]
-    [helix.dom :as d :refer [$d]]
-    [form-tricorder.utils :refer [style> css>]]
-    [form-tricorder.icons :refer [SunIcon MoonIcon SwapIcon
-                                  ViewVerticalIcon
-                                  ViewHorizontalIcon
-                                  SourceIcon]]
-    ["@radix-ui/react-toolbar" :as Toolbar]
-    #_["@radix-ui/react-icons" :refer []]))
+   [helix.core :refer [defnc fnc $ <> provider]]
+   [helix.hooks :as hooks]
+   [helix.dom :as d :refer [$d]]
+   [form-tricorder.re-frame-adapter :as rf]
+   [form-tricorder.utils :refer [style> css>]]
+   [form-tricorder.icons :refer [SunIcon MoonIcon SwapIcon
+                                 ViewVerticalIcon
+                                 ViewHorizontalIcon
+                                 SourceIcon]]
+   ["@radix-ui/react-toolbar" :as Toolbar]
+   #_["@radix-ui/react-icons" :refer []]))
 
 ;; Shared styles
 
@@ -103,15 +103,15 @@
 
 (defnc AppToolbar
   []
-  (let [view-split? (> (refx/use-sub [:frame/windows]) 1)
-        appearance (refx/use-sub [:theme/appearance])
-        frame-orientation (refx/use-sub [:frame/orientation])
+  (let [view-split? (> (rf/subscribe [:frame/windows]) 1)
+        appearance (rf/subscribe [:theme/appearance])
+        frame-orientation (rf/subscribe [:frame/orientation])
         handle-frame-orientation
-        #(refx/dispatch [:frame/set-orientation {:next-orientation %}])
+        #(rf/dispatch [:frame/set-orientation {:next-orientation %}])
         handle-swap
-        #(refx/dispatch [:views/swap])
+        #(rf/dispatch [:views/swap])
         handle-toggle-appearance
-        #(refx/dispatch [:theme/set-appearance {:next-appearance %}])]
+        #(rf/dispatch [:theme/set-appearance {:next-appearance %}])]
     ($d Root {:orientation "horizontal"
               :aria-label "App toolbar"}
         ($d ToggleGroup

@@ -1,9 +1,9 @@
 (ns form-tricorder.components.function-menu
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   ;; [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.model :as model :refer [modes]]
    [form-tricorder.utils :refer [log style> css>]]
    ["@radix-ui/react-menubar" :as Menubar]))

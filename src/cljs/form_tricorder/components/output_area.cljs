@@ -1,9 +1,9 @@
 (ns form-tricorder.components.output-area
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.view-pane :refer [ViewPane]]
    [form-tricorder.utils :refer [log style> css>]]
    ["@devbookhq/splitter$default" :as Splitter]))
@@ -51,8 +51,8 @@
 (defnc OutputArea
   []
   ;; ? cache component in state
-  (let [orientation (refx/use-sub [:frame/orientation])
-        windows (refx/use-sub [:frame/windows])
+  (let [orientation (rf/subscribe [:frame/orientation])
+        windows (rf/subscribe [:frame/windows])
         *sizes (hooks/use-ref (array 50 50))]
     (d/div
       {:class (str "OutputArea " (styles))}

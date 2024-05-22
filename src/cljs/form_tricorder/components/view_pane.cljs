@@ -1,9 +1,9 @@
 (ns form-tricorder.components.view-pane
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.function-tabs :refer [FunctionTabs]]
    [form-tricorder.utils :refer [css>]]
    ))
@@ -20,11 +20,11 @@
 
 (defnc ViewPane
   [{:keys [id only-child?]}]
-  (let [{:keys [func-id]} (refx/use-sub [:views/->view id])
-        handle-change-view #(refx/dispatch
+  (let [{:keys [func-id]} (rf/subscribe [:views/->view id])
+        handle-change-view #(rf/dispatch
                              [:views/set-func-id {:next-id %
                                                   :view-index id}])
-        handle-remove-view #(refx/dispatch
+        handle-remove-view #(rf/dispatch
                              [:views/remove {:view-index id}])]
     (d/div
       {:class (str "ViewPane " (styles))}

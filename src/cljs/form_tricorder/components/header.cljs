@@ -1,12 +1,11 @@
 (ns form-tricorder.components.header
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   ;; [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.utils :refer [style> css>]]
-   [form-tricorder.components.app-toolbar :refer [AppToolbar]]
-   ))
+   [form-tricorder.components.app-toolbar :refer [AppToolbar]]))
 
 (def styles
   (css> {:display "flex"

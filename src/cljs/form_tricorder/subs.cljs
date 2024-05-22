@@ -2,14 +2,14 @@
   (:require
    [formform.calc :as calc]
    [formform.expr :as expr]
-   [refx.alpha :as refx]))
+   [re-frame.core :as rf]))
 
 
 ;; Conventions for clarity:
 ;; - qualify keys with by the app-db entry the sub depends on
 ;; - prepend `->` to sub key when the sub computes derived data
 
-(refx/reg-sub
+(rf/reg-sub
  :views/->view
  (fn [db [_ index]]
    ;; {:pre [(< index (count (:views db)))]}
@@ -17,59 +17,59 @@
    (get (:views db) index)))
 
 
-(refx/reg-sub
+(rf/reg-sub
  :frame/orientation
  (fn [db _]
    (get-in db [:frame :orientation])))
 
-(refx/reg-sub
+(rf/reg-sub
  :frame/windows
  (fn [db _]
    (get-in db [:frame :windows])))
 
 
-(refx/reg-sub
+(rf/reg-sub
  :theme/appearance
  (fn [db _]
    (get-in db [:theme :appearance])))
 
 
-(refx/reg-sub
+(rf/reg-sub
  :cache/retrieve
  (fn [db [_ key]]
    (get-in db [:cache key :val])))
 
 
-(refx/reg-sub
+(rf/reg-sub
  :input/formula
  (fn [db _]
    (get-in db [:input :formula] :not-found)))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/expr
  (fn [db _]
    (get-in db [:input :expr] :not-found)))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/varorder
  (fn [db _]
    (get-in db [:input :varorder] nil)))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->expr-data
  (fn [db _]
    (let [input (:input db)]
      [(get input :expr :not-found)
       (get input :varorder nil)])))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->sorted-varorder
  :<- [:input/->expr-data]
  (fn [[_ varorder] _]
    (println "sorting: " varorder)
    (sort varorder)))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->varorder-permutations
  :<- [:input/->sorted-varorder]
  (fn [sorted-varorder _]
@@ -79,7 +79,7 @@
 
 
 ;; ? maybe replace with :dna sub
-(refx/reg-sub
+(rf/reg-sub
  :input/->value
  :<- [:input/->expr-data]
  (fn [[expr varorder] _]
@@ -91,7 +91,7 @@
      (println "computing value")
      (:results value))))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->dna
  :<- [:input/->expr-data]
  (fn [[expr varorder] _]
@@ -106,7 +106,7 @@
      (expr/op-get formDNA :dna))))
 
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->vmap
  :<- [:input/->value]
  (fn [value _]
@@ -116,7 +116,7 @@
      :else (->> value (into {}) calc/vdict->vmap))))
 
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->selfi-rules-fn
  :<- [:input/->dna]
  (fn [dna _]
@@ -125,7 +125,7 @@
      (nil? dna) (throw (ex-info "Invalid formDNA" {}))
      :else (partial calc/dna-get dna))))
 
-(refx/reg-sub
+(rf/reg-sub
  :input/->selfi-umwelt
  :<- [:input/varorder]
  (fn [varorder _]

@@ -1,6 +1,5 @@
 (ns form-tricorder.components.mode-ui
   (:require
-   [refx.alpha :as refx]
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
@@ -8,6 +7,7 @@
    [formform.expr :as expr]
    [clojure.math]
    [clojure.edn :as edn]
+   [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.utils :as utils :refer [style> css> pp-var]]
    [form-tricorder.components.varorder-select :refer [VarorderSelect]]))
 
@@ -21,7 +21,7 @@
   ; (println "Current varorder: " current-varorder)
   ; (println "---")
   (let [sorted-varorder (sort current-varorder)
-        permutations (refx/use-sub [:input/->varorder-permutations]
+        permutations (rf/subscribe [:input/->varorder-permutations]
                        ; [:input/->varorder-permutations sorted-varorder]
                       )
         pp-varorder #(str %1 " " (pp-var %2))]
