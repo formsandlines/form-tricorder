@@ -13,6 +13,7 @@
    [form-tricorder.functions :as func]
    [form-tricorder.utils :refer [log style> css> dark-theme light-theme]]
    [form-tricorder.components.header :refer [Header]]
+   [form-tricorder.components.error-boundary :refer [ErrorBoundary]]
    [form-tricorder.components.formula-input :refer [FormulaInput]]
    [form-tricorder.components.function-menu :refer [FunctionMenu]]
    [form-tricorder.components.output-area :refer [OutputArea]]
@@ -77,40 +78,42 @@
       :once
       (.add js/document.body.classList body-styles))
     (hooks/use-effect
-     [appearance]
-     (if (= appearance :dark)
-       (do (.add js/document.body.classList dark-theme)
-           (.remove js/document.body.classList light-theme))
-       (do (.add js/document.body.classList light-theme)
-           (.remove js/document.body.classList dark-theme))))
-    (d/div
-     {:class (str "App " (styles))}
-     (d/div
-      {:class (item-styles)}
-      ($ Header))
-     (d/div
-      {:class (item-styles)}
-       ($ FormulaInput
-          {:current-formula formula
-           :apply-input #(refx/dispatch [:input/changed-formula
-                                         {:next-formula %}])}))
-     (d/div
-      {:class (item-styles)}
-      ($ FunctionMenu {:handle-click
-                       (fn [func-id alt-view?]
-                         (let [view-index (if alt-view? 1 0)]
-                           (do
-                             (when alt-view? (refx/dispatch [:views/split]))
-                             (refx/dispatch [:views/set-func-id
-                                             {:next-id    func-id
-                                              :view-index view-index}]))))}))
-     (d/div
-       {:class (item-styles)
-        :style {:overflow-y "auto"}}
-      ; ($ ScaleTest {:scale "space" :n 11})
-      ; ($ ScaleTest {:scale "sizes" :n 3})
-      ; ($ ScaleTest {:scale "borderWidths" :n 3})
-      ($ OutputArea)))))
+      [appearance]
+      (if (= appearance :dark)
+        (do (.add js/document.body.classList dark-theme)
+            (.remove js/document.body.classList light-theme))
+        (do (.add js/document.body.classList light-theme)
+            (.remove js/document.body.classList dark-theme))))
+    ($ ErrorBoundary
+       (d/div
+         {:class (str "App " (styles))}
+         (d/div
+           {:class (item-styles)}
+           ($ Header))
+         (d/div
+           {:class (item-styles)}
+           ($ FormulaInput
+              {:current-formula formula
+               :apply-input #(refx/dispatch [:input/changed-formula
+                                             {:next-formula %}])}))
+         (d/div
+           {:class (item-styles)}
+           ($ FunctionMenu
+              {:handle-click
+               (fn [func-id alt-view?]
+                 (let [view-index (if alt-view? 1 0)]
+                   (do
+                     (when alt-view? (refx/dispatch [:views/split]))
+                     (refx/dispatch [:views/set-func-id
+                                     {:next-id    func-id
+                                      :view-index view-index}]))))}))
+         (d/div
+           {:class (item-styles)
+            :style {:overflow-y "auto"}}
+                                        ; ($ ScaleTest {:scale "space" :n 11})
+                                        ; ($ ScaleTest {:scale "sizes" :n 3})
+                                        ; ($ ScaleTest {:scale "borderWidths" :n 3})
+           ($ OutputArea))))))
 
 
 (defonce root

@@ -53,7 +53,9 @@
          :value input
          :placeholder "((a) b)"
          :on-change (fn [e] (do (.preventDefault e)
-                               (set-input (.. e -target -value))))
+                               (set-input (.. e -target -value))
+                               ;; (apply-input input)
+                               ))
          :on-key-press (fn [e] (when (= "Enter" (.-key e))
                                 (apply-input input)))})
       (d/div

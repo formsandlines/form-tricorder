@@ -13,6 +13,8 @@
 ;; Conventions for clarity:
 ;; - qualify keys with by the app-db entry the event is involved with
 
+;; (refx/reg-event-error-handler)
+
 (defn parse-formula
   [formula]
   (let [result (io/read-expr formula)]
