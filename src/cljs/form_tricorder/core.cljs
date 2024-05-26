@@ -70,6 +70,18 @@
          {:class (styles)})
         (str i))))))
 
+(defnc ErrorDisplay
+  []
+  (let [error (rf/subscribe [:error/get])]
+    (when error
+      (d/div
+        {:style {:font-family "courier, monospace"
+                 :background "#FFAAAA"
+                 :color "black"
+                 :padding "1em"}}
+        (d/pre
+          (d/code (pr-str error)))))))
+
 (defnc App
   []
   (let [formula (rf/subscribe [:input/formula])
@@ -95,7 +107,9 @@
            ($ FormulaInput
               {:current-formula formula
                :apply-input #(rf/dispatch [:input/changed-formula
-                                             {:next-formula %}])}))
+                                           {:next-formula %}])})
+           ($ ErrorDisplay)
+)
          (d/div
            {:class (item-styles)}
            ($ FunctionMenu
@@ -105,8 +119,8 @@
                    (do
                      (when alt-view? (rf/dispatch [:views/split]))
                      (rf/dispatch [:views/set-func-id
-                                     {:next-id    func-id
-                                      :view-index view-index}]))))}))
+                                   {:next-id    func-id
+                                    :view-index view-index}]))))}))
          (d/div
            {:class (item-styles)
             :style {:overflow-y "auto"}}

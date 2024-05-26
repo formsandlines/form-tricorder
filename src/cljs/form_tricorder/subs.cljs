@@ -41,6 +41,12 @@
 
 
 (rf/reg-sub
+ :error/get
+ (fn [db _]
+   (get db :error)))
+
+
+(rf/reg-sub
  :input/formula
  (fn [db _]
    (get-in db [:input :formula] :not-found)))

@@ -14,10 +14,41 @@
 ;; Conventions for clarity:
 ;; - qualify keys with by the app-db entry the event is involved with
 
-;; (rf/reg-event-error-handler)
+(rf/reg-event-error-handler
+ (fn [original-error re-frame-error]
+   (println "Original Error:")
+   (println original-error)
+   (println "Re-frame Error:")
+   (println (ex-data re-frame-error))
+   (rf/dispatch [:error/set {:error original-error}])))
+
+(def clear-errors
+  (rf/->interceptor
+   :id :clear-errors
+   :after (fn [context]
+            (assoc-in context [:effects :dispatch] [:error/clear]))))
+
+;; (rf/reg-global-interceptor clear-errors)
+
+(defn balanced?
+  [s]
+  (let [step (fn [stack c]
+               (cond
+                 (= c \() (conj stack c)
+                 (= c \)) (if (empty? stack)
+                            (reduced false)
+                            (pop stack))
+                 :else stack))]
+    (empty? (reduce step [] s))))
+
+(defn pre-parse-formula
+  [formula]
+  (when-not (balanced? formula)
+    (throw (ex-info "Unbalanced expression!" {}))))
 
 (defn parse-formula
   [formula]
+  (pre-parse-formula formula)
   (let [result (io/read-expr formula)]
     (if (insta/failure? result)
       (throw (ex-info "Formula parse error."
@@ -48,7 +79,7 @@
  :initialize-db
  [fetch-search-params]
  (fn [{:keys [search-params]} _]
-   (println search-params)
+   ;; (println search-params)
    (let [formula (or (.get search-params "f") "")
          expr (parse-formula formula)
          varorder (let [s (.get search-params "vars")]
@@ -85,7 +116,8 @@
              :modes {:calc-config nil}
              :theme {:appearance appearance}
              :cache {:selfi-evolution {:deps #{:expr :varorder}
-                                       :val nil}}}]
+                                       :val nil}}
+             :error nil}]
      ;; (println db)
      {:db db})))
 
@@ -115,6 +147,7 @@
 
 (rf/reg-event-fx
  :input/changed-formula
+ [clear-errors]
  (fn [{:keys [db]} [_ {:keys [next-formula]}]]
    (let [db-next
          (-> db
@@ -122,7 +155,7 @@
                      ;; ? wrap in interceptor:
                      (fn [{:keys [formula expr] :as m}]
                        (if-not (= formula next-formula)
-                         (let [next-expr (io/read-expr next-formula)
+                         (let [next-expr (parse-formula next-formula)
                                next-varorder
                                (let [vars (expr/find-vars next-expr {:ordered? true})
                                      current-varorder (get-in db [:input :varorder])]
@@ -233,3 +266,15 @@
                               m
                               (assoc m :val nil))))))))
 
+
+(rf/reg-event-db
+ :error/set
+ (fn [db [_ {:keys [error]}]]
+   (js/console.log "Setting error…")
+   (assoc db :error error)))
+
+(rf/reg-event-db
+ :error/clear
+ (fn [db _]
+   (js/console.log "Clearing error…")
+   (assoc db :error nil)))

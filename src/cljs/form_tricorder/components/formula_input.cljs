@@ -45,22 +45,34 @@
 
 (defnc FormulaInput
   [{:keys [current-formula apply-input]}]
-  (let [[input set-input] (hooks/use-state current-formula)]
+  (let [[input set-input] (hooks/use-state current-formula)
+        [submit-mode set-submit-mode] (hooks/use-state false)]
     (d/div
       {:class (str "FormulaInput " (styles))}
+      (d/input
+        {:type "checkbox"
+         :checked submit-mode
+         :on-change (fn [e]
+                      (set-submit-mode (not submit-mode)))})
       (d/input
         {:class (input-styles)
          :value input
          :placeholder "((a) b)"
-         :on-change (fn [e] (do (.preventDefault e)
-                               (set-input (.. e -target -value))
-                               ;; (apply-input input)
-                               ))
-         :on-key-press (fn [e] (when (= "Enter" (.-key e))
-                                (apply-input input)))})
+         :on-change (fn [e]
+                      (set-input (.. e -target -value))
+                      (when-not submit-mode
+                        (apply-input (.. e -target -value))))
+         :on-key-press (fn [e]
+                         (when (and submit-mode
+                                    (= "Enter" (.-key e)))
+                           (apply-input input)))
+         })
       (d/div
         {:class (button-wrapper-styles)}
         (d/button
           {:class (button-styles)
-           :on-click (fn [e] (apply-input input))}
+           :on-click (fn [e]
+                       (js/console.log "Clicked help button")
+                       ;; (apply-input input)
+                       )}
           ($d QuestionMarkCircledIcon))))))
