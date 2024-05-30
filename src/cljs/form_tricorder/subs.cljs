@@ -72,14 +72,14 @@
  :input/->sorted-varorder
  :<- [:input/->expr-data]
  (fn [[_ varorder] _]
-   (println "sorting: " varorder)
+   ;; (println "sorting: " varorder)
    (sort varorder)))
 
 (rf/reg-sub
  :input/->varorder-permutations
  :<- [:input/->sorted-varorder]
  (fn [sorted-varorder _]
-   (println "computing permutations")
+   ;; (println "computing permutations")
    (let [permutations (expr/permute-vars sorted-varorder)]
      permutations)))
 
@@ -94,7 +94,7 @@
    (when (nil? varorder)
      (throw (ex-info "Unknown variable ordering!" {})))
    (let [value (expr/eval-all {:varorder varorder} expr {})]
-     (println "computing value")
+     ;; (println "computing value")
      (:results value))))
 
 (rf/reg-sub
@@ -108,7 +108,7 @@
    (let [formDNA (if (expr/formDNA? expr)
                    expr
                    (expr/eval->expr-all {:varorder varorder} expr {}))]
-     (println "computing value")
+     ;; (println "computing value")
      (expr/op-get formDNA :dna))))
 
 
@@ -116,7 +116,7 @@
  :input/->vmap
  :<- [:input/->value]
  (fn [value _]
-   (println "computing vmap")
+   ;; (println "computing vmap")
    (cond
      (nil? value) (throw (ex-info "Unknown expression value!" {}))
      :else (->> value (into {}) calc/vdict->vmap))))
@@ -126,7 +126,7 @@
  :input/->selfi-rules-fn
  :<- [:input/->dna]
  (fn [dna _]
-   (println "computing ca rules function")
+   ;; (println "computing ca rules function")
    (cond
      (nil? dna) (throw (ex-info "Invalid formDNA" {}))
      :else (partial calc/dna-get dna))))
@@ -135,7 +135,7 @@
  :input/->selfi-umwelt
  :<- [:input/varorder]
  (fn [varorder _]
-   (println "computing ca umwelt")
+   ;; (println "computing ca umwelt")
    (cond
      (nil? varorder) (throw (ex-info "Invalid variable ordering" {}))
      :else (condp = (count varorder)
@@ -145,3 +145,12 @@
              4 :-lr+
              5 :-ler+
              (throw (ex-info "Invalid variable count" {}))))))
+
+
+(comment
+
+  (expr/eval-all [:fdna [] [:M]] {})
+  (expr/=>* [:fdna [] [:M]] {})
+
+                                        ;
+  )

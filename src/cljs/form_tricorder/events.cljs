@@ -251,13 +251,13 @@
 (rf/reg-event-db
  :cache/update
  (fn [db [_ {:keys [key update-fn]}]]
-   (js/console.log (str "Caching: " key))
+   ;; (js/console.log (str "Caching: " key))
    (update-in db [:cache key :val] update-fn)))
 
 (rf/reg-event-db
  :cache/invalidate
  (fn [db [_ {:keys [has-deps]}]]
-   (js/console.log (str "Invalidating: " has-deps))
+   ;; (js/console.log (str "Invalidating: " has-deps))
    (update db :cache
            (fn [cache]
              (update-vals cache
@@ -270,11 +270,11 @@
 (rf/reg-event-db
  :error/set
  (fn [db [_ {:keys [error]}]]
-   (js/console.log "Setting error…")
+   ;; (js/console.log "Setting error…")
    (assoc db :error error)))
 
 (rf/reg-event-db
  :error/clear
  (fn [db _]
-   (js/console.log "Clearing error…")
+   ;; (js/console.log "Clearing error…")
    (assoc db :error nil)))
