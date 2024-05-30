@@ -261,23 +261,26 @@
 
 
 (defnc F-Depthtree
-  [{:keys [expr]}]
+  [{:keys [expr theme]}]
   (let [id   (str "depthtree" (random-uuid))
         json (expr->json expr)]
     (hooks/use-effect
-     [expr]
+     [expr theme]
      (remove-children (.. js/document (getElementById id)))
      (form-svg "tree" json
                (clj->js
-                {:parentId id})))
+                {:parentId id
+                 :styleTheme theme})))
     (d/div
      {:class "Output"
       :id id})))
 
 (defnc F-Depthtree--init
   [args]
-  (let [expr (rf/subscribe [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])
+        appearance (rf/subscribe [:theme/appearance])]
     ($ F-Depthtree {:expr expr
+                    :theme (if (= :dark appearance) "dark" "light")
                     & args})))
 
 (defmethod gen-component :depthtree
@@ -289,23 +292,26 @@
 ;; Graph notation
 
 (defnc F-Graphs
-  [{:keys [expr]}]
+  [{:keys [expr theme]}]
   (let [id   (str "graph" (random-uuid))
         json (expr->json expr)]
     (hooks/use-effect
-      [expr]
+      [expr theme]
       (remove-children (.. js/document (getElementById id)))
       (form-svg "pack" json
                 (clj->js
-                  {:parentId id})))
+                 {:parentId id
+                  :styleTheme theme})))
     (d/div
       {:class "Output"
        :id id})))
 
 (defnc F-Graphs--init
   [args]
-  (let [expr (rf/subscribe [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])
+        appearance (rf/subscribe [:theme/appearance])]
     ($ F-Graphs {:expr expr
+                 :theme (if (= :dark appearance) "dark" "light")
                  & args})))
 
 (defmethod gen-component :graphs
@@ -317,23 +323,26 @@
 ;; Hooks notation
 
 (defnc F-Hooks
-  [{:keys [expr]}]
+  [{:keys [expr theme]}]
   (let [id   (str "hooks_" (random-uuid))
         json (expr->json expr)]
     (hooks/use-effect
-     [expr]
+     [expr theme]
      (remove-children (.. js/document (getElementById id)))
      (form-svg "gsbhooks" json
                (clj->js
-                {:parentId id})))
+                {:parentId id
+                 :styleTheme theme})))
     (d/div
      {:class "Output"
       :id id})))
 
 (defnc F-Hooks--init
   [args]
-  (let [expr (rf/subscribe [:input/expr])]
+  (let [expr (rf/subscribe [:input/expr])
+        appearance (rf/subscribe [:theme/appearance])]
     ($ F-Hooks {:expr expr
+                :theme (if (= :dark appearance) "dark" "light")
                 & args})))
 
 (defmethod gen-component :hooks

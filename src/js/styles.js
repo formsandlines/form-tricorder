@@ -14,11 +14,16 @@ const global = {
         fontContext: {family: 'sans-serif', size: '10px', style: 'normal'},
         strokeWidth: 1,
         labels: {reEven: '2|r|', reOdd: '2|r|+1'},
-        color: {base: d3.color('black'),
-                ground: d3.color('white'),
-                indef: d3.color('red'),
-                light: d3.color('#ddd'),
-            }
+        colorLight: {base: d3.color('black'),
+                     ground: d3.color('white'),
+                     indef: d3.color('red'),
+                     light: d3.color('#ddd'),
+		    },
+        colorDark: {base: d3.color('white'),
+                    ground: d3.color('black'),
+                    indef: d3.color('#FFAAAA'),
+                    light: d3.color('#333'),
+		   }
     }
 };
 global.basic = {
@@ -50,10 +55,14 @@ global.gestalt = {
     fontContext: { ...global.common.fontContext,
             family: 'georgia, serif'
         },
-    color: {...global.common.color,
-            pos: d3.color('white'), 
-            neg: d3.color('black')
-        }
+    colorLight: {...global.common.colorLight,
+		 pos: d3.color('white'), 
+		 neg: d3.color('black'),
+		},
+    colorDark: {...global.common.colorDark,
+		pos: d3.color('black'), 
+		neg: d3.color('white'),
+               }
 };
 const [basic, gestalt] = [global.basic, global.gestalt];
 
@@ -68,8 +77,7 @@ const tree = {
     common: {
         nodeSize: {w: 10.0, h: 10.0}, // size of nodes
         nodeSeparation: {hz: 20, vt: 40}, // separation between nodes
-        dashes: {link: '4px 6px'
-            },
+        dashes: {link: '4px 6px'},
     }
 };
 
@@ -77,11 +85,15 @@ tree.basic = {
     ...basic,
     ...tree.common,
 };
+tree.basic.colorLight.axis = d3.color('rgba(0,0,0,.06)');
+tree.basic.colorDark.axis = d3.color('rgba(255,255,255,.08)');
+
 tree.basic.applyAxisStyles = function(axis) {
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
 
     axis.selectAll('.tick').select('line')
         .style('stroke-width', this.nodeSize.w*1.5)
-        .style('stroke', 'rgba(0,0,0,.05')
+        .style('stroke', this.color.axis.toString())
         .style('stroke-linecap', 'round');
     axis.selectAll('.tick').select('text')
         .style('font-size', this.fontContext.size)
@@ -92,7 +104,9 @@ tree.basic.applyAxisStyles = function(axis) {
 
 };
 tree.basic.applyNodeStyles = function(nodes, nodePartitions) {
-    const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear} = nodePartitions;
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
+
+    const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear, formDNA} = nodePartitions;
 
     forms.selectAll('circle')
         .style('stroke', this.color.base.toString())
@@ -127,6 +141,10 @@ tree.basic.applyNodeStyles = function(nodes, nodePartitions) {
         .style('font-size', this.fontConst.size)
         .style('font-style', this.fontConst.style)
         .style('font-family', this.fontConst.family);
+    formDNA.selectAll('text')
+        .style('font-size', this.fontConst.size)
+        .style('font-style', this.fontConst.style)
+        .style('font-family', this.fontConst.family);
 
     sets.selectAll('circle.inner')
         // .classed('inner')
@@ -135,6 +153,8 @@ tree.basic.applyNodeStyles = function(nodes, nodePartitions) {
 
 };
 tree.basic.applyLinkStyles = function(links, linkPartitions) {
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
+
     const {reChildLink, rePointLink} = linkPartitions;
 
     links.selectAll('path')
@@ -182,7 +202,9 @@ pack.basic = {
     ...pack.common,
 };
 pack.basic.applyNodeStyles = function(nodes, nodePartitions) {
-    const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear} = nodePartitions;
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
+
+    const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear, formDNA} = nodePartitions;
 
     forms.select('circle')
         .style('stroke', this.color.base.toString())
@@ -208,6 +230,10 @@ pack.basic.applyNodeStyles = function(nodes, nodePartitions) {
         .style('font-size', this.fontConst.size)
         .style('font-style', this.fontConst.style)
         .style('font-family', this.fontConst.family);
+    formDNA.selectAll('text')
+        .style('font-size', this.fontConst.size)
+        .style('font-style', this.fontConst.style)
+        .style('font-family', this.fontConst.family);
 
     unclear.select('rect')
         .style('fill', this.color.light.toString());
@@ -229,9 +255,13 @@ pack.gestalt = {
     ...pack.common,
 };
 pack.gestalt.invertFill = function(d) {
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
+
     return getRealDepth(d)%2 ? this.color.pos.toString() : this.color.neg.toString();
 };
 pack.gestalt.applyNodeStyles = function(nodes, nodePartitions, chart) {
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
+
     const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear} = nodePartitions;
 
     const defs = d3.select(chart.node().parentNode)
@@ -335,7 +365,9 @@ boxmodel.basic = {
     // font: {...basic.font, size: '18px'}
 };
 boxmodel.basic.applyNodeStyles = function(nodes, nodePartitions) {
-    const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear} = nodePartitions;
+    this.color = this.theme === 'dark' ? this.colorDark : this.colorLight;
+
+    const {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear, formDNA} = nodePartitions;
 
     sets.select('polyline')
         .style('fill', 'none')
@@ -358,6 +390,10 @@ boxmodel.basic.applyNodeStyles = function(nodes, nodePartitions) {
         .style('font-style', this.fontVar.style)
         .style('font-family', this.fontVar.family);
     consts.select('text')
+        .style('font-size', this.fontConst.size)
+        .style('font-style', this.fontConst.style)
+        .style('font-family', this.fontConst.family);
+    formDNA.select('text')
         .style('font-size', this.fontConst.size)
         .style('font-style', this.fontConst.style)
         .style('font-family', this.fontConst.family);

@@ -37,7 +37,8 @@ class D3Form {
             ...{ margin: { left: 50, right: 50, top: 50, bottom: 50 }, 
                 padding: { left: 10, right: 10, top: 10, bottom: 10 },
                 // padding: { left: 0, right: 0, top: 0, bottom: 0 },
-                styleClass: 'basic' },
+                styleClass: 'basic', styleTheme: 'light',
+	    },
             ...opts
         } );
 
@@ -64,7 +65,8 @@ class D3Form {
 
         // set up design variables
         const design = styles.tree[this.styleClass];
-        const [nodeSize, nodeSep] = [design.nodeSize, design.nodeSeparation];
+        design.theme = this.styleTheme;
+	const [nodeSize, nodeSep] = [design.nodeSize, design.nodeSeparation];
         // const [fontSize, font] = [design.font.size, design.font.family]; // ? not needed
 
         this.padding = { left: 10, right: 10, top: 10, bottom: 10 };
@@ -158,7 +160,7 @@ class D3Form {
 
         // generate node partition selections
         const nodePartitions = resolveNodes(tree, nodes);
-        const {sets, rePoints, elements, vars, consts, unclear} = nodePartitions; // ? [leaves, forms, reEntries, reChilds] not needed
+        const {sets, rePoints, elements, vars, consts, unclear, formDNA} = nodePartitions; // ? [leaves, forms, reEntries, reChilds] not needed
 
         // curved line generator
         // const line = d3.line().curve(d3.curveBasis); // ? not needed
@@ -198,6 +200,11 @@ class D3Form {
             .text(d => `= ${d.data.value}`);
         unclear.selectAll('text')
             .text(d => `/${d.data.label}/`);
+        formDNA.selectAll('text')
+            .text(d => {
+		// TODO: shorten string when too long
+		return `::${d.data.dna.join('')}`;
+	    });
 
         sets.filter(d => d.children)
             .append('circle')
@@ -232,6 +239,7 @@ class D3Form {
 
         // set up design variables
         const design = styles.pack[this.styleClass];
+	design.theme = this.styleTheme;
         const [radius, padding] = [design.radius, design.padding];
         const [fontSize, font] = [design.font.size, design.font.family];
 
@@ -272,7 +280,7 @@ class D3Form {
 
         // generate node partition selections
         const nodePartitions = resolveNodes(pack, nodes);
-        const {sets, reEntries, rePoints, vars, consts, unclear} = nodePartitions; // ? [leaves, forms, reChilds, elements] not needed
+        const {sets, reEntries, rePoints, vars, consts, unclear, formDNA} = nodePartitions; // ? [leaves, forms, reChilds, elements] not needed
 
         // define detailled structure/logic
 
@@ -293,6 +301,13 @@ class D3Form {
         unclear.append('text')
             .call(textSubscript(d => d.data.label));
 
+        formDNA.append('text')
+            .text(d => {
+		// TODO: use a space-efficient representation (vmap?)
+		return '::…'
+		// return `::${d.data.dna.join('')}`;
+	    });
+	
         rePoints
             .append('circle')
             .attr('r', 1.5);
@@ -328,7 +343,8 @@ class D3Form {
 
         // set up design variables
         const design = styles.boxmodel[this.styleClass];
-        const {elemMargin, formMargin, formPadding, minFormSize, maxLineWidth, fontVar, fontConst, fontContext, labels} = {...design};
+        design.theme = this.styleTheme;
+	const {elemMargin, formMargin, formPadding, minFormSize, maxLineWidth, fontVar, fontConst, fontContext, labels} = {...design};
         const unclearPad = {hz: elemMargin.hz/2, vt: elemMargin.vt};
         const dataLabelPad = 4;
 
@@ -432,6 +448,11 @@ class D3Form {
                         w = txtSz.width;
                         h = txtSz.height * 0.7;
                         break;
+                    case 'operator': // ? check for 'label' === ':fdna'
+                        txtSz = textSize(`::${d.data.dna.join('')}`, fontConst.size, fontConst.family, fontConst.style);
+                        w = txtSz.width;
+                        h = txtSz.height * 0.7;
+                        break;
                     }
                 
                 }
@@ -454,7 +475,7 @@ class D3Form {
 
         // generate node partition selections
         const nodePartitions = resolveNodes(boxmodel, nodes);
-        const {forms, reEntries, vars, consts, unclear} = nodePartitions; // ? [leaves, sets, reChilds, rePoints, elements] not in use
+        const {forms, reEntries, vars, consts, unclear, formDNA} = nodePartitions; // ? [leaves, sets, reChilds, rePoints, elements] not in use
 
         // define detailled structure/logic
 
@@ -493,10 +514,15 @@ class D3Form {
             .attr('x',d => unclDiff(d) + unclearPad.hz )
             .attr('y',d => (d.y1-d.y0) -unclearPad.vt  - ((d.data.label.split('_').length > 1) ? 6 : 0) )
             .call(textSubscript(d => d.data.label));
-          
+        
         consts.append('text')
             .attr('y',d => (d.y1-d.y0) )
             .text(d => d.data.value);
+	formDNA.append('text')
+            .attr('y',d => (d.y1-d.y0) )
+            .text(d => {
+		return `::${d.data.dna.join('')}`;
+	    });
         vars.append('text')
             .attr('y',d => (d.y1-d.y0) )
             .call(textSubscript(d => d.data.label));
@@ -520,52 +546,55 @@ class D3Form {
 // -----------------------------------------------------------
 
 function resolveNodes(root, nodes) {
-  // resolves descendant nodes into filtered selections
-  const leaves = nodes.filter(d => root.leaves().filter(l => l === d).pop() )
-      .classed('leaf', true);
+    // resolves descendant nodes into filtered selections
+    const leaves = nodes.filter(d => root.leaves().filter(l => l === d).pop() )
+	  .classed('leaf', true);
 
-  const sets = nodes.filter(d => d.data.type === 'form' || d.data.type === 'reEntry')
-      .classed('form', true);
-  const forms = sets.filter(d => d.data.type === 'form')
-      .classed('form', true);
-  const reEntries = sets.filter(d => d.data.type === 'reEntry')
-      .classed('reEntry', true);
+    const sets = nodes.filter(d => d.data.type === 'form' || d.data.type === 'reEntry')
+	  .classed('form', true);
+    const forms = sets.filter(d => d.data.type === 'form')
+	  .classed('form', true);
+    const reEntries = sets.filter(d => d.data.type === 'reEntry')
+	  .classed('reEntry', true);
 
-  const elements = nodes.filter(d => !(d.data.type === 'form' || d.data.type === 'reEntry'))
-      .classed('element', true);
-  const vars = elements.filter(d => d.data.type === 'variable')
-      .classed('variable', true);
-  const consts = elements.filter(d => d.data.type === 'constant')
-      .classed('constant', true);
-  consts.unmarked = elements.filter(d => d.data.value == ":N").classed('unmarked', true);
-  consts.marked = elements.filter(d => d.data.value == ":M").classed('marked', true);
-  consts.indef = elements.filter(d => d.data.value == ":U").classed('indef', true);
-  consts.imag = elements.filter(d => d.data.value == ":I").classed('imag', true);
+    const elements = nodes.filter(d => !(d.data.type === 'form' || d.data.type === 'reEntry'))
+	  .classed('element', true);
+    const vars = elements.filter(d => d.data.type === 'variable')
+	  .classed('variable', true);
+    const consts = elements.filter(d => d.data.type === 'constant')
+	  .classed('constant', true);
+    consts.unmarked = elements.filter(d => d.data.value == ":N").classed('unmarked', true);
+    consts.marked = elements.filter(d => d.data.value == ":M").classed('marked', true);
+    consts.indef = elements.filter(d => d.data.value == ":U").classed('indef', true);
+    consts.imag = elements.filter(d => d.data.value == ":I").classed('imag', true);
 
-  const unclear = elements.filter(d => d.data.type === 'unclear')
-      .classed('unclear', true);
+    const unclear = elements.filter(d => d.data.type === 'unclear')
+	  .classed('unclear', true);
 
-  const reChilds = forms.filter(d => d.data.reChild)
-      .classed('reChild', true);
+    const formDNA = elements.filter(d => d.data.type === 'operator' && d.data.label === ':fdna')
+	  .classed('fdna', true);
 
-  const rePoints = elements.filter(d => d.data.type === 'reEntryPoint')
-      .classed('reEntryPoint', true);
+    const reChilds = forms.filter(d => d.data.reChild)
+	  .classed('reChild', true);
 
-  return {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear};
+    const rePoints = elements.filter(d => d.data.type === 'reEntryPoint')
+	  .classed('reEntryPoint', true);
+
+    return {leaves, sets, forms, reEntries, reChilds, rePoints, elements, vars, consts, unclear, formDNA};
 }
 
 function resolveLinks(root, links) {
-  // resolves links between descendant nodes into filtered selections
-  const reChildLink = links.filter(d => d.target.data.reChild)
-      .classed('reChildLink', true);
+    // resolves links between descendant nodes into filtered selections
+    const reChildLink = links.filter(d => d.target.data.reChild)
+	  .classed('reChildLink', true);
 
-  const rePointLink = links.filter(d => d.target.data.type === 'reEntryPoint')
-      .classed('rePointLink', true);
+    const rePointLink = links.filter(d => d.target.data.type === 'reEntryPoint')
+	  .classed('rePointLink', true);
 
-  return {reChildLink, rePointLink};
+    return {reChildLink, rePointLink};
 }
 
-function isText(node) { return node.data.type === 'variable' || node.data.type === 'constant' || node.data.type === 'unclear'; }
+function isText(node) { return node.data.type === 'variable' || node.data.type === 'constant' || node.data.type === 'unclear' || node.data.type === 'operator'; }
 
 function isContainer(node) { return node.data.type === 'form' || node.data.type === 'reEntry'; }
 
