@@ -3,6 +3,8 @@
         org.clojure/clojurescript {:mvn/version "1.11.132"}
         lilactown/helix {:mvn/version "0.2.1"}
         re-frame/re-frame {:mvn/version "1.4.3"}
+        me.raystubbs/zero {:mvn/version "0.1.12"}
+        com.lambdaisland/garden {:mvn/version "1.5.569"}
         eu.formsandlines/formform {:local/root "../formform-project/formform"}}
  :aliases
  {:dev

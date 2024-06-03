@@ -1,7 +1,7 @@
 (ns form-tricorder.utils
   (:require
-    [helix.hooks :as hooks]
-    ["/stitches.config" :refer (styled css darkTheme lightTheme)]))
+   [helix.hooks :as hooks]
+   ["/stitches.config" :refer (styled css darkTheme lightTheme)]))
 
 (defn splitv-atv [i v]
   {:pre [(vector? v)]}
