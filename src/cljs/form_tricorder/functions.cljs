@@ -3,6 +3,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
+   [garden.core :refer [css]]
    ;; ["react" :as react]
    [formform.calc :as calc]
    [formform.io :as io]
@@ -73,11 +74,25 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Value table
 
+(def vtable-css
+  (css [[":host"
+         {:font-family "var(--fonts-mono)"
+          :font-size "var(--fontSizes-1)"}]
+        ["th"
+         {:font-weight "var(--fontWeights-medium)"
+          :border-top "1px solid var(--colors-inner_fg)"
+          :border-bottom "1px solid var(--colors-inner_fg)"}]
+        ["tr:hover td"
+         {:background-color "var(--colors-inner_hl)"}]
+        ["td"
+         {:border-top "1px solid var(--colors-inner_n200)"}]]))
+
 (defnc F-Vtable--init
   [_]
   (let [ref (hooks/use-ref nil)
         varorder (rf/subscribe [:input/varorder])
-        results  (rf/subscribe [:input/->value])]
+        results  (rf/subscribe [:input/->value])
+        css vtable-css]
     (hooks/use-effect
       [results]
       (let [webc-el @ref]
@@ -89,6 +104,7 @@
                        #(rf/dispatch
                          [:input/changed-varorder {:next-varorder %}])})
       ($ "ff-vtable" {:ref ref
+                      :styles (str \" css \")
                       :varorder varorder}))))
 
 (defmethod gen-component :vtable
