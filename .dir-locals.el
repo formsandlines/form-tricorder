@@ -1,7 +1,10 @@
-((nil . ((cider-clojure-cli-aliases        . ":dev")
-         (cider-preferred-build-tool       . clojure-cli)
-         (cider-default-cljs-repl          . custom)
-         (cider-custom-cljs-repl-init-form . "(do (user/cljs-repl))")
-         (eval . (progn
-                   (make-variable-buffer-local 'cider-jack-in-nrepl-middlewares)
-                   (add-to-list 'cider-jack-in-nrepl-middlewares "shadow.cljs.devtools.server.nrepl/middleware"))))))
+((clojurescript-mode
+  ;; You use a shadow-cljs to build the project
+  ;; This answers the question "which command should be used?"
+  (cider-preferred-build-tool . shadow-cljs)
+  ;; This sets a default repl type & answers the question "select cljs repl type".
+  (cider-default-cljs-repl . shadow)
+  ;; This tells shadow cljs what to build & should match a key in shadow-cljs.edn
+  ;; build map. e.g :builds {:<some-key> {...}}
+  ;; pramas passed to shadow-cljs to start nrepl via cider-jack-in
+  (cider-shadow-default-options . "app")))

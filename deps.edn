@@ -3,23 +3,12 @@
         org.clojure/clojurescript {:mvn/version "1.11.132"}
         lilactown/helix {:mvn/version "0.2.1"}
         re-frame/re-frame {:mvn/version "1.4.3"}
-        me.raystubbs/zero {:mvn/version "0.1.12"}
-        com.lambdaisland/garden {:mvn/version "1.5.569"}
-        eu.formsandlines/formform {:local/root "../formform-project/formform"}}
+        eu.formsandlines/formform
+        {:local/root "../formform-project/formform"}
+        eu.formsandlines/formform-vis
+        {:local/root "../formform-project/formform-vis"}}
  :aliases
  {:dev
-  ;; With CIDER:
-  ;; 1. M-x cider-jack-in-cljs
-  ;; 2. M-x cider-connect-cljs with port 8777
-  ;; open http://localhost:3000 in browser
   {:extra-paths ["dev"]
    :extra-deps {binaryage/devtools {:mvn/version "1.0.7"}
-                thheller/shadow-cljs {:mvn/version "2.28.6"}
-                com.github.jpmonettas/flow-storm-inst {:mvn/version "3.6.10"}}}
-
-  :flowstorm
-  {:extra-deps {com.github.jpmonettas/flow-storm-dbg {:mvn/version "3.6.10"}}
-   :exec-fn flow-storm.debugger.main/start-debugger
-   :exec-args {:port 8777
-               :repl-type :shadow
-               :build-id :app}}}}
+                thheller/shadow-cljs {:mvn/version "2.28.6"}}}}}

@@ -7,9 +7,8 @@
    [formform.calc :as calc]
    [formform.io :as io]
    [clojure.math]
-   [clojure.test.check.generators] ;; <- BAD
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.web-components.core]
+   [formform-vis.core]
    [form-tricorder.components.mode-ui :as mode-ui]
    [form-tricorder.utils :as utils :refer [css> clj->js*]]))
 
