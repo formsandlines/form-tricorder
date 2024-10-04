@@ -10,7 +10,9 @@
    [clojure.math]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core]
+   [formform-vis.utils :refer [save-svg]]
    [form-tricorder.components.mode-ui :as mode-ui]
+   [form-tricorder.components.export-dialog :refer [ExportDialog]]
    [form-tricorder.utils :as utils :refer [css> clj->js*]]))
 
 
@@ -103,9 +105,9 @@
                        :set-varorder
                        #(rf/dispatch
                          [:input/changed-varorder {:next-varorder %}])})
-      ($ "ff-vtable" {:ref ref
-                      :styles (str \" css \")
-                      :varorder varorder}))))
+      ($ :ff-vtable {:ref ref
+                     :styles (str \" css \")
+                     :varorder varorder}))))
 
 (defmethod gen-component :vtable
   [_ args]
@@ -115,22 +117,67 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; vmap visualization
 
+;; (def vtable-css
+;;   (css [[":host"
+;;          {:font-family "var(--fonts-mono)"
+;;           :font-size "var(--fontSizes-1)"}]
+;;         ["th"
+;;          {:font-weight "var(--fontWeights-medium)"
+;;           :border-top "1px solid var(--colors-inner_fg)"
+;;           :border-bottom "1px solid var(--colors-inner_fg)"}]
+;;         ["tr:hover td"
+;;          {:background-color "var(--colors-inner_hl)"}]
+;;         ["td"
+;;          {:border-top "1px solid var(--colors-inner_n200)"}]]))
+
 (defnc F-Vmap--init
   [_]
-  (let [ref (hooks/use-ref nil)
+  (let [[psps? set-psps?] (hooks/use-state false)
+        ref (hooks/use-ref nil)
         varorder (rf/subscribe [:input/varorder])
-        vmap     (rf/subscribe [:input/->vmap])]
+        dna (rf/subscribe [:input/->dna])]
     (hooks/use-effect
-      [vmap]
+      [dna psps?]
       (let [webc-el @ref]
-        (aset webc-el "vmap" vmap)))
+        (aset webc-el "dna" dna)))
     (d/div {:class "Vmap"}
       ($ mode-ui/Calc {:current-varorder varorder
                        :debug-origin "Vmap"
                        :set-varorder
                        #(rf/dispatch
                          [:input/changed-varorder {:next-varorder %}])})
-      ($ "ff-vmap" {:ref ref}))))
+      (if psps?
+        ($ :ff-vmap-psps {:ref ref
+                          ;; "full-svg" (str true)
+                          "bg-color" (str "\"" "var(--colors-outer_bg)" "\"")
+                          :padding 6
+                          :varorder (str varorder)})
+        ($ :ff-vmap {:ref ref
+                     ;; "full-svg" (str true)
+                     "bg-color" (str "\"" "var(--colors-outer_bg)" "\"")
+                     :padding 6
+                     :varorder (str varorder)}))
+      (d/button {:on-click (fn [_] (set-psps? (fn [b] (not b))))}
+        (if psps? "-" "+"))
+      ($ ExportDialog)
+      (d/button {:on-click
+                 (fn [e]
+                   (let [el (js/document.createElement "ff-vmap")]
+                     (.setAttribute el "full-svg" "true")
+                     (aset el "varorder" varorder)
+                     (aset el "dna" dna)
+                     (.. e -target -parentNode (appendChild el))
+                     (js/setTimeout
+                      (fn []
+                        (let [vmap (.. el -shadowRoot
+                                       (getElementById "vmap-figure"))]
+                          ;; (js/console.log vmap)
+                          (save-svg vmap "test.svg")))
+                      1000)
+                     
+                     ;; (save-svg el "test.svg")
+                     ))}
+        "Save SVG"))))
 
 (defmethod gen-component :vmap
   [_ args]
@@ -150,9 +197,9 @@
       [expr appearance]
       (let [webc-el @ref]
         (aset webc-el "expr" expr)))
-    ($ "ff-fgraph" {:ref ref
-                    :type type
-                    :theme theme})))
+    ($ :ff-fgraph {:ref ref
+                   :type type
+                   :theme theme})))
 
 (defmethod gen-component :depthtree
   [_ args]
@@ -262,11 +309,11 @@
                        :set-varorder
                        #(rf/dispatch
                          [:input/changed-varorder {:next-varorder %}])})
-      ($ "ff-selfi" {:ref ref
-                     :res      100
-                     :iniptn   :random
-                     :vislimit 200
-                     :cellsize 4}))))
+      ($ :ff-selfi {:ref ref
+                    :res 100
+                    "ini-ptn" :random
+                    "vis-limit" 200
+                    :cellsize 4}))))
 
 (defmethod gen-component :selfi
   [_ args]

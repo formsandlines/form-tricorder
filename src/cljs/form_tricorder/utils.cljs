@@ -1,7 +1,8 @@
 (ns form-tricorder.utils
   (:require
    [helix.hooks :as hooks]
-   ["/stitches.config" :refer (styled css darkTheme lightTheme)]))
+   ["/stitches.config"
+    :refer (styled globalCss css darkTheme lightTheme keyframes)]))
 
 (defn splitv-atv [i v]
   {:pre [(vector? v)]}
@@ -31,6 +32,7 @@
   [cp & kvs]
   (update cp 1 (fn [props] (apply assoc props kvs))))
 
+;; ? needed
 (defn clj->js* 
   "Recursively calls `clj->js` on given map and each submap in the tree."
   [m]
@@ -55,19 +57,52 @@
 
 (defn style>
   [elem styles-map]
-  (styled elem (clj->js* styles-map)))
+  (styled elem (clj->js styles-map)))
+
+(defn keyframes>
+  [keyframes-map]
+  (keyframes (clj->js keyframes-map)))
 
 (defn css>
   [styles-map]
-  (-> styles-map clj->js* css))
+  (-> styles-map clj->js css))
+
+(defn global-css>
+  [styles-map]
+  (-> styles-map clj->js globalCss))
 
 (defn pp-val [v] (-> (name v) .toLowerCase))
 (defn pp-var [s] (if (> (count s) 1) (str "'" s "'") s))
 
-(comment
-  
-  (pow-nat 2 3)
 
-  (take 5 (geom-seq 3 5))
+(defn merge-deep
+  "Deeply merges all maps recursively nested inside the given input maps."
+  [m & ms]
+  (apply merge-with
+         (fn [x y]
+           (if (and (map? x)
+                    (map? y))
+             (merge-deep x y)
+             y))
+         m
+         ms))
+
+(comment
+
+  (= (merge-deep
+      {:a 1
+       :foo "a"
+       :b {:x 2
+           :bar "b"
+           :y {:o 3
+               :baz 4}}}
+      {:a 9
+       :moo "m"
+       :b {:x 8
+           :mar "n"
+           :y {:o 7
+               :maz "o"}}})
+     {:a 9, :foo "a", :b {:x 8, :bar "b",
+                          :y {:o 7, :baz 4, :maz "o"}, :mar "n"}, :moo "m"})
   
   )

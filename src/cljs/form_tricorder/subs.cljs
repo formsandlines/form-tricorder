@@ -112,14 +112,14 @@
      (expr/op-get formDNA :dna))))
 
 
-(rf/reg-sub
- :input/->vmap
- :<- [:input/->value]
- (fn [value _]
-   ;; (println "computing vmap")
-   (cond
-     (nil? value) (throw (ex-info "Unknown expression value!" {}))
-     :else (->> value (into {}) calc/vdict->vmap))))
+;; (rf/reg-sub
+;;  :input/->vmap
+;;  :<- [:input/->value]
+;;  (fn [value _]
+;;    ;; (println "computing vmap")
+;;    (cond
+;;      (nil? value) (throw (ex-info "Unknown expression value!" {}))
+;;      :else (->> value (into {}) calc/vdict->vmap))))
 
 
 (rf/reg-sub

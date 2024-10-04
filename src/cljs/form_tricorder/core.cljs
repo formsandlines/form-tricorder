@@ -11,7 +11,8 @@
    [form-tricorder.subs :as subs]
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
-   [form-tricorder.utils :refer [log style> css> dark-theme light-theme]]
+   [form-tricorder.utils :refer [log style> global-css> css>
+                                 dark-theme light-theme]]
    [form-tricorder.components.header :refer [Header]]
    [form-tricorder.components.error-boundary :refer [ErrorBoundary]]
    [form-tricorder.components.formula-input :refer [FormulaInput]]
@@ -21,8 +22,19 @@
    ["react-dom/client" :as rdom]))
 
 
-(def body-styles
-  (css> {:background-color "$colors$outer_bg"}))
+(def global-styles
+  (global-css>
+   {"body"
+    {:font-family "$base"
+     :font-weight "$normal"
+     :font-size "$base"
+     :line-height "$lineHeights$base"
+     :background-color "$colors$outer_bg"
+     "a:hover"
+     {:text-decoration "underline"}}}))
+
+;; (def body-styles
+;;   (css> {}))
 
 (def styles
   (css> {:display "flex"
@@ -30,17 +42,11 @@
          :flex-direction "column"
          :padding "$3" ; "0.6rem"
          :gap "$2" ; "0.4rem"
-
-         :font-family "$base"
-         :font-weight "$normal"
-         :font-size "$base"
          :color "$colors$outer_fg"
          "& a"
-         {
-          :color "$colors$outer_m100"
+         {:color "$colors$outer_m100"
           "&:hover"
           {
-           :text-decoration "underline"
            ; :color "$colors$outer_m200"
            }}}))
 
@@ -88,7 +94,10 @@
         appearance (rf/subscribe [:theme/appearance])]
     (hooks/use-effect
       :once
-      (.add js/document.body.classList body-styles))
+      (js/console.log {:a 1 :b "two" "c" :three 'd [4]})
+      (global-styles)
+      ;; (.add js/document.body.classList body-styles)
+      )
     (hooks/use-effect
       [appearance]
       (if (= appearance :dark)
