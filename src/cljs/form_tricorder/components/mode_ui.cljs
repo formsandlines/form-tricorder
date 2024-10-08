@@ -8,11 +8,12 @@
    [clojure.math]
    [clojure.edn :as edn]
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.utils :as utils :refer [style> css> pp-var]]
+   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.utils :as utils :refer [pp-var]]
    [form-tricorder.components.varorder-select :refer [VarorderSelect]]))
 
 (def styles
-  (css> {:margin-bottom "$6"}))
+  (css {:margin-bottom "$6"}))
 
 (defnc Calc
   [{:keys [current-varorder set-varorder debug-origin]}]

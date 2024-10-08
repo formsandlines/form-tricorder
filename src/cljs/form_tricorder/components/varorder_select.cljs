@@ -3,17 +3,17 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
-   [form-tricorder.utils :as utils :refer [style> css>]]
+   [form-tricorder.stitches-config :refer [styled css]]
    ["@radix-ui/react-select" :as Select]
    ["@radix-ui/react-icons" :refer [CheckIcon ChevronDownIcon ChevronUpIcon]]))
 
 
 (def Root
-  (style> (.-Root Select)
+  (styled (.-Root Select)
           {}))
 
 (def Trigger
-  (style> (.-Trigger Select)
+  (styled (.-Trigger Select)
           {:display "inline-flex"
            :align-items "center"
            :justify-content "center"
@@ -29,11 +29,11 @@
            :cursor "pointer"}))
 
 (def Portal
-  (style> (.-Portal Select)
+  (styled (.-Portal Select)
           {}))
 
 (def Content
-  (style> (.-Content Select)
+  (styled (.-Content Select)
           {:overflow "hidden"
 
            :font-family "$mono"
@@ -43,11 +43,11 @@
            :border-radius "$2"}))
 
 (def Viewport
-  (style> (.-Viewport Select)
+  (styled (.-Viewport Select)
           {:padding "0.2rem 0.3rem 0.2rem 0.4rem"}))
 
 (def Item
-  (style> (.-Item Select)
+  (styled (.-Item Select)
           {:font "inherit"
            :cursor "pointer"
            :border-radius "$2"
@@ -66,23 +66,23 @@
             :backgroundColor "$inner_m200"}}))
 
 (def ItemText
-  (style> (.-ItemText Select)
+  (styled (.-ItemText Select)
           {}))
 
 (def ScrollUpButton
-  (style> (.-ScrollUpButton Select)
+  (styled (.-ScrollUpButton Select)
           {}))
 
 (def ScrollDownButton
-  (style> (.-ScrollDownButton Select)
+  (styled (.-ScrollDownButton Select)
           {}))
 
 (def Icon
-  (style> (.-Icon Select)
+  (styled (.-Icon Select)
           {}))
 
 (def Arrow
-  (style> (.-Arrow Select)
+  (styled (.-Arrow Select)
           {}))
 
 (defnc VarorderSelect

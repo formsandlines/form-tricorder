@@ -5,18 +5,18 @@
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.function-tabs :refer [FunctionTabs]]
-   [form-tricorder.utils :refer [css>]]
+   [form-tricorder.stitches-config :refer [styled css]]
    ))
 
 (def styles
-  (css> {:position "relative"
-         :overflow-y "auto"
-         :display "flex"}))
+  (css {:position "relative"
+        :overflow-y "auto"
+        :display "flex"}))
 
 (def close-button-styles
-  (css> {:position "absolute"
-         :top "$4"
-         :right "$4"}))
+  (css {:position "absolute"
+        :top "$4"
+        :right "$4"}))
 
 (defnc ViewPane
   [{:keys [id only-child?]}]
@@ -36,5 +36,5 @@
              :on-click handle-remove-view}
             "[x]"))
         ($ FunctionTabs
-          {:func-id func-id
-           :handle-change-view handle-change-view})))))
+           {:func-id func-id
+            :handle-change-view handle-change-view})))))

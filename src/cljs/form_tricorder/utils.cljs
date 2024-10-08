@@ -1,8 +1,6 @@
 (ns form-tricorder.utils
   (:require
-   [helix.hooks :as hooks]
-   ["/stitches.config"
-    :refer (styled globalCss css darkTheme lightTheme keyframes)]))
+   [helix.hooks :as hooks]))
 
 (defn splitv-atv [i v]
   {:pre [(vector? v)]}
@@ -52,24 +50,8 @@
 ;   (react/useEffect effect (use-custom-compare-memoize deps eq?)))
 
 
-(def dark-theme darkTheme)
-(def light-theme lightTheme)
-
-(defn style>
-  [elem styles-map]
-  (styled elem (clj->js styles-map)))
-
-(defn keyframes>
-  [keyframes-map]
-  (keyframes (clj->js keyframes-map)))
-
-(defn css>
-  [styles-map]
-  (-> styles-map clj->js css))
-
-(defn global-css>
-  [styles-map]
-  (-> styles-map clj->js globalCss))
+;; (def dark-theme darkTheme)
+;; (def light-theme lightTheme)
 
 (defn pp-val [v] (-> (name v) .toLowerCase))
 (defn pp-var [s] (if (> (count s) 1) (str "'" s "'") s))

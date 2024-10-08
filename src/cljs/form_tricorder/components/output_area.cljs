@@ -5,47 +5,48 @@
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.view-pane :refer [ViewPane]]
-   [form-tricorder.utils :refer [log style> css>]]
+   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.utils :refer [log]]
    ["@devbookhq/splitter$default" :as Splitter]))
 
 (def styles
-  (css> {:height "100%"
-         ;; :overflow-y "auto"
-         :padding "0" ; "0.2rem"
-         :box-sizing "border-box"
-         ; :border "1px solid lightgray"
-         ; :height "auto"
-         ; :height "600px" ;; ! must be fixed because gutter-style
-         :border-radius "$3"
-         :background-color "$colors$inner_bg"
-         ; "& > div"
-         ; {:align-items "stretch"}
-         }))
+  (css {:height "100%"
+        ;; :overflow-y "auto"
+        :padding "0" ; "0.2rem"
+        :box-sizing "border-box"
+        ;; :border "1px solid lightgray"
+        ;; :height "auto"
+        ;; :height "600px" ;; ! must be fixed because gutter-style
+        :border-radius "$3"
+        :background-color "$colors$inner_bg"
+        ;; "& > div"
+        ;; {:align-items "stretch"}
+        }))
 
 (def gutter-styles
-  (css> {:position "relative"
-         "&:hover > *"
-         {:background-color "$outer_hl"}
-         "&::before"
-         {:content ""
-          :position "absolute"
-          :width 1
-          :height "100%"
-          :background-color "$outer_bg"}
-         "&[dir=Vertical]::before"
-         {:width "100%"
-          :height 1}}))
+  (css {:position "relative"
+        "&:hover > *"
+        {:background-color "$outer_hl"}
+        "&::before"
+        {:content ""
+         :position "absolute"
+         :width 1
+         :height "100%"
+         :background-color "$outer_bg"}
+        "&[dir=Vertical]::before"
+        {:width "100%"
+         :height 1}}))
 
 (def dragger-styles
-  (css> {:background-color "$outer_m200"
-         :position "relative"
-         :z-index 999}))
+  (css {:background-color "$outer_m200"
+        :position "relative"
+        :z-index 999}))
 
 (def item-styles
-  (css> {:height "100%"
-         :width "100%"
-         :overflow-y "auto"
-         }))
+  (css {:height "100%"
+        :width "100%"
+        :overflow-y "auto"
+        }))
 
 
 (defnc OutputArea

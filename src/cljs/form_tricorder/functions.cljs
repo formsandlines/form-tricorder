@@ -3,7 +3,7 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d]
-   [garden.core :refer [css]]
+   [garden.core :as garden]
    ;; ["react" :as react]
    [formform.calc :as calc]
    [formform.io :as io]
@@ -13,7 +13,8 @@
    [formform-vis.utils :refer [save-svg]]
    [form-tricorder.components.mode-ui :as mode-ui]
    [form-tricorder.components.export-dialog :refer [ExportDialog]]
-   [form-tricorder.utils :as utils :refer [css> clj->js*]]))
+   [form-tricorder.stitches-config :refer [css]]
+   [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 
 (defn expr->json
@@ -34,8 +35,8 @@
 
 (defnc F-EDN
   [{:keys [expr]}]
-  (let [styles (css> {:font-family "$mono"
-                      :background-color "$inner_hl"})]
+  (let [styles (css {:font-family "$mono"
+                     :background-color "$inner_hl"})]
     (d/pre {:class (styles)}
            (d/code (prn-str expr)))))
 
@@ -55,9 +56,9 @@
 
 (defnc F-JSON
   [{:keys [expr]}]
-  (let [styles (css> {:font-family "$mono"
-                      :font-size "$1"
-                      :background-color "$inner_hl"})]
+  (let [styles (css {:font-family "$mono"
+                     :font-size "$1"
+                     :background-color "$inner_hl"})]
     (d/pre {:class (styles)}
            (d/code (.stringify js/JSON (expr->json expr)
                                js/undefined 2)))))
@@ -77,17 +78,18 @@
 ;; Value table
 
 (def vtable-css
-  (css [[":host"
-         {:font-family "var(--fonts-mono)"
-          :font-size "var(--fontSizes-1)"}]
-        ["th"
-         {:font-weight "var(--fontWeights-medium)"
-          :border-top "1px solid var(--colors-inner_fg)"
-          :border-bottom "1px solid var(--colors-inner_fg)"}]
-        ["tr:hover td"
-         {:background-color "var(--colors-inner_hl)"}]
-        ["td"
-         {:border-top "1px solid var(--colors-inner_n200)"}]]))
+  (garden/css
+   [[":host"
+     {:font-family "var(--fonts-mono)"
+      :font-size "var(--fontSizes-1)"}]
+    ["th"
+     {:font-weight "var(--fontWeights-medium)"
+      :border-top "1px solid var(--colors-inner_fg)"
+      :border-bottom "1px solid var(--colors-inner_fg)"}]
+    ["tr:hover td"
+     {:background-color "var(--colors-inner_hl)"}]
+    ["td"
+     {:border-top "1px solid var(--colors-inner_n200)"}]]))
 
 (defnc F-Vtable--init
   [_]

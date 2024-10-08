@@ -6,33 +6,34 @@
     ;; [form-tricorder.re-frame-adapter :as rf]
     [form-tricorder.model :as model]
     [form-tricorder.functions :as func]
-    [form-tricorder.utils :refer [log style> css>]]
+    [form-tricorder.stitches-config :refer [styled css]]
+    [form-tricorder.utils :refer [log]]
     ["@radix-ui/react-tabs" :as Tabs]))
 
 
 
 (def Root
-  (style> (.-Root Tabs)
+  (styled (.-Root Tabs)
           {:display "flex"
            :gap "$6" ; "0.6rem"
            :padding "$4" ; "0.4rem"
            }))
 
 (def TabList
-  (style> (.-List Tabs)
+  (styled (.-List Tabs)
           {:display "flex"
            :flex-direction "column"
            :gap "$2" ; "0.4rem"
            :flex "flex-none"}))
 
 (def Trigger
-  (style> (.-Trigger Tabs)
+  (styled (.-Trigger Tabs)
           {:flex "flex-none"
            :outline "none"
            :border "none"
            :border-radius "$2"
-           :width "$tabIcon" ; "2.2rem"
-           :height "$tabIcon" ; "2.2rem"
+           :width "$icon-tab" ; "2.2rem"
+           :height "$icon-tab" ; "2.2rem"
            :color "$inner_fg"
            :cursor "pointer"
            "&[data-state=active]"
@@ -53,7 +54,7 @@
                    :css {:background-color (:base color)}}))}))
 
 (def Content
-  (style> (.-Content Tabs)
+  (styled (.-Content Tabs)
           {:flex "1 1 auto"}))
 
 (defnc FunctionTabs

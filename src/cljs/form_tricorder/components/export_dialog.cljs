@@ -6,36 +6,36 @@
    ;; ["react" :as react]
    ;; [garden.color :as gc]
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.utils :refer [style> css> keyframes>]]
+   [form-tricorder.stitches-config :refer [styled css keyframes]]
    ["@radix-ui/react-dialog" :as Dialog]
    [form-tricorder.utils :as utils]))
 
 (def Root
-  (style> (.-Root Dialog)
+  (styled (.-Root Dialog)
           {}))
 
 (def Trigger
-  (style> (.-Trigger Dialog)
+  (styled (.-Trigger Dialog)
           {}))
 
 (def Portal
-  (style> (.-Portal Dialog)
+  (styled (.-Portal Dialog)
           {}))
 
 (def overlayShow
-  (keyframes>
+  (keyframes
    {:0%   {:opacity 0}
     :100% {:opacity 1}}))
 
 (def contentShow
-  (keyframes>
+  (keyframes
    {:0%   {:opacity 0
            :transform "translate(-50%, -48%) scale(.96)"}
     :100% {:opacity 1
            :transform "translate(-50%, -50%) scale(1)"}}))
 
 (def Overlay
-  (style> (.-Overlay Dialog)
+  (styled (.-Overlay Dialog)
           {
            :background-color
            "color-mix(in srgb, $colors$inner_fg 60%, transparent)"
@@ -46,7 +46,7 @@
                            " 150ms cubic-bezier(0.16, 1, 0.3, 1)")}))
 
 (def Content
-  (style> (.-Content Dialog)
+  (styled (.-Content Dialog)
           (let [shadow "0 3px 5px 0px color-mix(in srgb, $colors$outer_fg 30%, transparent)"]
             {:background-color "$outer_bg"
              :position "fixed"
@@ -63,15 +63,15 @@
              })))
 
 (def Title
-  (style> (.-Title Dialog)
+  (styled (.-Title Dialog)
           {}))
 
 (def Description
-  (style> (.-Description Dialog)
+  (styled (.-Description Dialog)
           {}))
 
 (def Close
-  (style> (.-Close Dialog)
+  (styled (.-Close Dialog)
           {}))
 
 (def button-base-styles
@@ -120,17 +120,17 @@
        :background-color "color-mix(in srgb, $outer_m200, black 10%)"}}}}})
 
 (def ModalButton
-  (style> "button"
-          (css> (utils/merge-deep
-                 button-base-styles
-                 button-modal-styles))))
+  (styled "button"
+          (css (utils/merge-deep
+                button-base-styles
+                button-modal-styles))))
 
 (def modal-actions-styles
-  (css> {:display "flex"
-         :gap "$4"
-         :justify-content "end"
-         :margin-top "$4"
-         }))
+  (css {:display "flex"
+        :gap "$4"
+        :justify-content "end"
+        :margin-top "$4"
+        }))
 
 (defnc ExportDialog
   [{:keys []}]

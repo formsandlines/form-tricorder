@@ -11,8 +11,9 @@
    [form-tricorder.subs :as subs]
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
-   [form-tricorder.utils :refer [log style> global-css> css>
-                                 dark-theme light-theme]]
+   [form-tricorder.utils :refer [log]]
+   [form-tricorder.stitches-config
+    :refer [styled global-css css dark-theme light-theme]]
    [form-tricorder.components.header :refer [Header]]
    [form-tricorder.components.error-boundary :refer [ErrorBoundary]]
    [form-tricorder.components.formula-input :refer [FormulaInput]]
@@ -23,53 +24,53 @@
 
 
 (def global-styles
-  (global-css>
+  (global-css
    {"body"
     {:font-family "$base"
      :font-weight "$normal"
      :font-size "$base"
-     :line-height "$lineHeights$base"
-     :background-color "$colors$outer_bg"
+     :line-height "$base"
+     :background-color "$outer_bg"
      "a:hover"
      {:text-decoration "underline"}}}))
 
 ;; (def body-styles
-;;   (css> {}))
+;;   (css {}))
 
 (def styles
-  (css> {:display "flex"
-         :height "100vh"
-         :flex-direction "column"
-         :padding "$3" ; "0.6rem"
-         :gap "$2" ; "0.4rem"
-         :color "$colors$outer_fg"
-         "& a"
-         {:color "$colors$outer_m100"
-          "&:hover"
-          {
-           ; :color "$colors$outer_m200"
-           }}}))
+  (css {:display "flex"
+        :height "100vh"
+        :flex-direction "column"
+        :padding "$3" ; "0.6rem"
+        :gap "$2" ; "0.4rem"
+        :color "$colors$outer_fg"
+        "& a"
+        {:color "$colors$outer_m100"
+         "&:hover"
+         {
+          ;; :color "$colors$outer_m200"
+          }}}))
 
 (def item-styles
-  (css> {"&:last-child"
-         {:flex "1"
-          }}))
+  (css {"&:last-child"
+        {:flex "1"
+         }}))
 
 (defnc ScaleTest
   [{:keys [scale n]}]
   (let [rng (rest (range (inc n)))
-        test-styles (css> {:display "flex"
-                           :margin-bottom "10px"
+        test-styles (css {:display "flex"
+                          :margin-bottom "10px"
+                          "> *"
+                          {:padding-right "6px"
                            "> *"
-                           {:padding-right "6px"
-                            "> *"
-                            {:height "40px"
-                             :margin-bottom "2px"
-                             :background-color "black"}}})]
+                           {:height "40px"
+                            :margin-bottom "2px"
+                            :background-color "black"}}})]
     (d/div
      {:class (test-styles)}
      (for [i rng
-           :let [styles (css> {:width (str "$" scale "$" i)})]]
+           :let [styles (css {:width (str "$" scale "$" i)})]]
        (d/div
         {:key (str i)}
         (d/div

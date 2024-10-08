@@ -6,7 +6,8 @@
    [form-tricorder.re-frame-adapter :as rf]
    ;; [form-tricorder.re-frame-adapter :as rf]
    ;; [form-tricorder.icons :refer [InputHelpIcon]]
-   [form-tricorder.utils :refer [log style> css>]]
+   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.utils :refer [log]]
    ["@codemirror/state" :refer [EditorState StateField StateEffect]]
    ["@codemirror/view" :refer [EditorView keymap placeholder
                                drawSelection highlightSpecialChars]]
@@ -18,39 +19,39 @@
    ["@radix-ui/react-icons" :refer [QuestionMarkCircledIcon]]))
 
 (def styles
-  (css> {:display "flex"
-         :backgroundColor "$colors$inner_bg"
-         :borderRadius "$3"
-         }))
+  (css {:display "flex"
+        :backgroundColor "$colors$inner_bg"
+        :borderRadius "$3"
+        }))
 
 (def input-styles
-  (css> {:fontFamily "$mono"
-         ;; :color "$colors$inner_fg"
-         :width "100%"
-         ;; :backgroundColor "transparent"
-         ;; :appearance "none"
-         ;; :border-width "0"
-         ;; :padding "$3" ; "0.6rem"
-         ;; :flex "1 1 auto"
-         }))
+  (css {:fontFamily "$mono"
+        ;; :color "$colors$inner_fg"
+        :width "100%"
+        ;; :backgroundColor "transparent"
+        ;; :appearance "none"
+        ;; :border-width "0"
+        ;; :padding "$3" ; "0.6rem"
+        ;; :flex "1 1 auto"
+        }))
 
 (def button-wrapper-styles
-  (css> {:alignItems "center"}))
+  (css {:alignItems "center"}))
 
 (def button-styles
-  (css> {:height "100%"
-         :width "$inputIcon" ; "1.9rem"
-         :outline "none"
-         :border "none"
-         :cursor "pointer"
-         ; :borderRadius "$round"
-         :background "none"
-         "& svg"
-         {:width "100%"
-          :height "100%"
-          :stroke "$inner_n200"
-          "&:hover"
-          {:stroke "$inner_n100"}}}))
+  (css {:height "100%"
+        :width "$icon-input" ; "1.9rem"
+        :outline "none"
+        :border "none"
+        :cursor "pointer"
+        ;; :borderRadius "$round"
+        :background "none"
+        "& svg"
+        {:width "100%"
+         :height "100%"
+         :stroke "$inner_n200"
+         "&:hover"
+         {:stroke "$inner_n100"}}}))
 
 (def ^js ft-theme
   (.baseTheme EditorView

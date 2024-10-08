@@ -4,7 +4,7 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.utils :refer [style> css>]]
+   [form-tricorder.stitches-config :refer [styled css]]
    [form-tricorder.icons :refer [SunIcon MoonIcon SwapIcon
                                  ViewVerticalIcon
                                  ViewHorizontalIcon
@@ -44,7 +44,7 @@
 ;; Styled Components
 
 (def Root
-  (style> (.-Root Toolbar)
+  (styled (.-Root Toolbar)
           {:display "flex"
            :min-width "max-content"
            :height "100%"
@@ -53,7 +53,7 @@
            :color "$colors$outer_fg"
 
            "& .icon"
-           {:width "$toolbarIcon" ; "1.2rem" ; "auto"
+           {:width "$icon-toolbar" ; "1.2rem" ; "auto"
             :height "100%"
             :fill "$colors$outer_m200"}
            "& *:hover > .icon"
@@ -62,20 +62,20 @@
            {:fill "$colors$outer_n200"}}))
 
 (def Button
-  (style> (.-Button Toolbar)
+  (styled (.-Button Toolbar)
           (merge itemStyles
                  buttonStyles
                  {})))
 
 (def Separator
-  (style> (.-Separator Toolbar)
+  (styled (.-Separator Toolbar)
           (merge itemStyles
-                 {:width "$hairline"
+                 {:width "$px"
                   :background-color "$colors$outer_n200"
                   :margin "0 $1"})))
 
 (def ToggleGroup
-  (style> (.-ToggleGroup Toolbar)
+  (styled (.-ToggleGroup Toolbar)
           (merge itemStyles
                  {:display "flex"
                   :min-width "max-content"
@@ -83,18 +83,18 @@
                   })))
 
 (def ToggleItem
-  (style> (.-ToggleItem Toolbar)
+  (styled (.-ToggleItem Toolbar)
           (merge itemStyles
                  buttonStyles
                  {})))
 
 ; (def Link
-;   (style> (.-Link Toolbar)
+;   (styled (.-Link Toolbar)
 ;           (merge itemStyles
 ;                  linkStyles)))
 
 (def SourceLink
-  (style> (.-Link Toolbar)
+  (styled (.-Link Toolbar)
           (merge itemStyles
                  {:display "block"
                   :padding "$1 0"})))
