@@ -14,11 +14,13 @@
    [form-tricorder.utils :refer [log]]
    [form-tricorder.stitches-config
     :refer [styled global-css css dark-theme light-theme]]
+   [form-tricorder.foobar :refer [Foobar]]
    [form-tricorder.components.header :refer [Header]]
    [form-tricorder.components.error-boundary :refer [ErrorBoundary]]
    [form-tricorder.components.formula-input :refer [FormulaInput]]
    [form-tricorder.components.function-menu :refer [FunctionMenu]]
    [form-tricorder.components.output-area :refer [OutputArea]]
+   [form-tricorder.components.options-drawer :refer [OptionsDrawer]]
    ["react" :refer [StrictMode]]
    ["react-dom/client" :as rdom]))
 
@@ -28,9 +30,10 @@
    {"body"
     {:font-family "$base"
      :font-weight "$normal"
-     :font-size "$base"
+     ;; :font-size "$base"
      :line-height "$base"
-     :background-color "$outer_bg"
+     :color "$outer-fg"
+     :background-color "$outer-bg"
      "a:hover"
      {:text-decoration "underline"}}}))
 
@@ -43,39 +46,19 @@
         :flex-direction "column"
         :padding "$3" ; "0.6rem"
         :gap "$2" ; "0.4rem"
-        :color "$colors$outer_fg"
-        "& a"
-        {:color "$colors$outer_m100"
-         "&:hover"
-         {
-          ;; :color "$colors$outer_m200"
-          }}}))
+        :color "$colors$outer-fg"
+        ;; "& a"
+        ;; {:color "inherit" ;; outer_m100
+        ;;  "&:hover"
+        ;;  {
+        ;;   ;; :color "$colors$outer-link-hover" ;; outer_m200
+        ;;   }}
+        }))
 
 (def item-styles
   (css {"&:last-child"
         {:flex "1"
          }}))
-
-(defnc ScaleTest
-  [{:keys [scale n]}]
-  (let [rng (rest (range (inc n)))
-        test-styles (css {:display "flex"
-                          :margin-bottom "10px"
-                          "> *"
-                          {:padding-right "6px"
-                           "> *"
-                           {:height "40px"
-                            :margin-bottom "2px"
-                            :background-color "black"}}})]
-    (d/div
-     {:class (test-styles)}
-     (for [i rng
-           :let [styles (css {:width (str "$" scale "$" i)})]]
-       (d/div
-        {:key (str i)}
-        (d/div
-         {:class (styles)})
-        (str i))))))
 
 (defnc ErrorDisplay
   []
@@ -119,7 +102,13 @@
                :apply-input #(rf/dispatch [:input/changed-formula
                                            {:next-formula %}])})
            ($ ErrorDisplay)
-)
+           )
+         (d/div
+           {:style {:position "absolute"
+                    :z-index "9999"
+                    :bottom 0
+                    :left 0}}
+           ($ OptionsDrawer))
          (d/div
            {:class (item-styles)}
            ($ FunctionMenu
@@ -134,9 +123,10 @@
          (d/div
            {:class (item-styles)
             :style {:overflow-y "auto"}}
-                                        ; ($ ScaleTest {:scale "space" :n 11})
-                                        ; ($ ScaleTest {:scale "sizes" :n 3})
-                                        ; ($ ScaleTest {:scale "borderWidths" :n 3})
+           ;; ($ foobar/ScaleTest {:scale "space" :n 11})
+           ;; ($ foobar/ScaleTest {:scale "sizes" :n 3})
+           ;; ($ foobar/ScaleTest {:scale "borderWidths" :n 3})
+           ;; ($ Foobar)
            ($ OutputArea))))))
 
 

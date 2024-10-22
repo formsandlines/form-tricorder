@@ -11,8 +11,9 @@
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core]
    [formform-vis.utils :refer [save-svg]]
-   [form-tricorder.components.mode-ui :as mode-ui]
+   ;; [form-tricorder.components.mode-ui :as mode-ui]
    [form-tricorder.components.export-dialog :refer [ExportDialog]]
+   [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.stitches-config :refer [css]]
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
@@ -36,7 +37,8 @@
 (defnc F-EDN
   [{:keys [expr]}]
   (let [styles (css {:font-family "$mono"
-                     :background-color "$inner_hl"})]
+                     ;; :background-color "$inner_hl"
+                     })]
     (d/pre {:class (styles)}
            (d/code (prn-str expr)))))
 
@@ -58,7 +60,8 @@
   [{:keys [expr]}]
   (let [styles (css {:font-family "$mono"
                      :font-size "$1"
-                     :background-color "$inner_hl"})]
+                     ;; :background-color "$inner_hl"
+                     })]
     (d/pre {:class (styles)}
            (d/code (.stringify js/JSON (expr->json expr)
                                js/undefined 2)))))
@@ -102,11 +105,11 @@
       (let [webc-el @ref]
         (aset webc-el "results" results)))
     (d/div {:class "Vtable"}
-      ($ mode-ui/Calc {:current-varorder varorder
-                       :debug-origin "Vtable"
-                       :set-varorder
-                       #(rf/dispatch
-                         [:input/changed-varorder {:next-varorder %}])})
+      ;; ($ mode-ui/Calc {:current-varorder varorder
+      ;;                  :debug-origin "Vtable"
+      ;;                  :set-varorder
+      ;;                  #(rf/dispatch
+      ;;                    [:input/changed-varorder {:next-varorder %}])})
       ($ :ff-vtable {:ref ref
                      :styles (str \" css \")
                      :varorder varorder}))))
@@ -143,11 +146,11 @@
       (let [webc-el @ref]
         (aset webc-el "dna" dna)))
     (d/div {:class "Vmap"}
-      ($ mode-ui/Calc {:current-varorder varorder
-                       :debug-origin "Vmap"
-                       :set-varorder
-                       #(rf/dispatch
-                         [:input/changed-varorder {:next-varorder %}])})
+      ;; ($ mode-ui/Calc {:current-varorder varorder
+      ;;                  :debug-origin "Vmap"
+      ;;                  :set-varorder
+      ;;                  #(rf/dispatch
+      ;;                    [:input/changed-varorder {:next-varorder %}])})
       (if psps?
         ($ :ff-vmap-psps {:ref ref
                           ;; "full-svg" (str true)
@@ -159,27 +162,32 @@
                      "bg-color" (str "\"" "var(--colors-outer_bg)" "\"")
                      :padding 6
                      :varorder (str varorder)}))
-      (d/button {:on-click (fn [_] (set-psps? (fn [b] (not b))))}
+      ($ Button {:variant "outline"
+                 :size "sm"
+                 :on-click (fn [_] (set-psps? (fn [b] (not b))))}
         (if psps? "-" "+"))
       ($ ExportDialog)
-      (d/button {:on-click
-                 (fn [e]
-                   (let [el (js/document.createElement "ff-vmap")]
-                     (.setAttribute el "full-svg" "true")
-                     (aset el "varorder" varorder)
-                     (aset el "dna" dna)
-                     (.. e -target -parentNode (appendChild el))
-                     (js/setTimeout
-                      (fn []
-                        (let [vmap (.. el -shadowRoot
-                                       (getElementById "vmap-figure"))]
-                          ;; (js/console.log vmap)
-                          (save-svg vmap "test.svg")))
-                      1000)
-                     
-                     ;; (save-svg el "test.svg")
-                     ))}
-        "Save SVG"))))
+      ($ Button
+       {:variant "outline"
+        :size "sm"
+        :on-click
+        (fn [e]
+          (let [el (js/document.createElement "ff-vmap")]
+            (.setAttribute el "full-svg" "true")
+            (aset el "varorder" varorder)
+            (aset el "dna" dna)
+            (.. e -target -parentNode (appendChild el))
+            (js/setTimeout
+             (fn []
+               (let [vmap (.. el -shadowRoot
+                              (getElementById "vmap-figure"))]
+                 ;; (js/console.log vmap)
+                 (save-svg vmap "test.svg")))
+             1000)
+            
+            ;; (save-svg el "test.svg")
+            ))}
+       "Save SVG"))))
 
 (defmethod gen-component :vmap
   [_ args]
@@ -297,7 +305,7 @@
   (let [ref (hooks/use-ref nil)
         rules-fn (rf/subscribe [:input/->selfi-rules-fn])
         umwelt   (rf/subscribe [:input/->selfi-umwelt])
-        varorder (rf/subscribe [:input/varorder])
+        ;; varorder (rf/subscribe [:input/varorder])
         ;; dna      (rf/subscribe [:input/->dna])
         ]
     (hooks/use-effect
@@ -306,11 +314,11 @@
         (aset webc-el "rules"  rules-fn)
         (aset webc-el "umwelt" umwelt)))
     (d/div {:class "Selfi"}
-      ($ mode-ui/Calc {:current-varorder varorder
-                       :debug-origin "Selfi"
-                       :set-varorder
-                       #(rf/dispatch
-                         [:input/changed-varorder {:next-varorder %}])})
+      ;; ($ mode-ui/Calc {:current-varorder varorder
+      ;;                  :debug-origin "Selfi"
+      ;;                  :set-varorder
+      ;;                  #(rf/dispatch
+      ;;                    [:input/changed-varorder {:next-varorder %}])})
       ($ :ff-selfi {:ref ref
                     :res 100
                     "ini-ptn" :random

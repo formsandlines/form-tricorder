@@ -17,7 +17,7 @@
 (def styled       (wrap+el (aget obj "styled")))
 (def css          (wrap (aget obj "css")))
 (def global-css   (wrap (aget obj "globalCss")))
-(def keyframes    (aget obj "keyframes"))
+(def keyframes    (wrap (aget obj "keyframes")))
 (def get-css-text (aget obj "getCssText"))
 (def theme        (aget obj "theme"))
 (def create-theme (aget obj "createTheme"))

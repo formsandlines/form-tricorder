@@ -18,7 +18,7 @@
         ;; :height "auto"
         ;; :height "600px" ;; ! must be fixed because gutter-style
         :border-radius "$3"
-        :background-color "$colors$inner_bg"
+        :background-color "$inner-bg"
         ;; "& > div"
         ;; {:align-items "stretch"}
         }))
@@ -26,19 +26,19 @@
 (def gutter-styles
   (css {:position "relative"
         "&:hover > *"
-        {:background-color "$outer_hl"}
+        {:background-color "$m5"} ;; outer_hl
         "&::before"
         {:content ""
          :position "absolute"
          :width 1
          :height "100%"
-         :background-color "$outer_bg"}
+         :background-color "$outer-bg"}
         "&[dir=Vertical]::before"
         {:width "100%"
          :height 1}}))
 
 (def dragger-styles
-  (css {:background-color "$outer_m200"
+  (css {:background-color "$m3" ;; outer_m200
         :position "relative"
         :z-index 999}))
 

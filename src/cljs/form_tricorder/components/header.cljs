@@ -16,6 +16,7 @@
         :column-gap "6px"
         :align-items "stretch"
         :margin "-0.2rem 0 0.2rem 0"
+        :font-size "$sm"
 
         "& a"
         {:text-decoration "none"}}))

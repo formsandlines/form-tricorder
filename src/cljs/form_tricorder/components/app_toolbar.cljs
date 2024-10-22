@@ -14,33 +14,6 @@
 
 ;; Shared styles
 
-(def itemStyles
-  {:flex "0 0 auto"})
-
-(def linkStyles
-  {})
-
-(def buttonStyles
-  {:outline "none"
-   :cursor "pointer"
-   :border "none"
-   :padding "$1" ; "0.2rem"
-   :border-radius "$1"
-   :background "none"
-   :color "$colors$outer_fg"
-
-   "&:focus"
-   {:outline "solid"}
-   "&:focus-visible"
-   {:outline "none"}
-   "&:hover"
-   {:background-color "$colors$inner_bg"
-    :color "$colors$outer_m200"}
-   "&:disabled"
-   {:cursor "not-allowed"
-    :background "none"}})
-
-
 ;; Styled Components
 
 (def Root
@@ -50,16 +23,56 @@
            :height "100%"
            :column-gap "$1" ; "4px"
            :align-items "stretch"
-           :color "$colors$outer_fg"
+           :font-size "$sm"
+           :color "$outer-fg"
 
            "& .icon"
            {:width "$icon-toolbar" ; "1.2rem" ; "auto"
             :height "100%"
-            :fill "$colors$outer_m200"}
-           "& *:hover > .icon"
-           {:fill "$colors$outer_m200"}
+            :fill "$m7"
+            }
+           ;; "& *:hover > .icon"
+           ;; {:fill "$m8"}
+           "& *:disabled"
+           {:pointer-events "none"
+            :cursor "not-allowed"}
            "& *:disabled > .icon"
-           {:fill "$colors$outer_n200"}}))
+           {:fill "$outer-muted" ;; $n3
+            }}))
+
+(def buttonStyles
+  {:touch-action "manipulation"
+
+   :display "inline-flex"
+   :justify-content "center"
+   :align-items "center"
+   :white-space "nowrap"
+   :border-radius "$sm"
+   :_transition_colors []
+
+   :outline "none"
+   :cursor "pointer"
+   :border "none"
+   :padding "$1" ; "0.2rem"
+   :background "none"
+   :color "$m10"
+
+   "&:hover"
+   {:background-color "$outer-accent" ;; inner-bg
+    :color "$outer-accent-fg" ;; outer_m200
+    }})
+
+(def itemStyles
+  {:flex "0 0 auto"
+
+   ;; "&:focus"
+   ;; {:outline "solid"}
+   ;; "&:focus-visible"
+   ;; {:outline "none"}
+
+   "&:focus-visible"
+   {:_outlineNone []
+    :_ring [2 "$colors$ring" 1 "$colors$outer-bg"]}})
 
 (def Button
   (styled (.-Button Toolbar)
@@ -67,11 +80,20 @@
                  buttonStyles
                  {})))
 
+(def TextButton
+  (styled (.-Button Toolbar)
+          (merge itemStyles
+                 buttonStyles
+                 {:padding "$1 $1-5"
+
+                  "&:disabled"
+                  {:opacity "0.5"}})))
+
 (def Separator
   (styled (.-Separator Toolbar)
           (merge itemStyles
                  {:width "$px"
-                  :background-color "$colors$outer_n200"
+                  :background-color "$n2" ;; n200
                   :margin "0 $1"})))
 
 (def ToggleGroup
@@ -96,8 +118,10 @@
 (def SourceLink
   (styled (.-Link Toolbar)
           (merge itemStyles
-                 {:display "block"
-                  :padding "$1 0"})))
+                 buttonStyles
+                 ;; {:display "block"
+                 ;;  :padding "$1 0"}
+                 )))
 
 ;; Components
 
@@ -144,9 +168,9 @@
              :disabled (= appearance :dark)}
             ($ MoonIcon)))
         ($d Separator)
-        ($d Button {:on-click (fn [_] (js/console.log "Clicked about"))}
+        ($d TextButton {:on-click (fn [_] (js/console.log "Clicked about"))}
             "about")
-        ($d Button {:on-click (fn [_] (js/console.log "Clicked help"))}
+        ($d TextButton {:on-click (fn [_] (js/console.log "Clicked help"))}
             "help")
         ($d Separator)
         ($d SourceLink

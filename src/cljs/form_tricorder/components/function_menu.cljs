@@ -32,15 +32,15 @@
              :font-weight "$normal"
              :font-size "$2"
              :text-align "right"
-             :color "$outer_fg"
+             :color "$outer-fg"
              :cursor "pointer"
-             :box-shadow (str "inset 0 -20px 20px -8px $colors$fmenu_base"
+             :box-shadow (str "inset 0 -20px 20px -8px $colors$fmenu-base"
                               ", " shadow)
              :border-radius "$2"
              "&:focus"
              {}
              "&:hover"
-             {:box-shadow (str "inset 0 -20px 20px -8px $colors$fmenu_glow"
+             {:box-shadow (str "inset 0 -20px 20px -8px $colors$fmenu-glow"
                                ", " shadow)}
              :variants
              {:type
@@ -60,7 +60,7 @@
              :flex-direction "column"
              :margin-left "$2"
              :padding "0 0 $3 0"
-             :background "$outer_bg"
+             :background "$outer-bg"
              :box-shadow shadow
              :border-bottom-left-radius "$2"
              :border-bottom-right-radius "$2"

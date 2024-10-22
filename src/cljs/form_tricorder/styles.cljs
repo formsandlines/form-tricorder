@@ -39,116 +39,177 @@
     {:space (map (fn [[k [space _]]] [k space]) kvs)
      :sizes (map (fn [[k [_ size]]] [k size]) kvs)}))
 
+;; Palettes:
+;; https://huetone.ardov.me/?palette=N4IgdghgtgpiBcIBmAVATgSwMYAIAKEANjAC4lwA0IAFgK4wDOCA2qJLAiAMoRgAmIKlgD2hYWibxmIAMRI%2BSAEZIIg2TABsMAMwwAjGpl8NfAExYkhrABYsABkWVZi0xD4RFhiHoCcWH55UMgAcfMHhAOyGETARPhHBhhpIGhAaPoYArFiZwZkahrbWwdYFQdoR2lWmhnrBepl61iAAugC%2BFGzQcIgAchgA5tQkaiJiEiyyKkpIlkEwdjowc7IWZgqGinxYelhOMhCHfIqBsj7n7liGeeHn0RpxwVdBGq8QEQJBmd-BGqcy1kBeX%2Bph02msUSCem00NMiXanXA3U4XBgECQwmgo1E4kk0jk2lmSAyQWMMB8CysPmMfAMQQgTz8ZTOfz%2B2mumQgnJqQQivjsoSS2nqMSyENMyUKEUySGyhgq1iQtkMplM2h8FUMdmsem88I6XQ4iAAMhAAG4wfgwNDY8Z4qbKZQrGT6fRIRJBNZ6WKbAJ7fZpI7-HyZc7%2Ba51ayKdm8iqpGOyDSldIJmSZbT5BKFcGvSGyUxIGGZOy1Ux6VVwBGGnogACyEFoFttuMmclm6OeU1MfBgMEyhk0WDc-dJekUJmZMkcEFsqbcGpchh8wQixM%2BsmC8QF%2BziGj0otjthlSWhNn21ggpkqJPzwQFutaBqRRpAAGFxERmxMpFN2ypDLMfDUv8sz2DkAEqNobgQcEpgagBvyZB8A7aikqieksmT-Iol4wNYAY6lUnYhIodh2AWSQaGRpgluUehkQ4j4tFQJDCGAjCTLRID0VxNFcdoZFqNYglUMWXFUVxEQiSAd5cT40k8Vxeg8Wo5aCe0QA
 
 (def color-scales
-  {:s1  "#FCFCFA"
-   :s2  "#E6E3E1"
-   :s3  "#D5D2CF"
-   :s4  "#C4C0BE"
-   :s5  "#B3AEAD"
-   :s6  "#A19C9B"
-   :s7  "#918C8C"
-   :s8  "#797576"
-   :s9  "#656363"
-   :s10 "#514F4F"
-   :s11 "#3E3D3C"
-   :s12 "#2A2A28"
-   :s13 "#1B1B13"
+  {;; Sand
+   :--Sand-0 "#fdfbfa"    ;;  1 0
+   :--Sand-100 "#e6e3e1"  ;;  2 100 
+   :--Sand-200 "#d6d2cf"  ;;  3 200 
+   :--Sand-300 "#c4c0be"  ;;  4 300 
+   :--Sand-400 "#b2adab"  ;;  5 400 
+   :--Sand-500 "#a19c9b"  ;;  6 500 
+   :--Sand-600 "#8d8887"  ;;  7 600 
+   :--Sand-700 "#7e7978"  ;;  8 700 
+   :--Sand-800 "#6f6a69"  ;;  9 800 
+   :--Sand-900 "#5c5856"  ;; 10 900 
+   :--Sand-1000 "#4c4846" ;; 11 1000
+   :--Sand-1100 "#373332" ;; 12 1100
+   :--Sand-1200 "#181514" ;; 13 1200
 
-   :n1  "#14151F"
-   :n2  "#2E3347"
-   :n3  "#424659"
-   :n4  "#55586B"
-   :n5  "#666A7D"
-   :n6  "#76798C"
-   :n7  "#8A8D9E"
-   :n8  "#9A9EAD"
-   :n9  "#AEB1BF"
-   :n10 "#BEC2CF"
-   :n11 "#CED1DE"
-   :n12 "#E1E4F0"
-   :n13 "#F8F9FD"})
+   ;; Night
+   :--Night-0 "#fafbff"    ;; 13 0
+   :--Night-100 "#e0e3ef"  ;; 12 100 
+   :--Night-200 "#cfd2df"  ;; 11 200 
+   :--Night-300 "#bdc1ce"  ;; 10 300 
+   :--Night-400 "#aaadbb"  ;;  9 400 
+   :--Night-500 "#999dac"  ;;  8 500 
+   :--Night-600 "#858899"  ;;  7 600 
+   :--Night-700 "#76798c"  ;;  6 700 
+   :--Night-800 "#666a7d"  ;;  5 800 
+   :--Night-900 "#55586b"  ;;  4 900 
+   :--Night-1000 "#44485b" ;;  3 1000
+   :--Night-1100 "#2e3347" ;;  2 1100
+   :--Night-1200 "#131328" ;;  1 1200
 
-(def colors-ui
-  {:primary        "#76798C"
-   :primary-fg     "#fff"
-   :secondary      "#E6E3E1"
-   :secondary-fg   "#3E3D3C"
-   :destructive    "#BE5F5F"
-   :destructive-fg "#fff"
-   :accent         "#E1E4F0"
-   :accent-fg      "#000"
-   :muted          "#D5D2CF"
-   :muted-fg       "#FFFFFF"
-   :popover        "white"
-   :popover-fg     "black"
-   :card           "white"
-   :card-fg        "black"
-   :fg             "black"
-   :bg             "#FCFCFA"
-   :border         "#ddd"
-   :input          "#bab3a9"
-   :ring           "rgb(59 130 246 / 0.5)"})
+   ;; Coral
+   :--Coral-0 "#fffafa"
+   :--Coral-100 "#ffd9db"
+   :--Coral-200 "#ffc0c5"
+   :--Coral-300 "#ffa3ad"
+   :--Coral-400 "#ff8293"
+   :--Coral-500 "#f8657d"
+   :--Coral-600 "#e04f6a"
+   :--Coral-700 "#ce3e5b"
+   :--Coral-800 "#ba2e4e"
+   :--Coral-900 "#a4133c"
+   :--Coral-1000 "#8b002f"
+   :--Coral-1100 "#660020"
+   :--Coral-1200 "#31000b"})
 
 (def cs color-scales)
 
-(def colors-base
-  (merge colors-ui color-scales))
+(defn make-semantic-color-scales
+  [scales prefixes invert?]
+  (into {}
+        (for [n (range 13)
+              s (range (count scales))
+              :let [k (keyword (str (prefixes s) (if invert? (- 12 n) n)))
+                    i (keyword (str (scales s) "-" n (when (> n 0) "00")))]]
+          [k (color-scales i)])))
 
 (def colors-light
-  (into colors-base
-        {:outer_bg (cs :s2)
-         :outer_fg (cs :s12) ;; "#333231"
-         :outer_n100 (cs :s7) ;; "#969493"
-         :outer_n200 (cs :s4) ;; "#C2BEBE"
-         :outer_m100 (cs :n2) ;; "#2F3347"
-         :outer_m200 (cs :n6) ;; "#7A7E91"
-         :outer_hl "#9297B0"
-         :outer_contrast "#FFFBEB"
-         :fmenu_visu "#C4D1CC"
-         :fmenu_calc "#C8CAE0"
-         :fmenu_emul "#DDC2CD"
-         :fmenu_base "#D9D7D4"
-         :fmenu_glow "#EDEBE8"
-         :inner_bg (cs :s1)
-         :inner_fg (cs :s11) ;; "#4A4847"
-         :inner_n100 (cs :s6) ;; "#ADABAA"
-         :inner_n200 (cs :s3) ;; "#D9D4D4"
-         :inner_m100 (cs :n3) ;; "#3E445E"
-         :inner_m200 (cs :n7) ;; "#8D92A8"
-         :inner_hl "#FFFBEB"
-         :inner_contrast "#FFFBEB"
-         :inner_visu "#D8EBE2"
-         :inner_calc "#E8E8FF"
-         :inner_emul "#F5E1E8"}))
+  (merge
+   (make-semantic-color-scales ["--Sand" "--Night" "--Coral"]
+                               ["n" "m" "e"] false)
+   {:outer-primary        (cs :--Night-800)
+    :outer-primary-fg     "#FFFFFF"
+    :outer-secondary      (cs :--Sand-200)
+    :outer-secondary-fg   (cs :--Sand-1100)
+    :outer-destructive    (cs :--Coral-900)
+    :outer-destructive-fg "#FFFFFF"
+    :outer-accent         (cs :--Sand-200)
+    :outer-accent-fg      (cs :--Sand-1200)
+    :outer-muted          (cs :--Sand-300)
+    :outer-muted-fg       (cs :--Sand-500)
+    :outer-popover        (cs :--Sand-100)
+    :outer-popover-fg     (cs :--Sand-1200)
+    :outer-card           (cs :--Sand-100)
+    :outer-card-fg        (cs :--Sand-1200)
+    :outer-bg             (cs :--Sand-100)
+    :outer-fg             (cs :--Sand-1200)
+    :outer-border         (cs :--Sand-400)
+    :outer-input          (cs :--Sand-400)
+    ;; :outer-ring           "#AAB8FF"
+
+    :inner-primary        (cs :--Night-700)
+    :inner-primary-fg     "#FFFFFF"
+    :inner-secondary      (cs :--Sand-100)
+    :inner-secondary-fg   (cs :--Sand-1000)
+    :inner-destructive    (cs :--Coral-800)
+    :inner-destructive-fg "#FFFFFF"
+    :inner-accent         (cs :--Sand-100)
+    :inner-accent-fg      (cs :--Sand-1100)
+    :inner-muted          (cs :--Sand-200)
+    :inner-muted-fg       (cs :--Sand-400)
+    :inner-popover        (cs :--Sand-0)
+    :inner-popover-fg     (cs :--Sand-1100)
+    :inner-card           (cs :--Sand-0)
+    :inner-card-fg        (cs :--Sand-1100)
+    :inner-bg             (cs :--Sand-0)
+    :inner-fg             (cs :--Sand-1100)
+    :inner-border         (cs :--Sand-300)
+    :inner-input          (cs :--Sand-300)
+    ;; :inner-ring           "#B8C4FF"
+    :inner-visu "#D8EBE2"
+    :inner-calc "#E8E8FF"
+    :inner-emul "#F5E1E8"
+
+    :ring       "#B8C4FF"
+
+    :fmenu-visu "#C4D1CC"
+    :fmenu-calc "#C8CAE0"
+    :fmenu-emul "#DDC2CD"
+    :fmenu-base (cs :--Sand-200) ;; "#D9D7D4"
+    :fmenu-glow (cs :--Sand-100) ;; "#EDEBE8"
+    }))
 
 (def colors-dark
-  (into colors-base
-        {:outer_bg (cs :n2) ;; "#2F3347"
-         :outer_fg (cs :n12)
-         :outer_n100 (cs :n7) ;; "#848AA3"
-         :outer_n200 (cs :n4) ;; "#5D627A"
-         :outer_m100 (cs :s2) ;; "#E6E3E1"
-         :outer_m200 (cs :s6) ;; "#A5A3A2"
-         :outer_hl "#B6B9DB"
-         :outer_contrast "#B6B9DB"
-         :fmenu_visu "#516F6C"
-         :fmenu_calc "#51537E"
-         :fmenu_emul "#654E6A"
-         :fmenu_base "$outer_n200"
-         :fmenu_glow "$outer_n100"
-         :inner_bg (cs :n1)  ;; "#14151F"
-         :inner_fg (cs :n11) ;; "#C5C7D1"
-         :inner_n100 (cs :n6) ;; "#6B7085"
-         :inner_n200 (cs :n3) ;; "#46495C"
-         :inner_m100 (cs :s3) ;; "#C7C5C3"
-         :inner_m200 (cs :s7) ;; "#878584"
-         :inner_hl "#000"      ;; "#9D9FBD"
-         :inner_contrast "#9D9FBD"
-         :inner_visu "#3B524F"
-         :inner_calc "#3C3E5E"
-         :inner_emul "#593447"}))
+  (merge
+   (make-semantic-color-scales ["--Night" "--Sand" "--Coral"]
+                               ["n" "m" "e"] true)
+   {:outer-primary        (cs :--Sand-200)
+    :outer-primary-fg     "#000000"
+    :outer-secondary      (cs :--Night-1000)
+    :outer-secondary-fg   (cs :--Night-100)
+    :outer-destructive    (cs :--Coral-800)
+    :outer-destructive-fg "#FFFFFF"
+    :outer-accent         (cs :--Night-900)
+    :outer-accent-fg      (cs :--Night-100)
+    :outer-muted          (cs :--Night-900)
+    :outer-muted-fg       (cs :--Night-700)
+    :outer-popover        (cs :--Night-1100)
+    :outer-popover-fg     (cs :--Night-0)
+    :outer-card           (cs :--Night-1100)
+    :outer-card-fg        (cs :--Night-0)
+    :outer-bg             (cs :--Night-1100)
+    :outer-fg             (cs :--Night-0)
+    :outer-border         (cs :--Night-800)
+    :outer-input          (cs :--Night-800)
+    ;; :outer-ring           "#A19E9C"
 
+    :inner-primary        (cs :--Sand-300)
+    :inner-primary-fg     "#000000"
+    :inner-secondary      (cs :--Night-1100)
+    :inner-secondary-fg   (cs :--Night-200)
+    :inner-destructive    (cs :--Coral-900)
+    :inner-destructive-fg "#FFFFFF"
+    :inner-accent         (cs :--Night-1000)
+    :inner-accent-fg      (cs :--Night-200)
+    :inner-muted          (cs :--Night-1000)
+    :inner-muted-fg       (cs :--Night-800)
+    :inner-popover        (cs :--Night-1200)
+    :inner-popover-fg     (cs :--Night-100)
+    :inner-card           (cs :--Night-1200)
+    :inner-card-fg        (cs :--Night-100)
+    :inner-bg             (cs :--Night-1200)
+    :inner-fg             (cs :--Night-100)
+    :inner-border         (cs :--Night-900)
+    :inner-input          (cs :--Night-900)
+    ;; :inner-ring           "#8F8D8B"
+    :inner-visu "#3B524F"
+    :inner-calc "#3C3E5E"
+    :inner-emul "#593447"
+
+    :ring       "#A19E9C"
+
+    :fmenu-visu "#516F6C"
+    :fmenu-calc "#51537E"
+    :fmenu-emul "#654E6A"
+    :fmenu-base (cs :--Night-900) ;; #5D627A
+    :fmenu-glow (cs :--Night-600) ;; #848AA3
+    }))
 
 (def stitches-specs
   {:theme
@@ -291,11 +352,19 @@
              "$$ringOffsetShadow"
              (if (and offset-w (> offset-w 0))
                (let [off-spread (str offset-w "px")
-                     off-col    (or offset-col "$colors$bg")]
+                     off-col    (or offset-col "$colors$outer-bg")]
                  (str inset "0 0 0 " off-spread " " off-col))
                "0 0 #0000")
              :box-shadow
              "$$ringOffsetShadow, $$ringShadow, var(---shadow, 0 0 #0000)"}))
+
+    :_ringOuter
+    (fn [_]
+      #js {:_ring [2 "$colors$ring" 2 "$colors$outer-bg"]})
+
+    :_ringInner
+    (fn [_]
+      #js {:_ring [2 "$colors$ring" 2 "$colors$inner-bg"]})
 
     :_outline
     (fn [[col w offset style]]

@@ -22,9 +22,9 @@
 
            :font-family "$mono"
            :font-size "$1"
-           :background-color "$inner_bg"
-           :color "$inner_fg"
-           :border "1px solid $inner_n200"
+           :background-color "$inner-bg"
+           :color "$inner-fg"
+           :border "1px solid $inner-border"
            :border-radius "$2"
            :cursor "pointer"}))
 
@@ -38,8 +38,8 @@
 
            :font-family "$mono"
            :font-size "$1"
-           :background-color "$inner_bg"
-           :border "1px solid $inner_n200"
+           :background-color "$inner-bg"
+           :border "1px solid $inner-border"
            :border-radius "$2"}))
 
 (def Viewport
@@ -55,15 +55,15 @@
            :align-items "center"
            :padding "0.2rem 0.4rem"
 
-           :color "$inner_fg"
+           :color "$inner-fg"
            
            "&[data-disabled]"
            {; :color ""
             :pointer-events "none"}
            "&[data-highlighted]"
            {:outline "none"
-            :color "$inner_bg"
-            :backgroundColor "$inner_m200"}}))
+            :color "$inner-bg"
+            :backgroundColor "$inner-accent"}}))
 
 (def ItemText
   (styled (.-ItemText Select)

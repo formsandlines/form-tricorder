@@ -1,0 +1,1 @@
+{:lint-as {form-tricorder.utils/let+ clojure.core/let}}

@@ -34,10 +34,10 @@
            :border-radius "$2"
            :width "$icon-tab" ; "2.2rem"
            :height "$icon-tab" ; "2.2rem"
-           :color "$inner_fg"
+           :color "$inner-fg"
            :cursor "pointer"
            "&[data-state=active]"
-           {:background-color "$inner_n200"}
+           {:background-color "$n3"}
            "&:focus"
            {:border "1px solid black"}
 

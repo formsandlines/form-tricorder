@@ -1,6 +1,7 @@
 (ns form-tricorder.utils
   (:require
-   [helix.hooks :as hooks]))
+   [helix.hooks :as hooks])
+  (:require-macros [form-tricorder.utils]))
 
 (defn splitv-atv [i v]
   {:pre [(vector? v)]}
