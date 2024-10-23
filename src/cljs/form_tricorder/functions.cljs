@@ -11,7 +11,6 @@
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core]
    [formform-vis.utils :refer [save-svg]]
-   ;; [form-tricorder.components.mode-ui :as mode-ui]
    [form-tricorder.components.export-dialog :refer [ExportDialog]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.stitches-config :refer [css]]
@@ -105,11 +104,6 @@
       (let [webc-el @ref]
         (aset webc-el "results" results)))
     (d/div {:class "Vtable"}
-      ;; ($ mode-ui/Calc {:current-varorder varorder
-      ;;                  :debug-origin "Vtable"
-      ;;                  :set-varorder
-      ;;                  #(rf/dispatch
-      ;;                    [:input/changed-varorder {:next-varorder %}])})
       ($ :ff-vtable {:ref ref
                      :styles (str \" css \")
                      :varorder varorder}))))
@@ -146,11 +140,6 @@
       (let [webc-el @ref]
         (aset webc-el "dna" dna)))
     (d/div {:class "Vmap"}
-      ;; ($ mode-ui/Calc {:current-varorder varorder
-      ;;                  :debug-origin "Vmap"
-      ;;                  :set-varorder
-      ;;                  #(rf/dispatch
-      ;;                    [:input/changed-varorder {:next-varorder %}])})
       (if psps?
         ($ :ff-vmap-psps {:ref ref
                           ;; "full-svg" (str true)
@@ -305,7 +294,6 @@
   (let [ref (hooks/use-ref nil)
         rules-fn (rf/subscribe [:input/->selfi-rules-fn])
         umwelt   (rf/subscribe [:input/->selfi-umwelt])
-        ;; varorder (rf/subscribe [:input/varorder])
         ;; dna      (rf/subscribe [:input/->dna])
         ]
     (hooks/use-effect
@@ -314,11 +302,6 @@
         (aset webc-el "rules"  rules-fn)
         (aset webc-el "umwelt" umwelt)))
     (d/div {:class "Selfi"}
-      ;; ($ mode-ui/Calc {:current-varorder varorder
-      ;;                  :debug-origin "Selfi"
-      ;;                  :set-varorder
-      ;;                  #(rf/dispatch
-      ;;                    [:input/changed-varorder {:next-varorder %}])})
       ($ :ff-selfi {:ref ref
                     :res 100
                     "ini-ptn" :random

@@ -148,7 +148,7 @@
 (rf/reg-event-fx
  :input/changed-formula
  [clear-errors]
- (fn [{:keys [db]} [_ {:keys [next-formula]}]]
+ (fn [{:keys [db]} [_ {:keys [next-formula set-search-params?]}]]
    (let [db-next
          (-> db
              (update :input
@@ -170,10 +170,12 @@
          formula-next (get-in db-next [:input :formula])
          varorder-next (get-in db-next [:input :varorder])]
      {:db db-next
-      :fx [[:dispatch [:cache/invalidate
-                       {:has-deps #{:formula :expr :varorder}}]]
-           [:set-search-params [["f" formula-next]]]
-           [:set-search-params [["vars" (varorder->str varorder-next)]]]]})))
+      :fx (into [[:dispatch [:cache/invalidate
+                             {:has-deps #{:formula :expr :varorder}}]]]
+                (when set-search-params?
+                  [[:set-search-params [["f" formula-next]]]
+                   [:set-search-params [["vars"
+                                         (varorder->str varorder-next)]]]]))})))
 
 (rf/reg-event-fx
  :input/changed-varorder

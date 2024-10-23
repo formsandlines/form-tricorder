@@ -3,17 +3,14 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
-   ;; [formform.calc :as calc]
-   ;; [formform.expr :as expr]
-   ;; [formform.io :as io]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.events :as events]
    [form-tricorder.subs :as subs]
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
-   [form-tricorder.utils :refer [log]]
+   ;; [form-tricorder.utils :refer [log]]
    [form-tricorder.stitches-config
-    :refer [styled global-css css dark-theme light-theme]]
+    :refer [global-css css dark-theme light-theme]]
    [form-tricorder.foobar :refer [Foobar]]
    [form-tricorder.components.header :refer [Header]]
    [form-tricorder.components.error-boundary :refer [ErrorBoundary]]
@@ -36,9 +33,6 @@
      :background-color "$outer-bg"
      "a:hover"
      {:text-decoration "underline"}}}))
-
-;; (def body-styles
-;;   (css {}))
 
 (def styles
   (css {:display "flex"
@@ -74,14 +68,10 @@
 
 (defnc App
   []
-  (let [formula (rf/subscribe [:input/formula])
-        appearance (rf/subscribe [:theme/appearance])]
+  (let [appearance (rf/subscribe [:theme/appearance])]
     (hooks/use-effect
       :once
-      (js/console.log {:a 1 :b "two" "c" :three 'd [4]})
-      (global-styles)
-      ;; (.add js/document.body.classList body-styles)
-      )
+      (global-styles))
     (hooks/use-effect
       [appearance]
       (if (= appearance :dark)
@@ -98,11 +88,10 @@
          (d/div
            {:class (item-styles)}
            ($ FormulaInput
-              {:current-formula formula
-               :apply-input #(rf/dispatch [:input/changed-formula
-                                           {:next-formula %}])})
-           ($ ErrorDisplay)
-           )
+              {:apply-input #(rf/dispatch [:input/changed-formula
+                                           {:next-formula %1
+                                            :set-search-params? %2}])})
+           ($ ErrorDisplay))
          (d/div
            {:style {:position "absolute"
                     :z-index "9999"
@@ -123,9 +112,6 @@
          (d/div
            {:class (item-styles)
             :style {:overflow-y "auto"}}
-           ;; ($ foobar/ScaleTest {:scale "space" :n 11})
-           ;; ($ foobar/ScaleTest {:scale "sizes" :n 3})
-           ;; ($ foobar/ScaleTest {:scale "borderWidths" :n 3})
            ;; ($ Foobar)
            ($ OutputArea))))))
 

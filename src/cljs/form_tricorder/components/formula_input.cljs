@@ -124,8 +124,9 @@
                             v))}))
 
 (defnc FormulaInput
-  [{:keys [current-formula apply-input]}]
+  [{:keys [apply-input]}]
   (let [editor (hooks/use-ref nil)
+        current-formula (rf/subscribe [:input/formula])
         appearance (rf/subscribe [:theme/appearance])
         [code set-code] (hooks/use-state "")
         [view set-view] (hooks/use-state nil)
@@ -140,15 +141,19 @@
                             submit-mode (.. v -state (field submit-mode-active))]
                         (set-code input)
                         (when-not submit-mode
-                          (apply-input input)))))]
+                          (apply-input input false)))))]
     (hooks/use-effect
       :once
       (let [submit-mode-cmd (fn [^js v]
                               (if (.. v -state (field submit-mode-active))
                                 (let [input (.. v -state -doc toString)]
-                                  (apply-input input)
+                                  (apply-input input true)
                                   true)
-                                false))
+                                ;; ? just update search params
+                                (let [input (.. v -state -doc toString)]
+                                  (apply-input input true)
+                                  true) ;; false
+                                ))
             submit-keymap #js [#js {:key "Shift-Enter"
                                     :run submit-mode-cmd}]
             start-state
@@ -204,7 +209,10 @@
                                          (of (= appearance :dark)))]})))]
           (.. view (dispatch tsx)))))
     (d/div
-      {:class (str "FormulaInput " (styles))}
+      {:class (str "FormulaInput " (styles))
+       :on-blur (fn [_] (when-not submit-mode
+                         ;; ? just set search params
+                         (apply-input code true)))}
       (d/div
         {:class (input-styles)
          :ref editor})
@@ -245,5 +253,5 @@
             :size "icon"
             :layer "outer"
             :on-click (fn [_]
-                        (when submit-mode (apply-input code)))}
+                        (when submit-mode (apply-input code true)))}
            ($d ResetIcon))))))
