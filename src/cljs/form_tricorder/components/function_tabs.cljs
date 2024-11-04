@@ -37,7 +37,7 @@
            :color "$inner-fg"
            :cursor "pointer"
            "&[data-state=active]"
-           {:background-color "$n3"}
+           {:background-color "$n300"}
            "&:focus"
            {:border "1px solid black"}
 

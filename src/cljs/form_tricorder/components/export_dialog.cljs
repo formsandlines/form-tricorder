@@ -96,7 +96,7 @@
 
 (def button-modal-styles
   {:padding "8px 16px"
-   :border "1.5px solid $m3"
+   :border "1.5px solid $m300"
    :border-radius "$3"
    :font-size "$2"
 
@@ -107,17 +107,17 @@
       :color "$outer-fg"
       "&:hover"
       {
-       :border-color "color-mix(in srgb, $m3, black 10%)"
+       :border-color "color-mix(in srgb, $m300, black 10%)"
        :background-color "color-mix(in srgb, white 20%, transparent)"}}
 
      :primary
      {:font-weight "$medium"
-      :background-color "$m3"
+      :background-color "$m300"
       :color "$outer-bg"
       "&:hover"
       {:color "white"
        :border-color "white"
-       :background-color "color-mix(in srgb, $m3, black 10%)"}}}}})
+       :background-color "color-mix(in srgb, $m300, black 10%)"}}}}})
 
 (def ModalButton
   (styled "button"

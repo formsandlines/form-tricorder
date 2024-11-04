@@ -52,7 +52,8 @@
         :align-items "start"
         :gap "10px"
         :flex-direction "column"
-        :border "1px solid red"}}
+        ;; :border "1px solid red"
+        }}
       (d/h1 "Testing Area")
       ;; ($ Button
       ;;    {}

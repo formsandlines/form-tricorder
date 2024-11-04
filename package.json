@@ -1,6 +1,7 @@
 {
   "name": "form-tricorder",
   "devDependencies": {
+    "apcach": "^0.6.4",
     "react-refresh": "^0.14.2",
     "shadow-cljs": "^2.28.16"
   },

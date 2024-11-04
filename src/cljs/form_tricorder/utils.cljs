@@ -70,6 +70,15 @@
          m
          ms))
 
+(defn linear-map
+  "Domain->range mapping similar to Processings `map`:
+  https://processing.org/reference/map_.html"
+  [dmin dmax rmin rmax x]
+  (+ (* (- x dmin)
+        (/ (- rmax rmin)
+           (- dmax dmin)))
+     rmin))
+
 (comment
 
   (= (merge-deep

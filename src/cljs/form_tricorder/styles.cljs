@@ -40,11 +40,12 @@
      :sizes (map (fn [[k [_ size]]] [k size]) kvs)}))
 
 ;; Palettes:
-;; https://huetone.ardov.me/?palette=N4IgdghgtgpiBcIBmAVATgSwMYAIAKEANjAC4lwA0IAFgK4wDOCA2qJLAiAMoRgAmIKlgD2hYWibxmIAMRI%2BSAEZIIg2TABsMAMwwAjGpl8NfAExYkhrABYsABkWVZi0xD4RFhiHoCcWH55UMgAcfMHhAOyGETARPhHBhhpIGhAaPoYArFiZwZkahrbWwdYFQdoR2lWmhnrBepl61iAAugC%2BFGzQcIgAchgA5tQkaiJiEiyyKkpIlkEwdjowc7IWZgqGinxYelhOMhCHfIqBsj7n7liGeeHn0RpxwVdBGq8QEQJBmd-BGqcy1kBeX%2Bph02msUSCem00NMiXanXA3U4XBgECQwmgo1E4kk0jk2lmSAyQWMMB8CysPmMfAMQQgTz8ZTOfz%2B2mumQgnJqQQivjsoSS2nqMSyENMyUKEUySGyhgq1iQtkMplM2h8FUMdmsem88I6XQ4iAAMhAAG4wfgwNDY8Z4qbKZQrGT6fRIRJBNZ6WKbAJ7fZpI7-HyZc7%2Ba51ayKdm8iqpGOyDSldIJmSZbT5BKFcGvSGyUxIGGZOy1Ux6VVwBGGnogACyEFoFttuMmclm6OeU1MfBgMEyhk0WDc-dJekUJmZMkcEFsqbcGpchh8wQixM%2BsmC8QF%2BziGj0otjthlSWhNn21ggpkqJPzwQFutaBqRRpAAGFxERmxMpFN2ypDLMfDUv8sz2DkAEqNobgQcEpgagBvyZB8A7aikqieksmT-Iol4wNYAY6lUnYhIodh2AWSQaGRpgluUehkQ4j4tFQJDCGAjCTLRID0VxNFcdoZFqNYglUMWXFUVxEQiSAd5cT40k8Vxeg8Wo5aCe0QA
+;; https://huetone.ardov.me/?palette=N4IgdghgtgpiBcIBmAVATgSwMYAIAKEANjAC4lwA0IAFgK4wDOCA2qJLAiAMoRgAmIKlgD2hYWibxmIAMRI%2BSAEZIIg2TABsMAMwwAjGpl8NfAExYkhrABYsABkWVZi0xD4RFhiHoCcWH55UMgAcfMHhAOyGETARPhHBhhpIGhAaPoYArFiZwZkahrbWwdYFQdoR2lWmhnrBepl61oZIpjBIMAIAugC%2BFGzQcIgAchgA5tQkaiJiEiyyKkpIlkEwdjrtVvKmCoaKfFh6WE4yEGd8ioGyPjfuWIZ54TfRGnHB90EaXxARAkGZAOCGiuMmsYLyILaVWsUSCem08NMiVWfHaSCivX64EGnC4MAgSGE0GmonEkmkcm0yyQGSCxhgPjWVh8xj4BiCEHefjK12BwO0D0yECFNSCEV8dlCSW09RiWRhpmShQimSQ2UMFWsSFshlMpm0Pgqhjs1j03mR6girSQdhAmIGHEQABkIAA3GD8GBoEmzckLZTKFbqPT6JAWmQWNmxPYBY4nNLnEE%2BTI3fwPOrWRQCsUVVLZ2QaUrpfMyTLafIJQraIuw2SmJAIzK2uGmPR6k4wTvLRL27GOkAAWQgtHdPrJ8zkywJHwWO07mUMmiwbgXdL0ihMPJkjggthLbkNLkMPmCVpZD3ikpOcQ0ejlOdsqqS8JsJ2sEFMlVpdeCkrNLS0CxbV7dghhAABhcQiDHOYpAWKcVBaeQWRBZZ7ByJCIG0NwkOCUxDRaIFMl%2BRcTRSVQgmOXRMhBRQPxgax41NKoZxCRQ7Dseskg0DjTGbWQEQ4hwkPxfE7R6LoqBIYQwEYeZ%2BL0Di1D4-jtCUqhrHUkAm34nj%2BIiLTf34nwtMU0yzLUNstKbcSgA
 
 (def color-scales
   {;; Sand
    :--Sand-0 "#fdfbfa"    ;;  1 0
+   :--Sand-50 "#f2efed"
    :--Sand-100 "#e6e3e1"  ;;  2 100 
    :--Sand-200 "#d6d2cf"  ;;  3 200 
    :--Sand-300 "#c4c0be"  ;;  4 300 
@@ -56,10 +57,12 @@
    :--Sand-900 "#5c5856"  ;; 10 900 
    :--Sand-1000 "#4c4846" ;; 11 1000
    :--Sand-1100 "#373332" ;; 12 1100
+   :--Sand-1150 "#272322"
    :--Sand-1200 "#181514" ;; 13 1200
 
    ;; Night
    :--Night-0 "#fafbff"    ;; 13 0
+   :--Night-50 "#edeff7"
    :--Night-100 "#e0e3ef"  ;; 12 100 
    :--Night-200 "#cfd2df"  ;; 11 200 
    :--Night-300 "#bdc1ce"  ;; 10 300 
@@ -71,10 +74,12 @@
    :--Night-900 "#55586b"  ;;  4 900 
    :--Night-1000 "#44485b" ;;  3 1000
    :--Night-1100 "#2e3347" ;;  2 1100
+   :--Night-1150 "#202337"
    :--Night-1200 "#131328" ;;  1 1200
 
    ;; Coral
    :--Coral-0 "#fffafa"
+   :--Coral-50 "#ffeaea"
    :--Coral-100 "#ffd9db"
    :--Coral-200 "#ffc0c5"
    :--Coral-300 "#ffa3ad"
@@ -86,18 +91,23 @@
    :--Coral-900 "#a4133c"
    :--Coral-1000 "#8b002f"
    :--Coral-1100 "#660020"
+   :--Coral-1150 "#4b0015"
    :--Coral-1200 "#31000b"})
 
 (def cs color-scales)
+(def color-steps
+  [0 50 100 200 300 400 500 600 700 800 900 1000 1100 1150 1200])
 
 (defn make-semantic-color-scales
   [scales prefixes invert?]
-  (into {}
-        (for [n (range 13)
-              s (range (count scales))
-              :let [k (keyword (str (prefixes s) (if invert? (- 12 n) n)))
-                    i (keyword (str (scales s) "-" n (when (> n 0) "00")))]]
-          [k (color-scales i)])))
+  (let [max-step (last color-steps)
+        kvs (for [n color-steps
+                  s (range (count scales))
+                  :let [k (keyword (str (prefixes s)
+                                        (if invert? (- max-step n) n)))
+                        i (keyword (str (scales s) "-" n))]]
+              [k (color-scales i)])]
+    (into {} kvs)))
 
 (def colors-light
   (merge
@@ -117,7 +127,7 @@
     :outer-popover-fg     (cs :--Sand-1200)
     :outer-card           (cs :--Sand-100)
     :outer-card-fg        (cs :--Sand-1200)
-    :outer-bg             (cs :--Sand-100)
+    :outer-bg             (cs :--Sand-50)
     :outer-fg             (cs :--Sand-1200)
     :outer-border         (cs :--Sand-400)
     :outer-input          (cs :--Sand-400)

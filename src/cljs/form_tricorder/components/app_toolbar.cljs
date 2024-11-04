@@ -29,15 +29,15 @@
            "& .icon"
            {:width "$icon-toolbar" ; "1.2rem" ; "auto"
             :height "100%"
-            :fill "$m7"
+            :fill "$m700"
             }
            ;; "& *:hover > .icon"
-           ;; {:fill "$m8"}
+           ;; {:fill "$m800"}
            "& *:disabled"
            {:pointer-events "none"
             :cursor "not-allowed"}
            "& *:disabled > .icon"
-           {:fill "$outer-muted" ;; $n3
+           {:fill "$outer-muted" ;; $n300
             }}))
 
 (def buttonStyles
@@ -55,7 +55,7 @@
    :border "none"
    :padding "$1" ; "0.2rem"
    :background "none"
-   :color "$m10"
+   :color "$m1000"
 
    "&:hover"
    {:background-color "$outer-accent" ;; inner-bg
@@ -93,7 +93,7 @@
   (styled (.-Separator Toolbar)
           (merge itemStyles
                  {:width "$px"
-                  :background-color "$n2" ;; n200
+                  :background-color "$n200"
                   :margin "0 $1"})))
 
 (def ToggleGroup

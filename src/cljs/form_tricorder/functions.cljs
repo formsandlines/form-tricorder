@@ -86,12 +86,12 @@
       :font-size "var(--fontSizes-1)"}]
     ["th"
      {:font-weight "var(--fontWeights-medium)"
-      :border-top "1px solid var(--colors-inner_fg)"
-      :border-bottom "1px solid var(--colors-inner_fg)"}]
+      :border-top "1px solid var(--colors-inner-fg)"
+      :border-bottom "1px solid var(--colors-inner-fg)"}]
     ["tr:hover td"
-     {:background-color "var(--colors-inner_hl)"}]
+     {:background-color "var(--colors-n50)"}]
     ["td"
-     {:border-top "1px solid var(--colors-inner_n200)"}]]))
+     {:border-top "1px solid var(--colors-inner-muted)"}]]))
 
 (defnc F-Vtable--init
   [_]
@@ -143,12 +143,12 @@
       (if psps?
         ($ :ff-vmap-psps {:ref ref
                           ;; "full-svg" (str true)
-                          "bg-color" (str "\"" "var(--colors-outer_bg)" "\"")
+                          "bg-color" (str "\"" "var(--colors-outer-bg)" "\"")
                           :padding 6
                           :varorder (str varorder)})
         ($ :ff-vmap {:ref ref
                      ;; "full-svg" (str true)
-                     "bg-color" (str "\"" "var(--colors-outer_bg)" "\"")
+                     "bg-color" (str "\"" "var(--colors-outer-bg)" "\"")
                      :padding 6
                      :varorder (str varorder)}))
       ($ Button {:variant "outline"

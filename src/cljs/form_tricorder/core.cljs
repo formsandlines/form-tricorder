@@ -12,6 +12,7 @@
    [form-tricorder.stitches-config
     :refer [global-css css dark-theme light-theme]]
    [form-tricorder.foobar :refer [Foobar]]
+   [form-tricorder.colortest :refer [Colortest]]
    [form-tricorder.components.header :refer [Header]]
    [form-tricorder.components.error-boundary :refer [ErrorBoundary]]
    [form-tricorder.components.formula-input :refer [FormulaInput]]
@@ -94,7 +95,7 @@
            ($ ErrorDisplay))
          (d/div
            {:style {:position "absolute"
-                    :z-index "9999"
+                    :z-index "10"
                     :bottom 0
                     :left 0}}
            ($ OptionsDrawer))
@@ -112,7 +113,8 @@
          (d/div
            {:class (item-styles)
             :style {:overflow-y "auto"}}
-           ;; ($ Foobar)
+           ($ Colortest)
+           ($ Foobar)
            ($ OutputArea))))))
 
 

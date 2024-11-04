@@ -56,7 +56,7 @@
         :justify-content "center"
         :align-items "center"
         :white-space "nowrap"
-        :color "$m5"
+        :color "$m500"
 
         :_transition_colors []
         "&:focus-visible"
@@ -78,9 +78,9 @@
         ;; "& svg"
         ;; {:width "100%"
         ;;  :height "100%"
-        ;;  :fill "$n3"
+        ;;  :fill "$n300"
         ;;  "&:hover"
-        ;;  {:fill "$n2"}}
+        ;;  {:fill "$n200"}}
         }))
 
 (def ^js ft-theme
@@ -226,9 +226,9 @@
                            :width "$8"
                            :height "$8"
                            "&:hover"
-                           {:background-color "$m1"}
+                           {:background-color "$m100"}
                            "&[data-state=on]"
-                           {:background-color "$m1"}})
+                           {:background-color "$m100"}})
             :variant "default"
             :size "icon-sm"
             :layer "inner"
