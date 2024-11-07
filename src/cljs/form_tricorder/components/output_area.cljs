@@ -26,7 +26,7 @@
 (def gutter-styles
   (css {:position "relative"
         "&:hover > *"
-        {:background-color "$m500"} ;; outer_hl
+        {:background-color "$m16"} ;; outer_hl
         "&::before"
         {:content ""
          :position "absolute"
@@ -38,7 +38,7 @@
          :height 1}}))
 
 (def dragger-styles
-  (css {:background-color "$m300" ;; outer_m200
+  (css {:background-color "$m11" ;; outer_m200
         :position "relative"
         :z-index 999}))
 

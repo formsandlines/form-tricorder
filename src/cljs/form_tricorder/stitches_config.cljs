@@ -1,7 +1,8 @@
 (ns form-tricorder.stitches-config
   (:require
    ["@stitches/react" :refer [createStitches]]
-   [form-tricorder.styles :refer [stitches-specs colors-light colors-dark]]))
+   [form-tricorder.styles :refer [stitches-specs colors-light colors-dark]]
+   [form-tricorder.colors :refer [colors-light colors-dark]]))
 
 (def ^js obj
   (createStitches

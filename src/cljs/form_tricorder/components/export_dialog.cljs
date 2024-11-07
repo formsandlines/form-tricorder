@@ -96,7 +96,7 @@
 
 (def button-modal-styles
   {:padding "8px 16px"
-   :border "1.5px solid $m300"
+   :border "1.5px solid $m11"
    :border-radius "$3"
    :font-size "$2"
 
@@ -107,12 +107,12 @@
       :color "$outer-fg"
       "&:hover"
       {
-       :border-color "color-mix(in srgb, $m300, black 10%)"
+       :border-color "color-mix(in srgb, $m11, black 10%)"
        :background-color "color-mix(in srgb, white 20%, transparent)"}}
 
      :primary
      {:font-weight "$medium"
-      :background-color "$m300"
+      :background-color "$m11"
       :color "$outer-bg"
       "&:hover"
       {:color "white"

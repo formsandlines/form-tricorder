@@ -56,7 +56,7 @@
         :justify-content "center"
         :align-items "center"
         :white-space "nowrap"
-        :color "$m500"
+        :color "$m16"
 
         :_transition_colors []
         "&:focus-visible"
@@ -226,9 +226,9 @@
                            :width "$8"
                            :height "$8"
                            "&:hover"
-                           {:background-color "$m100"}
+                           {:background-color "$m5"}
                            "&[data-state=on]"
-                           {:background-color "$m100"}})
+                           {:background-color "$m5"}})
             :variant "default"
             :size "icon-sm"
             :layer "inner"

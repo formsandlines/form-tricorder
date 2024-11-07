@@ -29,7 +29,7 @@
            "& .icon"
            {:width "$icon-toolbar" ; "1.2rem" ; "auto"
             :height "100%"
-            :fill "$m700"
+            :fill "$m21"
             }
            ;; "& *:hover > .icon"
            ;; {:fill "$m800"}
@@ -55,7 +55,7 @@
    :border "none"
    :padding "$1" ; "0.2rem"
    :background "none"
-   :color "$m1000"
+   :color "$m27"
 
    "&:hover"
    {:background-color "$outer-accent" ;; inner-bg
@@ -93,7 +93,7 @@
   (styled (.-Separator Toolbar)
           (merge itemStyles
                  {:width "$px"
-                  :background-color "$n200"
+                  :background-color "$n8"
                   :margin "0 $1"})))
 
 (def ToggleGroup

@@ -85,14 +85,14 @@
            :color "$outer-primary-fg"
            "&:hover"
            {:background-color
-            "color-mix(in srgb, $colors$outer-primary 85%, $colors$n1200)"}}}
+            "color-mix(in srgb, $colors$outer-primary 85%, $colors$n30)"}}}
     {:variant :default
      :layer :inner
      :css {:background-color "$inner-primary"
            :color "$inner-primary-fg"
            "&:hover"
            {:background-color
-            "color-mix(in srgb, $colors$inner-primary 85%, $colors$n1200)"}}}
+            "color-mix(in srgb, $colors$inner-primary 85%, $colors$n30)"}}}
 
     {:variant :secondary
      :layer :outer
@@ -100,14 +100,14 @@
            :color "$outer-secondary-fg"
            "&:hover"
            {:background-color
-            "color-mix(in srgb, $colors$outer-secondary 95%, $colors$n1200)"}}}
+            "color-mix(in srgb, $colors$outer-secondary 95%, $colors$n30)"}}}
     {:variant :secondary
      :layer :inner
      :css {:background-color "$inner-secondary"
            :color "$inner-secondary-fg"
            "&:hover"
            {:background-color
-            "color-mix(in srgb, $colors$inner-secondary 95%, $colors$n1200)"}}}
+            "color-mix(in srgb, $colors$inner-secondary 95%, $colors$n30)"}}}
     
     {:variant :destructive
      :layer :outer
@@ -115,14 +115,14 @@
            :color "$outer-destructive-fg"
            "&:hover"
            {:background-color
-            "color-mix(in srgb, $colors$outer-destructive 85%, $colors$n1200)"}}}
+            "color-mix(in srgb, $colors$outer-destructive 85%, $colors$n30)"}}}
     {:variant :destructive
      :layer :inner
      :css {:background-color "$inner-destructive"
            :color "$inner-destructive-fg"
            "&:hover"
            {:background-color
-            "color-mix(in srgb, $colors$inner-destructive 85%, $colors$n1200)"}}}
+            "color-mix(in srgb, $colors$inner-destructive 85%, $colors$n30)"}}}
 
     {:variant :outline
      :layer :outer

@@ -3,6 +3,7 @@
    [clojure.string :as string]
    [clojure.math :as math]))
 
+
 (defn num-key [n]
   (-> n str (string/replace "." "-") keyword))
 
@@ -38,188 +39,6 @@
   (let [kvs (make-scale 3 true)]
     {:space (map (fn [[k [space _]]] [k space]) kvs)
      :sizes (map (fn [[k [_ size]]] [k size]) kvs)}))
-
-;; Palettes:
-;; https://huetone.ardov.me/?palette=N4IgdghgtgpiBcIBmAVATgSwMYAIAKEANjAC4lwA0IAFgK4wDOCA2qJLAiAMoRgAmIKlgD2hYWibxmIAMRI%2BSAEZIIg2TABsMAMwwAjGpl8NfAExYkhrABYsABkWVZi0xD4RFhiHoCcWH55UMgAcfMHhAOyGETARPhHBhhpIGhAaPoYArFiZwZkahrbWwdYFQdoR2lWmhnrBepl61oZIpjBIMAIAugC%2BFGzQcIgAchgA5tQkaiJiEiyyKkpIlkEwdjrtVvKmCoaKfFh6WE4yEGd8ioGyPjfuWIZ54TfRGnHB90EaXxARAkGZAOCGiuMmsYLyILaVWsUSCem08NMiVWfHaSCivX64EGnC4MAgSGE0GmonEkmkcm0yyQGSCxhgPjWVh8xj4BiCEHefjK12BwO0D0yECFNSCEV8dlCSW09RiWRhpmShQimSQ2UMFWsSFshlMpm0Pgqhjs1j03mR6girSQdhAmIGHEQABkIAA3GD8GBoEmzckLZTKFbqPT6JAWmQWNmxPYBY4nNLnEE%2BTI3fwPOrWRQCsUVVLZ2QaUrpfMyTLafIJQraIuw2SmJAIzK2uGmPR6k4wTvLRL27GOkAAWQgtHdPrJ8zkywJHwWO07mUMmiwbgXdL0ihMPJkjggthLbkNLkMPmCVpZD3ikpOcQ0ejlOdsqqS8JsJ2sEFMlVpdeCkrNLS0CxbV7dghhAABhcQiDHOYpAWKcVBaeQWRBZZ7ByJCIG0NwkOCUxDRaIFMl%2BRcTRSVQgmOXRMhBRQPxgax41NKoZxCRQ7Dseskg0DjTGbWQEQ4hwkPxfE7R6LoqBIYQwEYeZ%2BL0Di1D4-jtCUqhrHUkAm34nj%2BIiLTf34nwtMU0yzLUNstKbcSgA
-
-(def color-scales
-  {;; Sand
-   :--Sand-0 "#fdfbfa"    ;;  1 0
-   :--Sand-50 "#f2efed"
-   :--Sand-100 "#e6e3e1"  ;;  2 100 
-   :--Sand-200 "#d6d2cf"  ;;  3 200 
-   :--Sand-300 "#c4c0be"  ;;  4 300 
-   :--Sand-400 "#b2adab"  ;;  5 400 
-   :--Sand-500 "#a19c9b"  ;;  6 500 
-   :--Sand-600 "#8d8887"  ;;  7 600 
-   :--Sand-700 "#7e7978"  ;;  8 700 
-   :--Sand-800 "#6f6a69"  ;;  9 800 
-   :--Sand-900 "#5c5856"  ;; 10 900 
-   :--Sand-1000 "#4c4846" ;; 11 1000
-   :--Sand-1100 "#373332" ;; 12 1100
-   :--Sand-1150 "#272322"
-   :--Sand-1200 "#181514" ;; 13 1200
-
-   ;; Night
-   :--Night-0 "#fafbff"    ;; 13 0
-   :--Night-50 "#edeff7"
-   :--Night-100 "#e0e3ef"  ;; 12 100 
-   :--Night-200 "#cfd2df"  ;; 11 200 
-   :--Night-300 "#bdc1ce"  ;; 10 300 
-   :--Night-400 "#aaadbb"  ;;  9 400 
-   :--Night-500 "#999dac"  ;;  8 500 
-   :--Night-600 "#858899"  ;;  7 600 
-   :--Night-700 "#76798c"  ;;  6 700 
-   :--Night-800 "#666a7d"  ;;  5 800 
-   :--Night-900 "#55586b"  ;;  4 900 
-   :--Night-1000 "#44485b" ;;  3 1000
-   :--Night-1100 "#2e3347" ;;  2 1100
-   :--Night-1150 "#202337"
-   :--Night-1200 "#131328" ;;  1 1200
-
-   ;; Coral
-   :--Coral-0 "#fffafa"
-   :--Coral-50 "#ffeaea"
-   :--Coral-100 "#ffd9db"
-   :--Coral-200 "#ffc0c5"
-   :--Coral-300 "#ffa3ad"
-   :--Coral-400 "#ff8293"
-   :--Coral-500 "#f8657d"
-   :--Coral-600 "#e04f6a"
-   :--Coral-700 "#ce3e5b"
-   :--Coral-800 "#ba2e4e"
-   :--Coral-900 "#a4133c"
-   :--Coral-1000 "#8b002f"
-   :--Coral-1100 "#660020"
-   :--Coral-1150 "#4b0015"
-   :--Coral-1200 "#31000b"})
-
-(def cs color-scales)
-(def color-steps
-  [0 50 100 200 300 400 500 600 700 800 900 1000 1100 1150 1200])
-
-(defn make-semantic-color-scales
-  [scales prefixes invert?]
-  (let [max-step (last color-steps)
-        kvs (for [n color-steps
-                  s (range (count scales))
-                  :let [k (keyword (str (prefixes s)
-                                        (if invert? (- max-step n) n)))
-                        i (keyword (str (scales s) "-" n))]]
-              [k (color-scales i)])]
-    (into {} kvs)))
-
-(def colors-light
-  (merge
-   (make-semantic-color-scales ["--Sand" "--Night" "--Coral"]
-                               ["n" "m" "e"] false)
-   {:outer-primary        (cs :--Night-800)
-    :outer-primary-fg     "#FFFFFF"
-    :outer-secondary      (cs :--Sand-200)
-    :outer-secondary-fg   (cs :--Sand-1100)
-    :outer-destructive    (cs :--Coral-900)
-    :outer-destructive-fg "#FFFFFF"
-    :outer-accent         (cs :--Sand-200)
-    :outer-accent-fg      (cs :--Sand-1200)
-    :outer-muted          (cs :--Sand-300)
-    :outer-muted-fg       (cs :--Sand-500)
-    :outer-popover        (cs :--Sand-100)
-    :outer-popover-fg     (cs :--Sand-1200)
-    :outer-card           (cs :--Sand-100)
-    :outer-card-fg        (cs :--Sand-1200)
-    :outer-bg             (cs :--Sand-50)
-    :outer-fg             (cs :--Sand-1200)
-    :outer-border         (cs :--Sand-400)
-    :outer-input          (cs :--Sand-400)
-    ;; :outer-ring           "#AAB8FF"
-
-    :inner-primary        (cs :--Night-700)
-    :inner-primary-fg     "#FFFFFF"
-    :inner-secondary      (cs :--Sand-100)
-    :inner-secondary-fg   (cs :--Sand-1000)
-    :inner-destructive    (cs :--Coral-800)
-    :inner-destructive-fg "#FFFFFF"
-    :inner-accent         (cs :--Sand-100)
-    :inner-accent-fg      (cs :--Sand-1100)
-    :inner-muted          (cs :--Sand-200)
-    :inner-muted-fg       (cs :--Sand-400)
-    :inner-popover        (cs :--Sand-0)
-    :inner-popover-fg     (cs :--Sand-1100)
-    :inner-card           (cs :--Sand-0)
-    :inner-card-fg        (cs :--Sand-1100)
-    :inner-bg             (cs :--Sand-0)
-    :inner-fg             (cs :--Sand-1100)
-    :inner-border         (cs :--Sand-300)
-    :inner-input          (cs :--Sand-300)
-    ;; :inner-ring           "#B8C4FF"
-    :inner-visu "#D8EBE2"
-    :inner-calc "#E8E8FF"
-    :inner-emul "#F5E1E8"
-
-    :ring       "#B8C4FF"
-
-    :fmenu-visu "#C4D1CC"
-    :fmenu-calc "#C8CAE0"
-    :fmenu-emul "#DDC2CD"
-    :fmenu-base (cs :--Sand-200) ;; "#D9D7D4"
-    :fmenu-glow (cs :--Sand-100) ;; "#EDEBE8"
-    }))
-
-(def colors-dark
-  (merge
-   (make-semantic-color-scales ["--Night" "--Sand" "--Coral"]
-                               ["n" "m" "e"] true)
-   {:outer-primary        (cs :--Sand-200)
-    :outer-primary-fg     "#000000"
-    :outer-secondary      (cs :--Night-1000)
-    :outer-secondary-fg   (cs :--Night-100)
-    :outer-destructive    (cs :--Coral-800)
-    :outer-destructive-fg "#FFFFFF"
-    :outer-accent         (cs :--Night-900)
-    :outer-accent-fg      (cs :--Night-100)
-    :outer-muted          (cs :--Night-900)
-    :outer-muted-fg       (cs :--Night-700)
-    :outer-popover        (cs :--Night-1100)
-    :outer-popover-fg     (cs :--Night-0)
-    :outer-card           (cs :--Night-1100)
-    :outer-card-fg        (cs :--Night-0)
-    :outer-bg             (cs :--Night-1100)
-    :outer-fg             (cs :--Night-0)
-    :outer-border         (cs :--Night-800)
-    :outer-input          (cs :--Night-800)
-    ;; :outer-ring           "#A19E9C"
-
-    :inner-primary        (cs :--Sand-300)
-    :inner-primary-fg     "#000000"
-    :inner-secondary      (cs :--Night-1100)
-    :inner-secondary-fg   (cs :--Night-200)
-    :inner-destructive    (cs :--Coral-900)
-    :inner-destructive-fg "#FFFFFF"
-    :inner-accent         (cs :--Night-1000)
-    :inner-accent-fg      (cs :--Night-200)
-    :inner-muted          (cs :--Night-1000)
-    :inner-muted-fg       (cs :--Night-800)
-    :inner-popover        (cs :--Night-1200)
-    :inner-popover-fg     (cs :--Night-100)
-    :inner-card           (cs :--Night-1200)
-    :inner-card-fg        (cs :--Night-100)
-    :inner-bg             (cs :--Night-1200)
-    :inner-fg             (cs :--Night-100)
-    :inner-border         (cs :--Night-900)
-    :inner-input          (cs :--Night-900)
-    ;; :inner-ring           "#8F8D8B"
-    :inner-visu "#3B524F"
-    :inner-calc "#3C3E5E"
-    :inner-emul "#593447"
-
-    :ring       "#A19E9C"
-
-    :fmenu-visu "#516F6C"
-    :fmenu-calc "#51537E"
-    :fmenu-emul "#654E6A"
-    :fmenu-base (cs :--Night-900) ;; #5D627A
-    :fmenu-glow (cs :--Night-600) ;; #848AA3
-    }))
 
 (def stitches-specs
   {:theme
@@ -439,4 +258,5 @@
             h (str (or h w) (when-not (string? h) "px"))]
         #js {:width  w
              :height h}))}})
+
 

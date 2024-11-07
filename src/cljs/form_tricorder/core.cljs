@@ -113,8 +113,8 @@
          (d/div
            {:class (item-styles)
             :style {:overflow-y "auto"}}
-           ($ Colortest)
-           ($ Foobar)
+           ;; ($ Colortest)
+           ;; ($ Foobar)
            ($ OutputArea))))))
 
 
