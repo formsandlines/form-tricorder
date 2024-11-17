@@ -5,7 +5,9 @@
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.function-tabs :refer [FunctionTabs]]
+   [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.stitches-config :refer [styled css]]
+   ["@radix-ui/react-icons" :refer [Cross2Icon]]
    ))
 
 (def styles
@@ -31,10 +33,17 @@
       (d/div
         {:class "ViewPaneControls"}
         (when-not only-child?
-          (d/button
-            {:class (close-button-styles)
-             :on-click handle-remove-view}
-            "[x]"))
+          ($ Button
+             {:css (clj->js {:position "absolute"
+                             :width "$6"
+                             :height "$6"
+                             :top "$4"
+                             :right "$4"})
+              :variant "secondary"
+              :size "icon"
+              :layer "inner"
+              :on-click handle-remove-view}
+             ($d Cross2Icon)))
         ($ FunctionTabs
            {:func-id func-id
             :handle-change-view handle-change-view})))))

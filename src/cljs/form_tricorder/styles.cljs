@@ -105,6 +105,7 @@
            :icon-toolbar "18px" ;; -> rem?
            :icon-input "30px" ;; -> rem?
            :icon-tab "36px" ;; -> rem?
+           :text-tab "18px" ;; -> rem?
            ;; new:
            :px "1px"
            :icon-xs "0.75rem" ;; 12px

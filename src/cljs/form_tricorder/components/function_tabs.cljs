@@ -5,6 +5,7 @@
     [helix.hooks :as hooks]
     ;; [form-tricorder.re-frame-adapter :as rf]
     [form-tricorder.model :as model]
+    [form-tricorder.icons :refer [function-icon]]
     [form-tricorder.functions :as func]
     [form-tricorder.stitches-config :refer [styled css]]
     [form-tricorder.utils :refer [log]]
@@ -26,36 +27,63 @@
            :gap "$2" ; "0.4rem"
            :flex "flex-none"}))
 
+(def text-only
+  #{:edn :json})
+
 (def Trigger
   (styled (.-Trigger Tabs)
           {:flex "flex-none"
-           :outline "none"
-           :border "none"
-           :border-radius "$2"
+
+           :touch-action "manipulation"
+           :display "inline-flex"
+           :justify-content "center"
+           :align-items "center"
+           :white-space "nowrap"
+           :border-radius "$md"
+           :_text ["$xs"]
+           :font-weight "$normal"
+           :_transition_colors []
+           "&:focus-visible"
+           {:_outlineNone []
+            :_ringOuter []}
+           "&:disabled"
+           {:pointer-events "none"
+            :opacity "0.5"}
+           "&:hover"
+           {:cursor "pointer"}
+           
            :width "$icon-tab" ; "2.2rem"
            :height "$icon-tab" ; "2.2rem"
+           :padding 0
            :color "$inner-fg"
-           :cursor "pointer"
            "&[data-state=active]"
-           {:background-color "$n11"}
-           "&:focus"
-           {:border "1px solid black"}
+           {:background-color "$n3"
+            "&:hover"
+            {:cursor "default"}}
 
            :variants
            {:type {:a {} :b {} :c {}}
             :subtype {:a {} :b {} :c {}}}
            :compoundVariants
            (vec (for [{mode-id :id items :items} model/modes
-                      {func-id :id color :color} items]
+                      {func-id :id} items]
                   {:type (name mode-id)
                    :subtype (name func-id)
                    ;; color is actually always the same for one mode
                    ;; so this is mostly obsolete, but more flexible for now
-                   :css {:background-color (:base color)}}))}))
+                   :css {:height (if (text-only func-id)
+                                   "$text-tab"
+                                   "$icon-tab")
+                         :background-color
+                         (str "$inner-tab-" (name mode-id))
+                         "&[data-state=inactive]:hover"
+                         {:background-color
+                          (str "$inner-tab-" (name mode-id) "-hover")}}}))}))
 
 (def Content
   (styled (.-Content Tabs)
-          {:flex "1 1 auto"}))
+          {:flex "1 1 auto"
+           :padding "0 0 $10 0"}))
 
 (defnc FunctionTabs
   [{:keys [func-id handle-change-view]}]
@@ -70,10 +98,12 @@
           (for [{:keys [id label]} (:items mode)
                 :let [id-str (name id)]]
             ($d Trigger {:key     id-str
+                         :title   label
                          :type    (name mode-id)
                          :subtype id-str
                          :value   id-str}
-                label)))
+                (or (function-icon id)
+                    label))))
         (for [{:keys [id]} (:items mode)
               :let [id-str (name id)]]
           ($d Content {:key   id-str

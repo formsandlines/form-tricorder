@@ -1,64 +1,49 @@
-(ns form-tricorder.model)
+(ns form-tricorder.model
+  (:require
+   [form-tricorder.icons :as icons]))
 
-(def visu-items
+(def expr-items
   [{:id    :hooks
-    :label "Hooks notation"
-    :color {:base "$inner-visu"}}
+    :label "Hooks notation"}
    {:id    :graphs
-    :label "Graph notation"
-    :color {:base "$inner-visu"}}
+    :label "Graph notation"}
    {:id    :depthtree
-    :label "Depth tree"
-    :color {:base "$inner-visu"}}])
+    :label "Depth tree"}
+   {:id    :edn
+    :label "EDN"}
+   {:id    :json
+    :label "JSON"}])
 
-(def calc-items
+(def eval-items
   [{:id    :vtable
-    :label "Value table"
-    :color {:base "$inner-calc"}}
+    :label "Value table"}
    {:id    :vmap
-    :label "vmap"
-    :color {:base "$inner-calc"}}])
+    :label "vmap"}])
 
 (def emul-items
   [{:id    :selfi
-    :label "SelFi"
-    :color {:base "$inner-emul"}}
+    :label "SelFi"}
    {:id    :mindform
-    :label "mindFORM"
-    :color {:base "$inner-emul"}}
+    :label "mindFORM"}
    {:id    :lifeform
-    :label "lifeFORM"
-    :color {:base "$inner-emul"}}])
-
-(def misc-items
-  [{:id    :edn
-    :label "EDN"
-    :color {:base "$inner-emul"}}
-   {:id    :json
-    :label "JSON"
-    :color {:base "$inner-emul"}}])
+    :label "lifeFORM"}])
 
 (def modes
-  [{:id    :visu
-    :label "visualize"
-    :color {:base  "$fmenu-visu"
+  [{:id    :expr
+    :label "expression"
+    :color {:base  "$outer-fmenu-expr"
             :hover ""}
-    :items visu-items}
-   {:id    :calc
-    :label "calculate"
-    :color {:base  "$fmenu-calc"
+    :items expr-items}
+   {:id    :eval
+    :label "evaluation"
+    :color {:base  "$outer-fmenu-eval"
             :hover ""}
-    :items calc-items}
+    :items eval-items}
    {:id    :emul
-    :label "emulate"
-    :color {:base  "$fmenu-emul"
+    :label "emulation"
+    :color {:base  "$outer-fmenu-emul"
             :hover ""}
-    :items emul-items}
-   {:id    :misc
-    :label "…"
-    :color {:base  "$fmenu-emul"
-            :hover ""}
-    :items misc-items}])
+    :items emul-items}])
 
 
 (def modes-map
@@ -75,4 +60,4 @@
 
 (comment
   (prn func->mode)
-  (modes-map :calc))
+  (modes-map :eval))

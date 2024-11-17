@@ -50,6 +50,30 @@
                        (partial linear-map 0 (dec n) 13.15 13.15) ;; hue
                        )))
 
+;; expr mode
+(def scale-seafoam-apcach
+  (let [n (count crs)]
+    (make-scale-apcach contrasts-mirrored
+                       (partial linear-map 0 (dec n) 0.0185  0.0351)  ;; chroma
+                       (partial linear-map 0 (dec n) 160.83 188.46) ;; hue
+                       )))
+
+;; eval mode
+(def scale-lavender-apcach
+  (let [n (count crs)]
+    (make-scale-apcach contrasts-mirrored
+                       (partial linear-map 0 (dec n) 0.0209  0.0446)  ;; chroma
+                       (partial linear-map 0 (dec n) 285.79 280.68) ;; hue
+                       )))
+
+;; emul mode
+(def scale-mauve-apcach
+  (let [n (count crs)]
+    (make-scale-apcach contrasts-mirrored
+                       (partial linear-map 0 (dec n) 0.0180 0.0398)  ;; chroma
+                       (partial linear-map 0 (dec n) 360 350) ;; hue
+                       )))
+
 (defn make-scale
   [scale-apcach]
   (vec (concat ["#ffffff"]
@@ -59,6 +83,9 @@
 (def scale-sand  (make-scale scale-sand-apcach))
 (def scale-night (make-scale scale-night-apcach))
 (def scale-coral (make-scale scale-coral-apcach))
+(def scale-seafoam (make-scale scale-seafoam-apcach))
+(def scale-lavender (make-scale scale-lavender-apcach))
+(def scale-mauve (make-scale scale-mauve-apcach))
 
 (def scale-range [1 30])
 (def scale-range-ext [0 31])
@@ -88,6 +115,26 @@
                 [:card-fg :n 28]
                 [:border :n 11]
                 [:border :n 11]
+                [:tab-expr :fx 4]
+                [:tab-eval :fv 4]
+                [:tab-emul :fe 4]
+                [:tab-expr-hover :fx 6]
+                [:tab-eval-hover :fv 6]
+                [:tab-emul-hover :fe 6]
+                [:icon-expr :fx 26]
+                [:icon-eval :fv 26]
+                [:icon-emul :fe 26]
+                [:fmenu-expr :fx 5]
+                [:fmenu-eval :fv 5]
+                [:fmenu-emul :fe 5]
+                [:fmenu-expr-shadow :fx 7]
+                [:fmenu-eval-shadow :fv 7]
+                [:fmenu-emul-shadow :fe 7]
+                [:fmenu-expr-shadow-hover :fx 9]
+                [:fmenu-eval-shadow-hover :fv 9]
+                [:fmenu-emul-shadow-hover :fe 9]
+                ;; [:fmenu-base :n 8]
+                ;; [:fmenu-glow :n 5]
                 ]
         make-color-kvs (fn [prefix f]
                          (map (fn [[k scale i]]
@@ -103,32 +150,43 @@
 (def colors-light
   (let [n-scale (scale->kvs scale-sand "n")
         m-scale (scale->kvs scale-night "m")
-        signal-scale (scale->kvs scale-coral "e")]
-    (merge n-scale m-scale signal-scale semantic-colors
+        signal-scale (scale->kvs scale-coral "e")
+        expr-scale (scale->kvs scale-seafoam "fx")
+        eval-scale (scale->kvs scale-lavender "fv")
+        emul-scale (scale->kvs scale-mauve "fe")]
+    (merge n-scale m-scale signal-scale
+           expr-scale eval-scale emul-scale
+           semantic-colors
            {:outer-bg "var(--colors-n4)"
-            :inner-visu "#D8EBE2"
-            :inner-calc "#E8E8FF"
-            :inner-emul "#F5E1E8"
-            :fmenu-visu "#C4D1CC"
-            :fmenu-calc "#C8CAE0"
-            :fmenu-emul "#DDC2CD"
-            :fmenu-base "var(--colors-n8)"
-            :fmenu-glow "var(--colors-n5)"
+            ;; :inner-expr "var(--colors-fx4)" ;; old: "#D8EBE2"
+            ;; :inner-eval "var(--colors-fv4)" ;; old: "#E8E8FF"
+            ;; :inner-emul "var(--colors-fe4)" ;; old: "#F5E1E8"
+            ;; :fmenu-expr "var(--colors-fx8)" ;; old: "#C4D1CC"
+            ;; :fmenu-eval "var(--colors-fv8)" ;; old: "#C8CAE0"
+            ;; :fmenu-emul "var(--colors-fe8)" ;; old: "#DDC2CD"
+            ;; :fmenu-base "var(--colors-n8)"
+            ;; :fmenu-glow "var(--colors-n5)"
             :ring       "#B8C4FF"})))
 
 (def colors-dark
   (let [n-scale (scale->kvs (reverse scale-night) "n")
         m-scale (scale->kvs (reverse scale-sand) "m")
-        signal-scale (scale->kvs (reverse scale-coral) "e")]
-    (merge n-scale m-scale signal-scale semantic-colors
-           {:inner-visu "#3B524F"
-            :inner-calc "#3C3E5E"
-            :inner-emul "#593447"
-            :fmenu-visu "#516F6C"
-            :fmenu-calc "#51537E"
-            :fmenu-emul "#654E6A"
-            :fmenu-base "var(--colors-n8)"
-            :fmenu-glow "var(--colors-n11)"
+        signal-scale (scale->kvs (reverse scale-coral) "e")
+        expr-scale (scale->kvs (reverse scale-seafoam) "fx")
+        eval-scale (scale->kvs (reverse scale-lavender) "fv")
+        emul-scale (scale->kvs (reverse scale-mauve) "fe")]
+    (merge n-scale m-scale signal-scale
+           expr-scale eval-scale emul-scale
+           semantic-colors
+           {
+            ;; :inner-expr "var(--colors-fx4)" ;; old: "#3B524F"
+            ;; :inner-eval "var(--colors-fv4)" ;; old: "#3C3E5E"
+            ;; :inner-emul "var(--colors-fe4)" ;; old: "#593447"
+            ;; :fmenu-expr "var(--colors-fx8)" ;; old: "#516F6C"
+            ;; :fmenu-eval "var(--colors-fv8)" ;; old: "#51537E"
+            ;; :fmenu-emul "var(--colors-fe8)" ;; old: "#654E6A"
+            ;; :fmenu-base "var(--colors-n8)"
+            ;; :fmenu-glow "var(--colors-n11)"
             :ring       "#A19E9C"})))
 
 ;; (def scale-sand-outer (concat (drop 2 scale-sand)
@@ -208,6 +266,109 @@
   ;;     "#282c3f"
   ;;     "#121527"
   ;;     "#000000"]
+
+  scale-seafoam
+  ;; => ["#ffffff"
+  ;;     "#edfff7"
+  ;;     "#e6fbf2"
+  ;;     "#e0f5ec"
+  ;;     "#d9efe6"
+  ;;     "#d2e9e1"
+  ;;     "#cbe3db"
+  ;;     "#c4ddd6"
+  ;;     "#bdd7d0" ;; x
+  ;;     "#b6d1ca"
+  ;;     "#afcbc4"
+  ;;     "#a8c4bf"
+  ;;     "#a1beb9"
+  ;;     "#9ab8b3"
+  ;;     "#92b1ad"
+  ;;     "#8baaa7"
+  ;;     "#83a3a0"
+  ;;     "#7b9c9a"
+  ;;     "#749694"
+  ;;     "#6c8f8e"
+  ;;     "#648788"
+  ;;     "#5c8081"
+  ;;     "#54787a"
+  ;;     "#4b7073"
+  ;;     "#42676b"
+  ;;     "#395e63"
+  ;;     "#2f555a"
+  ;;     "#244b50"
+  ;;     "#173f46"
+  ;;     "#063239"
+  ;;     "#001921"
+  ;;     "#000000"]
+
+  scale-lavender
+  ;; => ["#ffffff"
+  ;;     "#f9f9ff"
+  ;;     "#f4f4ff"
+  ;;     "#edeeff"
+  ;;     "#e7e8ff"
+  ;;     "#e1e2fe"
+  ;;     "#dbdcf9"
+  ;;     "#d4d5f3"
+  ;;     "#cecfee"
+  ;;     "#c7c9e9"
+  ;;     "#c1c3e4"
+  ;;     "#babcde"
+  ;;     "#b3b6d9"
+  ;;     "#acafd3"
+  ;;     "#a5a9cd"
+  ;;     "#9ea2c7"
+  ;;     "#979ac1"
+  ;;     "#8f94bb"
+  ;;     "#888db5"
+  ;;     "#8186ae"
+  ;;     "#797ea8"
+  ;;     "#7277a1"
+  ;;     "#696f9a"
+  ;;     "#616792"
+  ;;     "#585e8a"
+  ;;     "#4f5581"
+  ;;     "#464c78"
+  ;;     "#3b426e"
+  ;;     "#313763"
+  ;;     "#242954"
+  ;;     "#0e0f3a"
+  ;;     "#000000"]
+
+  scale-mauve
+  ;; => ["#ffffff"
+  ;;     "#fff6fd"
+  ;;     "#fff0f8"
+  ;;     "#ffeaf3"
+  ;;     "#fee3ed"
+  ;;     "#f9dde7" ;; x
+  ;;     "#f4d6e2"
+  ;;     "#efcfdc"
+  ;;     "#eac9d6"
+  ;;     "#e5c2d1"
+  ;;     "#e0bbcb"
+  ;;     "#dbb4c5"
+  ;;     "#d5adbf"
+  ;;     "#d0a6b9"
+  ;;     "#ca9fb3"
+  ;;     "#c498ad"
+  ;;     "#bd90a6"
+  ;;     "#b789a0"
+  ;;     "#b1819a"
+  ;;     "#ab7a94"
+  ;;     "#a4728d"
+  ;;     "#9d6a86"
+  ;;     "#96627f"
+  ;;     "#8e5978"
+  ;;     "#855070"
+  ;;     "#7d4767"
+  ;;     "#733d5e"
+  ;;     "#683255" ;; x
+  ;;     "#5c254a"
+  ;;     "#4d163c"
+  ;;     "#2d0020"
+  ;;     "#000000"]
+  
   ,)  
 
 (comment

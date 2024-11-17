@@ -89,7 +89,7 @@
       :border-top "1px solid var(--colors-inner-fg)"
       :border-bottom "1px solid var(--colors-inner-fg)"}]
     ["tr:hover td"
-     {:background-color "var(--colors-n50)"}]
+     {:background-color "var(--colors-n3)"}]
     ["td"
      {:border-top "1px solid var(--colors-inner-muted)"}]]))
 
@@ -151,32 +151,33 @@
                      "bg-color" (str "\"" "var(--colors-outer-bg)" "\"")
                      :padding 6
                      :varorder (str varorder)}))
-      ($ Button {:variant "outline"
-                 :size "sm"
-                 :on-click (fn [_] (set-psps? (fn [b] (not b))))}
-        (if psps? "-" "+"))
-      ($ ExportDialog)
-      ($ Button
-       {:variant "outline"
-        :size "sm"
-        :on-click
-        (fn [e]
-          (let [el (js/document.createElement "ff-vmap")]
-            (.setAttribute el "full-svg" "true")
-            (aset el "varorder" varorder)
-            (aset el "dna" dna)
-            (.. e -target -parentNode (appendChild el))
-            (js/setTimeout
-             (fn []
-               (let [vmap (.. el -shadowRoot
-                              (getElementById "vmap-figure"))]
-                 ;; (js/console.log vmap)
-                 (save-svg vmap "test.svg")))
-             1000)
+      (comment
+        ($ Button {:variant "outline"
+                   :size "sm"
+                   :on-click (fn [_] (set-psps? (fn [b] (not b))))}
+           (if psps? "-" "+"))
+        ($ ExportDialog)
+        ($ Button
+           {:variant "outline"
+            :size "sm"
+            :on-click
+            (fn [e]
+              (let [el (js/document.createElement "ff-vmap")]
+                (.setAttribute el "full-svg" "true")
+                (aset el "varorder" varorder)
+                (aset el "dna" dna)
+                (.. e -target -parentNode (appendChild el))
+                (js/setTimeout
+                 (fn []
+                   (let [vmap (.. el -shadowRoot
+                                  (getElementById "vmap-figure"))]
+                     ;; (js/console.log vmap)
+                     (save-svg vmap "test.svg")))
+                 1000)
             
-            ;; (save-svg el "test.svg")
-            ))}
-       "Save SVG"))))
+                ;; (save-svg el "test.svg")
+                ))}
+           "Save SVG")))))
 
 (defmethod gen-component :vmap
   [_ args]
