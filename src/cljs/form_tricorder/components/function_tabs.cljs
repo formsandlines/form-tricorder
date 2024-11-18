@@ -28,7 +28,7 @@
            :flex "flex-none"}))
 
 (def text-only
-  #{:edn :json})
+  {:edn "EDN" :json "JSON" :fdna "DNA"})
 
 (def Trigger
   (styled (.-Trigger Tabs)
@@ -103,7 +103,7 @@
                          :subtype id-str
                          :value   id-str}
                 (or (function-icon id)
-                    label))))
+                    (text-only id)))))
         (for [{:keys [id]} (:items mode)
               :let [id-str (name id)]]
           ($d Content {:key   id-str

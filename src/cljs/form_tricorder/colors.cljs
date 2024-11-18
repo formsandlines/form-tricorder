@@ -32,7 +32,7 @@
 (def scale-sand-apcach
   (let [n (count crs)]
     (make-scale-apcach contrasts-mirrored
-                       (partial linear-map 0 (dec n) 0.004 0.005) ;; chroma
+                       (partial linear-map 0 (dec n) 0.006 0.008) ;; chroma
                        (partial linear-map 0 (dec n) 36.37 31.06) ;; hue
                        )))
 
@@ -98,7 +98,6 @@
 (def semantic-colors
   (let [schema [[:bg :n 1]
                 [:fg :n 28]
-
                 [:primary :m 21]
                 [:primary-fg :m 0]
                 [:secondary :n 5]
@@ -132,10 +131,7 @@
                 [:fmenu-emul-shadow :fe 7]
                 [:fmenu-expr-shadow-hover :fx 9]
                 [:fmenu-eval-shadow-hover :fv 9]
-                [:fmenu-emul-shadow-hover :fe 9]
-                ;; [:fmenu-base :n 8]
-                ;; [:fmenu-glow :n 5]
-                ]
+                [:fmenu-emul-shadow-hover :fe 9]]
         make-color-kvs (fn [prefix f]
                          (map (fn [[k scale i]]
                                 [(keyword (str prefix "-" (name k)))
@@ -158,15 +154,7 @@
            expr-scale eval-scale emul-scale
            semantic-colors
            {:outer-bg "var(--colors-n4)"
-            ;; :inner-expr "var(--colors-fx4)" ;; old: "#D8EBE2"
-            ;; :inner-eval "var(--colors-fv4)" ;; old: "#E8E8FF"
-            ;; :inner-emul "var(--colors-fe4)" ;; old: "#F5E1E8"
-            ;; :fmenu-expr "var(--colors-fx8)" ;; old: "#C4D1CC"
-            ;; :fmenu-eval "var(--colors-fv8)" ;; old: "#C8CAE0"
-            ;; :fmenu-emul "var(--colors-fe8)" ;; old: "#DDC2CD"
-            ;; :fmenu-base "var(--colors-n8)"
-            ;; :fmenu-glow "var(--colors-n5)"
-            :ring       "#B8C4FF"})))
+            :ring "#B8C4FF"})))
 
 (def colors-dark
   (let [n-scale (scale->kvs (reverse scale-night) "n")
@@ -178,22 +166,7 @@
     (merge n-scale m-scale signal-scale
            expr-scale eval-scale emul-scale
            semantic-colors
-           {
-            ;; :inner-expr "var(--colors-fx4)" ;; old: "#3B524F"
-            ;; :inner-eval "var(--colors-fv4)" ;; old: "#3C3E5E"
-            ;; :inner-emul "var(--colors-fe4)" ;; old: "#593447"
-            ;; :fmenu-expr "var(--colors-fx8)" ;; old: "#516F6C"
-            ;; :fmenu-eval "var(--colors-fv8)" ;; old: "#51537E"
-            ;; :fmenu-emul "var(--colors-fe8)" ;; old: "#654E6A"
-            ;; :fmenu-base "var(--colors-n8)"
-            ;; :fmenu-glow "var(--colors-n11)"
-            :ring       "#A19E9C"})))
-
-;; (def scale-sand-outer (concat (drop 2 scale-sand)
-;;                               (take 2 (repeat (last scale-sand)))))
-
-;; (def scale-night-outer (concat (drop 1 scale-sand)
-;;                                (take 1 (repeat (last scale-sand)))))
+           {:ring "#A19E9C"})))
 
 
 (comment
@@ -414,195 +387,4 @@
        
   ;; 31 "#000000" ;;
 )
-
-
-
-(comment
-  ;; Calculations/experiments to map old scale values onto new ones
-
-  (def sand-old
-    ["#fdfbfa"
-     "#f2efed"
-     "#e6e3e1"
-     "#d6d2cf"
-     "#c4c0be"
-     "#b2adab"
-     "#a19c9b"
-     "#8d8887"
-     "#7e7978"
-     "#6f6a69"
-     "#5c5856"
-     "#4c4846"
-     "#373332"
-     "#272322"
-     "#181514"])
-
-  (def night-old
-    ["#fafbff"
-     "#edeff7"
-     "#e0e3ef"
-     "#cfd2df"
-     "#bdc1ce"
-     "#aaadbb"
-     "#999dac"
-     "#858899"
-     "#76798c"
-     "#666a7d"
-     "#55586b"
-     "#44485b"
-     "#2e3347"
-     "#202337"
-     "#131328"])
-
-
-  (let [old-scale (mapv #(.cssToApcach ap % #js {:fg "#000000"}) night-old)
-        new-scale scale-night-apcach
-        get-contrast (fn [col-old col-new]
-                       (Math/abs (- (.. col-old -lightness)
-                                    (.. col-new -lightness))))]
-    (for [i (range (count old-scale))
-          :let [col-old (old-scale i)
-                min-contrast (reduce
-                              (fn [[min-pos min-cr] [j col]]
-                                (let [cr (get-contrast col-old col)]
-                                  (if (< cr min-cr)
-                                    [(inc j) cr]
-                                    [min-pos min-cr])))
-                              [-1 10000]
-                              (map vector (range) new-scale)
-                              ;; (map vector (range 29 -1 -1) (reverse new-scale))
-                              ,)]]
-      [i min-contrast]))
-
-  ;; legend: [index-old [index-new contrast-ratio]]
-
-  ;; Night lightness old vs new
-  ;;      0  [0 [1 0.00177001953125]]
-  ;;     50  [1 [3 0.00213623046875]]
-  ;;    100  [2 [5 0.001708984375]]
-  ;;    200  [3 [8 0.00341796875]]
-  ;;    300  [4 [11 0.008544921875]]
-  ;;    400  [5 [14 0.0089111328125]]
-  ;;    500  [6 [16 0.001841796875000079]]
-  ;;    600  [7 [19 0.002899902343750038]]
-  ;;    700  [8 [21 0.0022524414062499165]]
-  ;;    800  [9 [23 0.0034882812499998916]]
-  ;;    900  [10 [25 0.002193847656250081]]
-  ;;   1000  [11 [27 0.014431640624999964]]
-  ;;   1100  [12 [30 0.20385791015625002]]
-  ;;   1150  [13 [30 0.20385791015625002]]
-  ;;   1200  [14 [30 0.20385791015625002]]
-
-  ;; Sand lightness old vs new
-  ;;      0  [0 [1 4.8828125E-4]]
-  ;;     50  [1 [3 9.765625E-4]]
-  ;;    100  [2 [5 0.001220703125]]
-  ;;    200  [3 [8 0.00390625]]
-  ;;    300  [4 [11 0.00732421875]]
-  ;;    400  [5 [14 0.0107421875]]
-  ;;    500  [6 [16 0.001353515625000079]]
-  ;;    600  [7 [19 0.002899902343750038]]
-  ;;    700  [8 [21 0.0027343749999999556]]
-  ;;    800  [9 [23 0.005916992187499748]]
-  ;;    900  [10 [25 0.0012109374999999534]]
-  ;;   1000  [11 [27 0.013943359374999964]]
-  ;;   1100  [12 [30 0.20409887695312504]]
-  ;;   1150  [13 [30 0.20409887695312504]]
-  ;;   1200  [14 [30 0.20409887695312504]]
-
-  ;; ---
-
-  ;; Misguided approach to compare contrast ratios:
-  ;; -> too coarse, sometimes 4 values with same contrast ratio
-  ;; -> use lightness, better aligned with perception
-
-  ;; Sand vs col-old (bg, reversed)
-  ;; => ([0 [3 0]]
-  ;;     [1 [5 0]]
-  ;;     [2 [7 0]]
-  ;;     [3 [10 0]]
-  ;;     [4 [13 0]]
-  ;;     [5 [16 0]]
-  ;;     [6 [18 0]]
-  ;;     [7 [21 0]]
-  ;;     [8 [23 0]]
-  ;;     [9 [25 0]]
-  ;;     [10 [27 0]]
-  ;;     [11 [28 0]]
-  ;;     [12 [30 0]]
-  ;;     [13 [30 0]]
-  ;;     [14 [30 0]])
-
-  ;; Sand vs col-old (bg)
-  ;; => ([0 [1 0]]       0
-  ;;     [1 [1 0]]      50
-  ;;     [2 [3 0]]     100
-  ;;     [3 [6 0]]     200
-  ;;     [4 [9 0]]     300
-  ;;     [5 [12 0]]    400
-  ;;     [6 [14 0]]    500
-  ;;     [7 [17 0]]    600
-  ;;     [8 [19 0]]    700
-  ;;     [9 [21 0]]    800
-  ;;     [10 [23 0]]   900
-  ;;     [11 [25 0]]  1000
-  ;;     [12 [27 0]]  1100
-  ;;     [13 [28 0]]  1150
-  ;;     [14 [28 0]]) 1200
-
-  
-  ;; Sand vs col-new (bg) (== Night vs col-new (bg))
-  ;; => ([0 [1 0]]
-  ;;     [1 [1 0]]
-  ;;     [2 [3 0]]
-  ;;     [3 [6 0]]
-  ;;     [4 [8 0]] <9
-  ;;     [5 [11 0]] <12
-  ;;     [6 [14 0]]
-  ;;     [7 [17 0]]
-  ;;     [8 [19 0]]
-  ;;     [9 [21 0]]
-  ;;     [10 [23 0]]
-  ;;     [11 [25 0]]
-  ;;     [12 [27 0]]
-  ;;     [13 [28 0]]
-  ;;     [14 [28 0]])
-
-  
-  ;; Night vs col-old (bg) (== Sand vs col-old (bg))
-  ;; => ([0 [1 0]]
-  ;;     [1 [1 0]]
-  ;;     [2 [3 0]]
-  ;;     [3 [6 0]]
-  ;;     [4 [9 0]]
-  ;;     [5 [12 0]]
-  ;;     [6 [14 0]]
-  ;;     [7 [17 0]]
-  ;;     [8 [19 0]]
-  ;;     [9 [21 0]]
-  ;;     [10 [23 0]]
-  ;;     [11 [25 0]]
-  ;;     [12 [27 0]]
-  ;;     [13 [28 0]]
-  ;;     [14 [28 0]])
-
-  ;; Night vs col-new (bg)
-  ;; => ([0 [1 0]]
-  ;;     [1 [1 0]]
-  ;;     [2 [3 0]]
-  ;;     [3 [6 0]]
-  ;;     [4 [8 0]] <9
-  ;;     [5 [11 0]] <12
-  ;;     [6 [14 0]]
-  ;;     [7 [17 0]]
-  ;;     [8 [19 0]]
-  ;;     [9 [21 0]]
-  ;;     [10 [23 0]]
-  ;;     [11 [25 0]]
-  ;;     [12 [27 0]]
-  ;;     [13 [28 0]]
-  ;;     [14 [28 0]])
-
-  
-  ,)
 

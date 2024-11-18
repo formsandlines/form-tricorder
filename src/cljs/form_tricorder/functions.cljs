@@ -2,17 +2,21 @@
   (:require
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
-   [helix.dom :as d]
+   [helix.dom :as d :refer [$d]]
    [garden.core :as garden]
    ;; ["react" :as react]
    [formform.calc :as calc]
    [formform.io :as io]
    [clojure.math]
+   [clojure.string :as string]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core]
    [formform-vis.utils :refer [save-svg]]
    [form-tricorder.components.export-dialog :refer [ExportDialog]]
    [form-tricorder.components.common.button :refer [Button]]
+   [form-tricorder.components.common.select
+    :refer [Select SelectTrigger SelectValue SelectItem SelectContent
+            SelectGroup SelectLabel]]
    [form-tricorder.stitches-config :refer [css]]
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
@@ -183,6 +187,90 @@
   [_ args]
   ($ F-Vmap--init {& args}))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; formDNA
+
+(defnc F-FDNA
+  [{:keys [dna]}]
+  (let [styles (css {:font-family "$mono"
+                     :font-size "$xs"
+                     "& code" {:word-wrap "break-word"
+                               :letter-spacing "0.05em"
+                               :display "flex"
+                               "& > *"
+                               {:padding "0.1rem 0"}
+                               ".dna"
+                               {:display "inline-flex"
+                                :flex-wrap "wrap"
+                                "& > span"
+                                {:padding "0 0.1rem"}
+                                "& > span:nth-child(odd)"
+                                {:color "$n29"
+                                 :background-color "$n3"}
+                                "& > span:nth-child(even)"
+                                {:color "$m29"
+                                 :background-color "$m3"}}}})]
+    (d/div {:class (styles)}
+      (d/code
+        (d/span "::")
+        (d/span
+          {:class "dna"}
+          (for [[group i] (map vector (partition 4 dna) (range))
+                :let [s (string/join "" group)]]
+            (d/span
+              {:key (str i)}
+              s)))))))
+
+(defn code->str
+  [c]
+  (case c
+    "const" "Constants (NUIM)"
+    (str (string/upper-case c)
+         " → 0123")))
+
+(defnc EncodingSel
+  [{:keys [current-code set-code]}]
+  (let [encodings ["const" "nmui" "nuim"]]
+    ($d Select
+      {:id "fdna-encoding-select"
+       :value current-code
+       :onValueChange (fn [v] (set-code v))}
+      ($ SelectTrigger
+         {:layer "inner"
+          :style {:width "10rem"}}
+         ($d SelectValue
+           (code->str current-code)))
+      ($ SelectContent
+         {:layer "inner"}
+         (for [c encodings
+               :let [label (code->str c)]]
+           ($ SelectItem
+              {:key c
+               :value c
+               :layer "inner"}
+              label))))))
+
+(defnc F-FDNA--init
+  [args]
+  (let [[code set-code] (hooks/use-state "const")
+        dna-view (rf/subscribe [:input/->dna-view (keyword code)])]
+    (d/div
+      {:style {:display "flex"
+               :flex-direction "column"
+               :gap "1rem"}}
+      ($ EncodingSel {:current-code code
+                      :set-code set-code})
+      ($ F-FDNA {:dna dna-view
+                 & args}))))
+
+(defmethod gen-component :fdna
+  [_ args]
+  ($ F-FDNA--init {& args}))
+
+(comment
+  (let [dna (map (fn [part] (string/join "" (map name part))) (partition 4 (calc/rand-dna 3)))])
+  ,)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Visualization

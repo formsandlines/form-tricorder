@@ -111,6 +111,18 @@
      ;; (println "computing value")
      (expr/op-get formDNA :dna))))
 
+(rf/reg-sub
+ :input/->dna-view
+ :<- [:input/->dna]
+ (fn [dna [_ type]]
+   (when (= :not-found dna)
+     (throw (ex-info "formDNA data missing!" {})))
+   (let [dna-view (case type
+                    :nmui (calc/dna->digits calc/nmui-code dna)
+                    :nuim (calc/dna->digits calc/nuim-code dna)
+                    (mapv name dna))]
+     dna-view)))
+
 
 ;; (rf/reg-sub
 ;;  :input/->vmap

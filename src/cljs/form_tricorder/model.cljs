@@ -18,7 +18,9 @@
   [{:id    :vtable
     :label "Value table"}
    {:id    :vmap
-    :label "vmap"}])
+    :label "vmap"}
+   {:id    :fdna
+    :label "formDNA"}])
 
 (def emul-items
   [{:id    :selfi
