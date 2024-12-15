@@ -61,7 +61,7 @@
                :_paddingY "$3"}
 
      :sm   {:height "$9"
-            :border-radius "$md"
+            :border-radius "$base"
             :_paddingX "$3"
             :_paddingY "$3"}
 

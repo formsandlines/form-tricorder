@@ -29,11 +29,6 @@
   (styled (.-Trigger Collapsible)
           {}))
 
-;; const scaleUp = keyframes({
-;;   '0%': { transform: 'scale(1)' },
-;;   '100%': { transform: 'scale(1.5)' },
-;; });
-
 (def slide-out
   (keyframes
    {:from {:width 0}

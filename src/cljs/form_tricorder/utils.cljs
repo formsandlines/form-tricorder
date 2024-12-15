@@ -1,6 +1,7 @@
 (ns form-tricorder.utils
   (:require
-   [helix.hooks :as hooks])
+   [helix.hooks :as hooks]
+   [clojure.math :as math])
   (:require-macros [form-tricorder.utils]))
 
 (defn splitv-atv [i v]
@@ -79,7 +80,30 @@
            (- dmax dmin)))
      rmin))
 
+(defn pad
+  "Pads `0` or given `pad-char` before string."
+  ([len s] (pad \0 len s))
+  ([pad-char len s]
+   (let [s (if (string? s) s (str s))]
+     (loop [s s]
+       (if (< (count s) len)
+         (recur (str pad-char s))
+         s)))))
+
+(defn get-timestamp
+  []
+  (let [date    (js/Date.)
+        year    (.getUTCFullYear date)
+        month   (pad 2 (inc (.getUTCMonth date)))
+        day     (pad 2 (.getUTCDate date))
+        hours   (pad 2 (.getHours date))
+        minutes (pad 2 (.getMinutes date))
+        seconds (pad 2 (.getSeconds date))]
+    (str year month day "-" hours minutes seconds)))
+
 (comment
+  (pad 2 (.getUTCDate (js/Date.)))
+  (get-timestamp)
 
   (= (merge-deep
       {:a 1

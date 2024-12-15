@@ -50,27 +50,27 @@
     {;; double-stranded modular scale
      ;; ratio: 1:√3 (1.732), bases: 16, 14
      ;; https://www.modularscale.com/?16,14&px&1.732
-     :1 "0.875rem" ;; 14px
-     :2 "1rem"     ;; 16px
-     :3 "1.516rem" ;; 24.248px
-     :4 "1.732rem" ;; 27.712px
-     :5 "2.625rem" ;; 41.998px
-     :6 "3rem"     ;; 47.997px
-     :7 "4.546rem" ;; 72.74px
-     :8 "5.196rem" ;; 83.131px
+     :1 "0.875rem" ;; 14px  sm
+     :2 "1rem"     ;; 16px  base
+     :3 "1.516rem" ;; 24.248px  ~2xl
+     :4 "1.732rem" ;; 27.712px  ~2-3xl
+     :5 "2.625rem" ;; 41.998px  ~4-5xl
+     :6 "3rem"     ;; 47.997px  ~5xl
+     :7 "4.546rem" ;; 72.74px   ~7xl
+     :8 "5.196rem" ;; 83.131px  ~7-8xl
 
-     :xs   "0.75rem"  ;; 12px  OK :small -> :xs
-     :sm   "0.875rem" ;; 14px  OK :base -> :sm
-     :base "1rem"     ;; 16px  OK :medium -> :base
+     :xs   "0.75rem"  ;; 12px     OK :small -> :xs
+     :sm   "0.875rem" ;; 14px  1  OK :base -> :sm
+     :base "1rem"     ;; 16px  2  OK :medium -> :base
      :lg   "1.125rem" ;; 18px
      :xl   "1.25rem"  ;; 20px
-     :2xl  "1.5rem"   ;; 24px
-     :3xl  "1.875rem" ;; 30px
-     :4xl  "2.25rem"  ;; 36px
-     :5xl  "3rem"     ;; 48px
+     :2xl  "1.5rem"   ;; 24px  ~3
+     :3xl  "1.875rem" ;; 30px  ~4
+     :4xl  "2.25rem"  ;; 36px  ~4-5
+     :5xl  "3rem"     ;; 48px  ~6
      :6xl  "3.75rem"  ;; 60px
-     :7xl  "4.5rem"   ;; 72px
-     :8xl  "6rem"     ;; 96px
+     :7xl  "4.5rem"   ;; 72px  ~7
+     :8xl  "6rem"     ;; 96px  ~8
      :9xl  "8rem"     ;; 128px
      }
 

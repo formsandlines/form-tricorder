@@ -4,16 +4,20 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    [garden.core :as garden]
-   ;; ["react" :as react]
+   ["react" :as react]
    [formform.calc :as calc]
+   [formform.expr :as expr]
    [formform.io :as io]
    [clojure.math]
    [clojure.string :as string]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core]
-   [formform-vis.utils :refer [save-svg]]
+   [formform-vis.utils :refer [save-svg save-img]]
+   [form-tricorder.icons :refer [PerspectivesExpandIcon
+                                 PerspectivesCollapseIcon]]
    [form-tricorder.components.export-dialog :refer [ExportDialog]]
    [form-tricorder.components.common.button :refer [Button]]
+   [form-tricorder.components.common.toggle :refer [Toggle]]
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
@@ -133,17 +137,66 @@
 ;;         ["td"
 ;;          {:border-top "1px solid var(--colors-inner_n200)"}]]))
 
+(def vmap-export-css
+  (garden/css
+   [[":host"
+     {:font-family "var(--fonts-mono)"
+      :font-size "var(--fontSizes-xs)"
+      :color "var(--colors-m0)"}]]))
+
 (defnc F-Vmap--init
   [_]
   (let [[psps? set-psps?] (hooks/use-state false)
         ref (hooks/use-ref nil)
         varorder (rf/subscribe [:input/varorder])
-        dna (rf/subscribe [:input/->dna])]
+        dna (rf/subscribe [:input/->dna])
+        ;; make-preview (fn [varorder dna]
+        ;;                (fnc [_ preview-ref]
+        ;;                  {:wrap [(react/forwardRef)]}
+        ;;                  (let [preview-ref (hooks/use-ref nil)]
+        ;;                    ($ :ff-vmap
+        ;;                       {:ref preview-ref
+        ;;                        :varorder varorder
+        ;;                        :dna dna}))))
+        ;; (fn []
+        ;;   (let [el (js/document.createElement "ff-vmap")]
+        ;;     (.setAttribute el "full-svg" "true")
+        ;;     (aset el "varorder" varorder)
+        ;;     (aset el "dna" dna)
+        ;;     el))
+        ]
     (hooks/use-effect
       [dna psps?]
       (let [webc-el @ref]
         (aset webc-el "dna" dna)))
     (d/div {:class "Vmap"}
+      (d/div
+        {:style {:display "flex"
+                 :gap "4px"
+                 :margin-bottom 10}}
+        ($ Toggle {:variant "outline"
+                   :layer "inner"
+                   ;; :size "md"
+                   :on-click (fn [_] (set-psps? (fn [b] (not b))))}
+           ($ (if psps? PerspectivesCollapseIcon
+                  PerspectivesExpandIcon))
+           (d/span
+             {:style {:margin-left "0.2rem"}}
+             "Perspectives"))
+        ($ ExportDialog
+           {:save-svg save-svg
+            :save-img save-img
+            :get-svg-el #(.. % -shadowRoot
+                             (getElementById (if psps?
+                                               "psps-figure"
+                                               "vmap-figure")))
+            :vis-id (if psps? "ff-vmap-psps" "ff-vmap")
+            :vis-props {:varorder varorder
+                        :dna dna
+                        :full-svg true
+                        :styles (str \" vmap-export-css \")
+                        ;; "bg-color" (str "\"" "var(--colors-m29)" "\"")
+                        }}))
       (if psps?
         ($ :ff-vmap-psps {:ref ref
                           ;; "full-svg" (str true)
@@ -154,34 +207,7 @@
                      ;; "full-svg" (str true)
                      "bg-color" (str "\"" "var(--colors-outer-bg)" "\"")
                      :padding 6
-                     :varorder (str varorder)}))
-      (comment
-        ($ Button {:variant "outline"
-                   :size "sm"
-                   :on-click (fn [_] (set-psps? (fn [b] (not b))))}
-           (if psps? "-" "+"))
-        ($ ExportDialog)
-        ($ Button
-           {:variant "outline"
-            :size "sm"
-            :on-click
-            (fn [e]
-              (let [el (js/document.createElement "ff-vmap")]
-                (.setAttribute el "full-svg" "true")
-                (aset el "varorder" varorder)
-                (aset el "dna" dna)
-                (.. e -target -parentNode (appendChild el))
-                (js/setTimeout
-                 (fn []
-                   (let [vmap (.. el -shadowRoot
-                                  (getElementById "vmap-figure"))]
-                     ;; (js/console.log vmap)
-                     (save-svg vmap "test.svg")))
-                 1000)
-            
-                ;; (save-svg el "test.svg")
-                ))}
-           "Save SVG")))))
+                     :varorder (str varorder)})))))
 
 (defmethod gen-component :vmap
   [_ args]
@@ -216,7 +242,7 @@
         (d/span "::")
         (d/span
           {:class "dna"}
-          (for [[group i] (map vector (partition 4 dna) (range))
+          (for [[group i] (map vector (partition-all 4 dna) (range))
                 :let [s (string/join "" group)]]
             (d/span
               {:key (str i)}
@@ -269,7 +295,9 @@
   ($ F-FDNA--init {& args}))
 
 (comment
-  (let [dna (map (fn [part] (string/join "" (map name part))) (partition 4 (calc/rand-dna 3)))])
+  (expr/op-get (expr/eval->expr-all {:varorder nil} [] {}) :dna)
+  ;; => "[:fdna [a] ::MIUN]"
+  ;; => [:fdna [a] [:M :I :U :N]]
   ,)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

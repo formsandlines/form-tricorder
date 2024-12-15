@@ -10,15 +10,19 @@
    {:id    :depthtree
     :label "Depth tree"}
    {:id    :edn
-    :label "EDN"}
+    :label "EDN data format"}
    {:id    :json
-    :label "JSON"}])
+    :label "JSON data format"}])
 
 (def eval-items
   [{:id    :vtable
     :label "Value table"}
    {:id    :vmap
     :label "vmap"}
+   ;; {:id    :vcube
+   ;;  :label "vcube"}
+   ;; {:id    :vgraph
+   ;;  :label "vgraph (hypercube)"}
    {:id    :fdna
     :label "formDNA"}])
 
@@ -27,8 +31,9 @@
     :label "SelFi"}
    {:id    :mindform
     :label "mindFORM"}
-   {:id    :lifeform
-    :label "lifeFORM"}])
+   ;; {:id    :lifeform
+   ;;  :label "lifeFORM"}
+   ])
 
 (def modes
   [{:id    :expr

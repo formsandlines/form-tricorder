@@ -8,6 +8,53 @@
 ;; ^.+\sd=(".+?")\stransform=(".+?").+$
 ;; (d/path\n{:d $1\n:transform $2})
 
+
+(defnc PerspectivesExpandIcon
+  [{:keys [classes style] :or {style {}}}]
+  (d/svg
+    {:class (str "icon" (when classes (str " " classes)))
+     :style (merge {:stroke "currentcolor"
+                    :stroke-width "1.2px"
+                    :stroke-linecap "round"
+                    :width 16
+                    :height 16}
+                   style)
+     :viewBox "0 0 16 16"
+     :xmlns "http://www.w3.org/2000/svg"}
+    (d/g
+      {:transform "translate(8,8)"}
+      (d/line
+        {:x1 -6.8 :x2 6.8
+         :y1 0 :y2 0
+         :transform "rotate(30)"})
+      (d/line
+        {:x1 -6.8 :x2 6.8
+         :y1 0 :y2 0
+         :transform "rotate(-30)"})
+      (d/line
+        {:x1 -6.8 :x2 6.8
+         :y1 0 :y2 0
+         :transform "rotate(90)"}))))
+
+(defnc PerspectivesCollapseIcon
+  [{:keys [classes style] :or {style {}}}]
+  (d/svg
+    {:class (str "icon" (when classes (str " " classes)))
+     :style (merge {:stroke "currentcolor"
+                    :stroke-width "1.2px"
+                    :stroke-linecap "round"
+                    :width 16
+                    :height 16}
+                   style)
+     :viewBox "0 0 16 16"
+     :xmlns "http://www.w3.org/2000/svg"}
+    (d/g
+      {:transform "translate(8,8)"}
+      (d/line
+        {:x1 -6.8 :x2 6.8
+         :y1 0 :y2 0}))))
+
+
 (defn ficon-params
   [mode-id]
   {:size 24})
