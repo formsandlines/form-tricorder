@@ -75,14 +75,19 @@
       (global-styles))
     (hooks/use-effect
       [appearance]
-      (if (= appearance :dark)
-        (do (.add js/document.body.classList st/dark-theme)
-            (.remove js/document.body.classList st/light-theme))
-        (do (.add js/document.body.classList st/light-theme)
-            (.remove js/document.body.classList st/dark-theme))))
+      (do
+        (let [root-el (.. js/document -documentElement)]
+          (.setAttribute root-el "data-theme" (name appearance))
+          (aset (.-style root-el) "color-scheme" (name appearance)))
+        (if (= appearance :dark)
+          (do (.add js/document.body.classList st/dark-theme)
+              (.remove js/document.body.classList st/light-theme))
+          (do (.add js/document.body.classList st/light-theme)
+              (.remove js/document.body.classList st/dark-theme)))))
     ($ ErrorBoundary
        (d/div
-         {:class (str "App " (styles))}
+        {:class (str "App " (styles))
+         :style {:color-scheme (name appearance)}}
          (d/div
            {:class (item-styles)}
            ($ Header))
