@@ -4,7 +4,7 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.stitches-config :refer [styled css keyframes]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :as utils :refer [pp-var]]
    ;; [form-tricorder.components.varorder-select :refer [VarorderSelect]]
    [form-tricorder.components.common.label :refer [Label]]
@@ -16,7 +16,7 @@
 
 
 (def Root
-  (styled (.-Root Collapsible)
+  (st/styled (.-Root Collapsible)
           {:display "flex"
            :align-items "center"
            :gap "$3"
@@ -26,21 +26,21 @@
            :background-color "$outer-bg"}))
 
 (def Trigger
-  (styled (.-Trigger Collapsible)
+  (st/styled (.-Trigger Collapsible)
           {}))
 
 (def slide-out
-  (keyframes
+  (st/keyframes
    {:from {:width 0}
     :to   {:width "var(--radix-collapsible-content-width)"}}))
 
 (def slide-in
-  (keyframes
+  (st/keyframes
    {:from {:width "var(--radix-collapsible-content-width)"}
     :to   {:width 0}}))
 
 (def Content
-  (styled (.-Content Collapsible)
+  (st/styled (.-Content Collapsible)
           {:overflow "hidden"
            "&[data-state=open]"
            {:animation (str slide-out " 100ms ease-in")}
@@ -57,8 +57,8 @@
   {:width "$icon-sm"
    :height "$icon-sm"})
 
-(def IconChevronLeft (styled ChevronLeftIcon common-icon-styles))
-(def IconChevronRight (styled ChevronRightIcon common-icon-styles))
+(def IconChevronLeft (st/styled ChevronLeftIcon common-icon-styles))
+(def IconChevronRight (st/styled ChevronRightIcon common-icon-styles))
 
 (defn display-varorder
   [varorder]

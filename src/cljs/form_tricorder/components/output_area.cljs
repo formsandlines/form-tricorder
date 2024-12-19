@@ -5,12 +5,12 @@
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.view-pane :refer [ViewPane]]
-   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :refer [log]]
    ["@devbookhq/splitter$default" :as Splitter]))
 
 (def styles
-  (css {:height "100%"
+  (st/css {:height "100%"
         ;; :overflow-y "auto"
         :padding "0" ; "0.2rem"
         :box-sizing "border-box"
@@ -24,7 +24,7 @@
         }))
 
 (def gutter-styles
-  (css {:position "relative"
+  (st/css {:position "relative"
         "&:hover > *"
         {:background-color "$m16"} ;; outer_hl
         "&::before"
@@ -38,12 +38,12 @@
          :height 1}}))
 
 (def dragger-styles
-  (css {:background-color "$m11" ;; outer_m200
+  (st/css {:background-color "$m11" ;; outer_m200
         :position "relative"
         :z-index 999}))
 
 (def item-styles
-  (css {:height "100%"
+  (st/css {:height "100%"
         :width "100%"
         :overflow-y "auto"
         }))

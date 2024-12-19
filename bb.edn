@@ -1,0 +1,5 @@
+{:paths ["src" "dev"]
+ :tasks
+ {css-vars (shell {:dir "."} "npx nbb dev/css/core.cljs")
+  css-repl (shell {:dir "."} "npx nbb nrepl-server")}}
+

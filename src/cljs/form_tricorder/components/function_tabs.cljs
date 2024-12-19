@@ -7,21 +7,21 @@
     [form-tricorder.model :as model]
     [form-tricorder.icons :refer [function-icon]]
     [form-tricorder.functions :as func]
-    [form-tricorder.stitches-config :refer [styled css]]
+    [form-tricorder.stitches-config :as st]
     [form-tricorder.utils :refer [log]]
     ["@radix-ui/react-tabs" :as Tabs]))
 
 
 
 (def Root
-  (styled (.-Root Tabs)
+  (st/styled (.-Root Tabs)
           {:display "flex"
            :gap "$6" ; "0.6rem"
            :padding "$4" ; "0.4rem"
            }))
 
 (def TabList
-  (styled (.-List Tabs)
+  (st/styled (.-List Tabs)
           {:display "flex"
            :flex-direction "column"
            :gap "$2" ; "0.4rem"
@@ -31,7 +31,7 @@
   {:edn "EDN" :json "JSON" :fdna "DNA"})
 
 (def Trigger
-  (styled (.-Trigger Tabs)
+  (st/styled (.-Trigger Tabs)
           {:flex "flex-none"
 
            :touch-action "manipulation"
@@ -81,7 +81,7 @@
                           (str "$inner-tab-" (name mode-id) "-hover")}}}))}))
 
 (def Content
-  (styled (.-Content Tabs)
+  (st/styled (.-Content Tabs)
           {:flex "1 1 auto"
            :padding "0 0 $10 0"}))
 

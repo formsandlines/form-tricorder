@@ -2,7 +2,7 @@
   (:require
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.dom :as d :refer [$d]]
-   [form-tricorder.stitches-config :refer [styled css]]))
+   [form-tricorder.stitches-config :as st]))
 
 ;; RegEx to convert paths to Helix components:
 ;; ^.+\sd=(".+?")\stransform=(".+?").+$
@@ -60,7 +60,7 @@
   {:size 24})
 
 (def FunctionIcon
-  (styled "svg"
+  (st/styled "svg"
           { ;; :opacity "0.7"
            "& .ficon-area" {:fill "currentcolor"
                             :fill-opacity "0.5"}

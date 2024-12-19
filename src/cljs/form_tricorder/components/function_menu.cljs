@@ -5,24 +5,24 @@
    [helix.dom :as d :refer [$d]]
    ;; [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.model :as model :refer [modes]]
-   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :refer [log]]
    [form-tricorder.icons :refer [function-icon]]
    ["@radix-ui/react-menubar" :as Menubar]))
 
 
 (def Root
-  (styled (.-Root Menubar)
+  (st/styled (.-Root Menubar)
           {:display "flex"
            :column-gap "$2" ; "4px"
            :box-sizing "border-box"}))
 
 (def Menu
-  (styled (.-Menu Menubar)
+  (st/styled (.-Menu Menubar)
           {}))
 
 (def Trigger
-  (styled (.-Trigger Menubar)
+  (st/styled (.-Trigger Menubar)
           (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
             {:flex "1"
              :display "inline-block"
@@ -56,11 +56,11 @@
                            }]))}})))
 
 (def Portal
-  (styled (.-Portal Menubar)
+  (st/styled (.-Portal Menubar)
           {}))
 
 (def Content
-  (styled (.-Content Menubar)
+  (st/styled (.-Content Menubar)
           (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
             {:display "flex"
              :flex-direction "column"
@@ -75,7 +75,7 @@
              })))
 
 (def Item
-  (styled (.-Item Menubar)
+  (st/styled (.-Item Menubar)
           {
            :display "flex"
            ;; :justify-content "space-between"

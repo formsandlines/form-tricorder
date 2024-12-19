@@ -5,7 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :refer [css styled]]
+   [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-label" :as LabelPrimitive]
    ;; ["@stitches/react" :refer [css]]
@@ -16,7 +16,7 @@
 
 ;; "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 (def Root
-  (styled (.-Root LabelPrimitive)
+  (st/styled (.-Root LabelPrimitive)
           {:font-size "$sm"
            :font-weight "$normal"
            :line-height "$none"

@@ -8,7 +8,7 @@
    ;; [form-tricorder.icons :refer [InputHelpIcon]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
-   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :refer [log]]
    ["@codemirror/state" :refer [EditorState StateField StateEffect]]
    ["@codemirror/view" :refer [EditorView keymap placeholder
@@ -23,14 +23,14 @@
    ))
 
 (def styles
-  (css {:display "flex"
+  (st/css {:display "flex"
         :align-items "stretch"
         :justify-content "space-between"
         :min-height "$10"
         }))
 
 (def input-styles
-  (css {:fontFamily "$mono"
+  (st/css {:fontFamily "$mono"
         :background-color "$inner-bg"
         ;; :color "$inner-fg"
         :width "100%"
@@ -43,13 +43,13 @@
         }))
 
 (def button-wrapper-styles
-  (css {
+  (st/css {
         :padding "$1-5"
         ;; :align-items "center"
         }))
 
 (def button-styles
-  (css {:height "$7"
+  (st/css {:height "$7"
         :width "$7" ;; "$icon-input" ; "1.9rem"
         :touch-action "manipulation"
         :display "inline-flex"
@@ -217,7 +217,7 @@
         {:class (input-styles)
          :ref editor})
       (d/div
-        {:class ((css {:display "flex"
+        {:class ((st/css {:display "flex"
                        :align-items "center"
                        :background-color "$inner-bg"
                        :padding "$1"}))}
@@ -239,7 +239,7 @@
               (set-submit-mode (not submit-mode)))}
            ($d (if submit-mode LinkBreak1Icon LinkNone1Icon))))
       (d/div
-        {:class ((css {:height "inherit"
+        {:class ((st/css {:height "inherit"
                        :width (if submit-mode "$9-5" 0)
                        :margin-left (if submit-mode "$1" 0)
                        :visibility (if submit-mode "visible" "hidden")

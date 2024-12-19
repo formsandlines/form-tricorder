@@ -21,7 +21,7 @@
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
-   [form-tricorder.stitches-config :refer [css]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :as utils :refer [clj->js*]]))
 
 
@@ -43,7 +43,7 @@
 
 (defnc F-EDN
   [{:keys [expr]}]
-  (let [styles (css {:font-family "$mono"
+  (let [styles (st/css {:font-family "$mono"
                      ;; :background-color "$inner_hl"
                      })]
     (d/pre {:class (styles)}
@@ -65,7 +65,7 @@
 
 (defnc F-JSON
   [{:keys [expr]}]
-  (let [styles (css {:font-family "$mono"
+  (let [styles (st/css {:font-family "$mono"
                      :font-size "$1"
                      ;; :background-color "$inner_hl"
                      })]
@@ -219,7 +219,7 @@
 
 (defnc F-FDNA
   [{:keys [dna]}]
-  (let [styles (css {:font-family "$mono"
+  (let [styles (st/css {:font-family "$mono"
                      :font-size "$xs"
                      "& code" {:word-wrap "break-word"
                                :letter-spacing "0.05em"

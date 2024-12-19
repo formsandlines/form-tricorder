@@ -5,7 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :refer [css styled]]
+   [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-slot" :refer [Slot]]
    ;; ["@stitches/react" :refer [css]]
@@ -162,8 +162,8 @@
     :layer :outer
     :size "default"}})
 
-(def dButton (styled "button" styles))
-(def Slot (styled Slot styles))
+(def dButton (st/styled "button" styles))
+(def Slot (st/styled Slot styles))
 
 (defnc Button
   [props ref]

@@ -6,6 +6,7 @@
                   :output-dir "public/js"
                   :asset-path "/js"
                   :modules    {:app {:entries [form-tricorder.core]}}
-                  :devtools   {:after-load form-tricorder.core/init!}}}
+                  :devtools   {:reload-strategy :full
+                               :after-load form-tricorder.core/init!}}}
 
  :dev-http {3000 {:root "public"}}}

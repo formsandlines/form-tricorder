@@ -4,7 +4,7 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.icons :refer [SunIcon MoonIcon SwapIcon
                                  ViewVerticalIcon
                                  ViewHorizontalIcon
@@ -17,7 +17,7 @@
 ;; Styled Components
 
 (def Root
-  (styled (.-Root Toolbar)
+  (st/styled (.-Root Toolbar)
           {:display "flex"
            :min-width "max-content"
            :height "100%"
@@ -75,13 +75,13 @@
     :_ring [2 "$colors$ring" 1 "$colors$outer-bg"]}})
 
 (def Button
-  (styled (.-Button Toolbar)
+  (st/styled (.-Button Toolbar)
           (merge itemStyles
                  buttonStyles
                  {})))
 
 (def TextButton
-  (styled (.-Button Toolbar)
+  (st/styled (.-Button Toolbar)
           (merge itemStyles
                  buttonStyles
                  {:padding "$1 $1-5"
@@ -90,14 +90,14 @@
                   {:opacity "0.5"}})))
 
 (def Separator
-  (styled (.-Separator Toolbar)
+  (st/styled (.-Separator Toolbar)
           (merge itemStyles
                  {:width "$px"
                   :background-color "$n8"
                   :margin "0 $1"})))
 
 (def ToggleGroup
-  (styled (.-ToggleGroup Toolbar)
+  (st/styled (.-ToggleGroup Toolbar)
           (merge itemStyles
                  {:display "flex"
                   :min-width "max-content"
@@ -105,18 +105,18 @@
                   })))
 
 (def ToggleItem
-  (styled (.-ToggleItem Toolbar)
+  (st/styled (.-ToggleItem Toolbar)
           (merge itemStyles
                  buttonStyles
                  {})))
 
 ; (def Link
-;   (styled (.-Link Toolbar)
+;   (st/styled (.-Link Toolbar)
 ;           (merge itemStyles
 ;                  linkStyles)))
 
 (def SourceLink
-  (styled (.-Link Toolbar)
+  (st/styled (.-Link Toolbar)
           (merge itemStyles
                  buttonStyles
                  ;; {:display "block"

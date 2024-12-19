@@ -15,14 +15,14 @@
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
-   [form-tricorder.stitches-config :refer [css]]))
+   [form-tricorder.stitches-config :as st]))
 
 (def l "inner")
 
 (defnc ScaleTest
   [{:keys [scale n]}]
   (let [rng (rest (range (inc n)))
-        test-styles (css {:display "flex"
+        test-styles (st/css {:display "flex"
                           :margin-bottom "10px"
                           "> *"
                           {:padding-right "6px"
@@ -33,7 +33,7 @@
     (d/div
      {:class (test-styles)}
      (for [i rng
-           :let [styles (css {:width (str "$" scale "$" i)})]]
+           :let [styles (st/css {:width (str "$" scale "$" i)})]]
        (d/div
         {:key (str i)}
         (d/div
@@ -236,7 +236,7 @@
       (d/h2 "Toggles")
       (let [variants ["default" "outline"]
             sizes ["default" "sm" "lg" "icon" "icon-sm"]
-            icon-style (css {:width "$icon-sm"
+            icon-style (st/css {:width "$icon-sm"
                              :height "$icon-sm"})]
         (d/div
           {:style {:display "grid"
@@ -269,7 +269,7 @@
       (let [variants ["default" "secondary" "destructive"
                       "outline" "ghost" "link"]
             sizes ["default" "sm" "lg" "icon"]
-            icon-style (css {:width "$icon-sm"
+            icon-style (st/css {:width "$icon-sm"
                              :height "$icon-sm"})]
         (d/div
           {:style {:display "grid"

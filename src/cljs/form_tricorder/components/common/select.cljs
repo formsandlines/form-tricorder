@@ -5,7 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :refer [css styled]]
+   [form-tricorder.stitches-config :as st]
    ["@radix-ui/react-select" :as SelectPrimitive]
    ;; ["lucide-react" :refer [Check ChevronDown ChevronUp]]
    ["@radix-ui/react-icons" :refer [CheckIcon ChevronDownIcon ChevronUpIcon]]
@@ -28,7 +28,7 @@
   (.-Icon SelectPrimitive))
 
 (def Trigger
-  (styled (.-Trigger SelectPrimitive)
+  (st/styled (.-Trigger SelectPrimitive)
           {:display "flex"
            :height "$10"
            :width "100%"
@@ -75,8 +75,8 @@
   {:width "$icon-sm" ;; 4 x 4
    :height "$icon-sm"})
 
-(def IconChevronUp (styled ChevronUpIcon common-icon-styles))
-(def IconChevronDown (styled ChevronDownIcon common-icon-styles))
+(def IconChevronUp (st/styled ChevronUpIcon common-icon-styles))
+(def IconChevronDown (st/styled ChevronDownIcon common-icon-styles))
 
 
 (defnc SelectTrigger
@@ -104,7 +104,7 @@
    :_paddingY "$1"})
 
 (def ScrollUpButton
-  (styled (.-ScrollUpButton SelectPrimitive)
+  (st/styled (.-ScrollUpButton SelectPrimitive)
           scroll-button-styles))
 
 (defnc SelectScrollUpButton
@@ -119,7 +119,7 @@
         ($d IconChevronUp))))
 
 (def ScrollDownButton
-  (styled (.-ScrollDownButton SelectPrimitive)
+  (st/styled (.-ScrollDownButton SelectPrimitive)
           scroll-button-styles))
 
 (defnc SelectScrollDownButton
@@ -138,7 +138,7 @@
   (.-Portal SelectPrimitive))
 
 (def Content
-  (styled (.-Content SelectPrimitive)
+  (st/styled (.-Content SelectPrimitive)
           {:position "relative"
            :z-index "50"
            :max-height "$96" ;; 96
@@ -188,7 +188,7 @@
            {:layer :outer}}))
 
 (def Viewport
-  (styled (.-Viewport SelectPrimitive)
+  (st/styled (.-Viewport SelectPrimitive)
           {:padding "$1"}))
 
 (defnc SelectContent
@@ -230,7 +230,7 @@
 
 
 (def Label
-  (styled (.-Label SelectPrimitive)
+  (st/styled (.-Label SelectPrimitive)
           {:_paddingY "$1-5"
            :padding-left "$8"
            :padding-right "$2"
@@ -249,7 +249,7 @@
 
 
 (def Item
-  (styled (.-Item SelectPrimitive)
+  (st/styled (.-Item SelectPrimitive)
           {:position "relative"
            :display "flex"
            :width "100%"
@@ -289,7 +289,7 @@
   (.-ItemText SelectPrimitive))
 
 (def dSpan
-  (styled "span"
+  (st/styled "span"
           {:position "absolute"
            :left "$2"
            :display "flex"
@@ -299,7 +299,7 @@
            :justify-content "center"}))
 
 
-(def IconCheck (styled CheckIcon common-icon-styles))
+(def IconCheck (st/styled CheckIcon common-icon-styles))
 
 (defnc SelectItem
   [props ref]
@@ -319,7 +319,7 @@
 
 
 (def Separator
-  (styled (.-Separator SelectPrimitive)
+  (st/styled (.-Separator SelectPrimitive)
           {:_marginX -1
            :_marginY 1
            :height "$px"

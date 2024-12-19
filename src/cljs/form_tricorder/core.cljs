@@ -3,14 +3,14 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [shadow.css :refer (css)]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.events :as events]
    [form-tricorder.subs :as subs]
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
    ;; [form-tricorder.utils :refer [log]]
-   [form-tricorder.stitches-config
-    :refer [global-css css dark-theme light-theme]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.foobar :refer [Foobar]]
    [form-tricorder.colortest :refer [Colortest]]
    [form-tricorder.components.header :refer [Header]]
@@ -24,7 +24,7 @@
 
 
 (def global-styles
-  (global-css
+  (st/global-css
    {"body"
     {:font-family "$base"
      :font-weight "$normal"
@@ -36,7 +36,7 @@
      {:text-decoration "underline"}}}))
 
 (def styles
-  (css {:display "flex"
+  (st/css {:display "flex"
         :height "100vh"
         :flex-direction "column"
         :padding "$3" ; "0.6rem"
@@ -51,7 +51,7 @@
         }))
 
 (def item-styles
-  (css {"&:last-child"
+  (st/css {"&:last-child"
         {:flex "1"
          }}))
 
@@ -76,10 +76,10 @@
     (hooks/use-effect
       [appearance]
       (if (= appearance :dark)
-        (do (.add js/document.body.classList dark-theme)
-            (.remove js/document.body.classList light-theme))
-        (do (.add js/document.body.classList light-theme)
-            (.remove js/document.body.classList dark-theme))))
+        (do (.add js/document.body.classList st/dark-theme)
+            (.remove js/document.body.classList st/light-theme))
+        (do (.add js/document.body.classList st/light-theme)
+            (.remove js/document.body.classList st/dark-theme))))
     ($ ErrorBoundary
        (d/div
          {:class (str "App " (styles))}

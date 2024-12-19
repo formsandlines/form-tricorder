@@ -5,7 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :refer [css styled]]
+   [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-checkbox" :as CheckboxPrimitive]
    ["lucide-react" :refer [Check]]
@@ -17,7 +17,7 @@
 
 
 (def Root
-  (styled (.-Root CheckboxPrimitive)
+  (st/styled (.-Root CheckboxPrimitive)
           {:height "$icon-sm"
            :width "$icon-sm"
            :flex-shrink 0
@@ -52,14 +52,14 @@
            {:layer :outer}}))
 
 (def Indicator
-  (styled (.-Indicator CheckboxPrimitive)
+  (st/styled (.-Indicator CheckboxPrimitive)
           {:display "flex"
            :align-items "center"
            :justify-content "center"
            :color "currentColor"}))
 
 (def IconCheck
-  (styled Check
+  (st/styled Check
           {:height "$icon-sm"
            :width "$icon-sm"}))
 

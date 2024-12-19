@@ -5,7 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :refer [css styled]]
+   [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-toggle" :as TogglePrimitive]))
 
@@ -13,7 +13,7 @@
 
 
 (def Root
-  (styled (.-Root TogglePrimitive)
+  (st/styled (.-Root TogglePrimitive)
           {:touch-action "manipulation"
            :display "inline-flex"
            :justify-content "center"

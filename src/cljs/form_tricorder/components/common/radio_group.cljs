@@ -5,7 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :refer [css styled]]
+   [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-radio-group" :as RadioGroupPrimitive]
    ["lucide-react" :refer [Circle]]
@@ -17,13 +17,13 @@
 
 
 (def Root
-  (styled (.-Root RadioGroupPrimitive)
+  (st/styled (.-Root RadioGroupPrimitive)
           {:display "grid"
            :gap 2}))
 
 ;;         "ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
 (def Item
-  (styled (.-Item RadioGroupPrimitive)
+  (st/styled (.-Item RadioGroupPrimitive)
           {:aspect-ratio "1 / 1"
            :height "$icon-sm" ;; 4
            :width "$icon-sm" ;; 4
@@ -57,13 +57,13 @@
            {:layer :outer}}))
 
 (def Indicator
-  (styled (.-Indicator RadioGroupPrimitive)
+  (st/styled (.-Indicator RadioGroupPrimitive)
           {:display "flex"
            :align-items "center"
            :justify-content "center"}))
 
 (def IconCircle
-  (styled Circle
+  (st/styled Circle
           {:height "0.625rem" ;; 2.5
            :width  "0.625rem" ;; 2.5
            :fill "currentColor"

@@ -6,17 +6,17 @@
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.function-tabs :refer [FunctionTabs]]
    [form-tricorder.components.common.button :refer [Button]]
-   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.stitches-config :as st]
    ["@radix-ui/react-icons" :refer [Cross2Icon]]
    ))
 
 (def styles
-  (css {:position "relative"
+  (st/css {:position "relative"
         :overflow-y "auto"
         :display "flex"}))
 
 (def close-button-styles
-  (css {:position "absolute"
+  (st/css {:position "absolute"
         :top "$4"
         :right "$4"}))
 
@@ -34,7 +34,7 @@
         {:class "ViewPaneControls"}
         (when-not only-child?
           ($ Button
-             {:css (clj->js {:position "absolute"
+             {:st/css (clj->js {:position "absolute"
                              :width "$6"
                              :height "$6"
                              :top "$4"

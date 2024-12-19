@@ -4,11 +4,11 @@
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
    ;; [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.stitches-config :refer [styled css]]
+   [form-tricorder.stitches-config :as st]
    [form-tricorder.components.app-toolbar :refer [AppToolbar]]))
 
 (def styles
-  (css {:display "flex"
+  (st/css {:display "flex"
         :min-width "max-content"
         :height "1.5rem"
         :padding "0 0.1rem"
@@ -22,14 +22,14 @@
         {:text-decoration "none"}}))
 
 (def item-styles
-  (css {:flex "0 0 auto"}))
+  (st/css {:flex "0 0 auto"}))
 
 (def applink-styles
-  (css {:display "block"
+  (st/css {:display "block"
         :align-self "center"}))
 
 (def toolbar-styles
-  (css {}))
+  (st/css {}))
 
 (defnc Header
   []
