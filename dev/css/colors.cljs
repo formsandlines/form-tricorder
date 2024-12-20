@@ -2,7 +2,8 @@
   (:require
    ["apcach" :as ap]
    [css.common :as c]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [clojure.pprint :as pprint]))
 
 
 ;; Color Scales
@@ -78,13 +79,14 @@
                        (partial c/linear-map 0 (dec n) 360 350) ;; hue
                        )))
 
+(def cs-range (range 0 (inc 31)))
+
 (defn make-scale
   [scale-apcach prefix]
-  (let [key-comparator (c/make-key-comparator #(parse-long (name %)))
-        scale-suffix #(str "-" %)
+  (let [scale-suffix #(str "-" %)
         n-min 0
         n-max (inc (count scale-apcach))]
-    (into (sorted-map-by key-comparator)
+    (into {}
           (concat [[(keyword (str n-min))
                     [(c/css-var prefix (scale-suffix n-min)) "#ffffff"]]]
                   (map (fn [i v]
@@ -107,26 +109,21 @@
 
 ;; Light- and darkmode scales
 (defn derive-scale
-  [from-scale prefix]
-  (map-indexed
-   (fn [i [css-prop _]]
-     (let [k (keyword (str prefix i))]
-       [k [(c/css-var (str "col-" prefix) (str i))
-           (c/css-eval-var css-prop)]]))
-   (vals from-scale)))
-
-
-(def key-comparator
-  (fn [a b]
-    (let [[s1 s2] (map #(re-find #"[a-z]+" (name %)) [a b])
-          [n1 n2] (map #(parse-long (re-find #"\d+" (name %))) [a b])
-          result1 (compare s1 s2)]
-      (case result1
-        0 (compare n1 n2)
-        result1))))
+  ([from-scale prefix] (derive-scale from-scale prefix false))
+  ([from-scale prefix reverse?]
+   (map
+    (fn [[scale-k [css-prop _]]]
+      (let [n (let [n (parse-long (name scale-k))]
+                (if reverse?
+                  (- (last cs-range) n)
+                  n))
+            k (keyword (str prefix n))]
+        [k [(c/css-var (str "col-" prefix) (str n))
+            (c/css-eval-var css-prop)]]))
+    from-scale)))
 
 (def light-mode-scales
-  (into (sorted-map-by key-comparator)
+  (into {}
         (concat
          (derive-scale (:sand scales) "n")
          (derive-scale (:night scales) "m")
@@ -136,29 +133,45 @@
          (derive-scale (:mauve scales) "fe"))))
 
 (def dark-mode-scales
-  (into (sorted-map-by key-comparator)
+  (into {}
         (concat
-         (derive-scale (reverse (:night scales)) "n")
-         (derive-scale (reverse (:sand scales)) "m")
-         (derive-scale (reverse (:coral scales)) "e")
-         (derive-scale (reverse (:seafoam scales)) "fx")
-         (derive-scale (reverse (:lavender scales)) "fv")
-         (derive-scale (reverse (:mauve scales)) "fe"))))
+         (derive-scale (:night scales) "n" true)
+         (derive-scale (:sand scales) "m" true)
+         (derive-scale (:coral scales) "e" true)
+         (derive-scale (:seafoam scales) "fx" true)
+         (derive-scale (:lavender scales) "fv" true)
+         (derive-scale (:mauve scales) "fe" true))))
 
+(def light-mode-additions
+  {:ring ["--col-ring" "#B8C4FF"]})
+
+(def dark-mode-additions
+  {:ring ["--col-ring" "#A19E9C"]})
+
+(def light-mode-colors
+  (merge light-mode-scales
+         light-mode-additions))
+
+(def dark-mode-colors
+  (merge dark-mode-scales
+         dark-mode-additions))
 
 (def semantic-colors
-  (let [cs-range (range 0 (inc 31))]
-    (into (sorted-map)
+  (let [from-scale (fn [scale i]
+                     (-> scale name (str i)
+                         keyword light-mode-scales first c/css-eval-var))]
+    (into {}
           (map
-           (fn [[k scale i css-prop]]
-             [k [(c/css-var "col-" (name k))
-                 {:inner
-                  (-> scale (str i)
-                      keyword light-mode-scales first c/css-eval-var)
-                  :outer
-                  (-> scale (str (min (last cs-range) (+ i 2)))
-                      keyword light-mode-scales first c/css-eval-var)}
-                 (or css-prop nil)]])
+           (fn [[k [v1 v2] css-prop]] ;; [scale i]
+             (let [vals (if (integer? v2)
+                          {:inner
+                           (from-scale v1 v2)
+                           :outer
+                           (from-scale v1 (min (last cs-range) (+ v2 2)))}
+                          {:inner v1 :outer v2})]
+               [k [(c/css-var "col-" (name k))
+                   vals
+                   (or css-prop nil)]]))
 
            ;; Syntax explanation:
            ;; [ <name> <scale> <scale-index> <css-prop-map> ]
@@ -166,52 +179,52 @@
            ;; color-alias: "foo" | nil (→ same as <name>)
            (let [CSS-BG :background-color
                  CSS-FG :color]
-             [[:bg :n 1 CSS-BG]
-              [:fg :n 28 CSS-FG]
-              [:bg-primary :m 21 CSS-BG]
-              [:fg-primary :m 0 CSS-FG]
-              [:bg-secondary :n 5 CSS-BG]
-              [:fg-secondary :n 27 CSS-FG]
-              [:bg-destructive :e 23 CSS-BG]
-              [:fg-destructive :e 0 CSS-FG]
-              [:bg-accent :n 5 CSS-BG]
-              [:fg-accent :n 28 CSS-FG]
-              [:bg-input :n 11 CSS-BG]
-              [:fg-input :n 27 CSS-FG]
-              [:bg-muted :n 8 CSS-BG]
-              [:fg-muted :n 14 CSS-FG]
-              [:bg-popover :n 1 CSS-BG]
-              [:fg-popover :n 28 CSS-FG]
-              [:bg-card :n 1 CSS-BG]
-              [:fg-card :n 28 CSS-FG]
-              [:border-col :n 11 :border-color]
+             [[:bg [:n 1] CSS-BG]
+              [:fg [:n 28] CSS-FG]
+              [:bg-primary [:m 21] CSS-BG]
+              [:fg-primary [:m 0] CSS-FG]
+              [:bg-secondary [:n 5] CSS-BG]
+              [:fg-secondary [:n 27] CSS-FG]
+              [:bg-destructive [:e 23] CSS-BG]
+              [:fg-destructive [:e 0] CSS-FG]
+              [:bg-accent [:n 5] CSS-BG]
+              [:fg-accent [:n 28] CSS-FG]
+              [:bg-input [:n 11] CSS-BG]
+              [:fg-input [:n 27] CSS-FG]
+              [:bg-muted [:n 8] CSS-BG]
+              [:fg-muted [:n 14] CSS-FG]
+              [:bg-popover [:n 1] CSS-BG]
+              [:fg-popover [:n 28] CSS-FG]
+              [:bg-card [:n 1] CSS-BG]
+              [:fg-card [:n 28] CSS-FG]
+              [:border-col [:n 11] :border-color]
               ;; [:border-fg :n 20 {CSS-FG nil}]
-              [:tab-expr :fx 4]
-              [:tab-eval :fv 4]
-              [:tab-emul :fe 4]
-              [:tab-expr-hover :fx 6]
-              [:tab-eval-hover :fv 6]
-              [:tab-emul-hover :fe 6]
-              [:icon-expr :fx 26]
-              [:icon-eval :fv 26]
-              [:icon-emul :fe 26]
-              [:fmenu-expr :fx 5]
-              [:fmenu-eval :fv 5]
-              [:fmenu-emul :fe 5]
-              [:fmenu-expr-shadow :fx 7]
-              [:fmenu-eval-shadow :fv 7]
-              [:fmenu-emul-shadow :fe 7]
-              [:fmenu-expr-shadow-hover :fx 9]
-              [:fmenu-eval-shadow-hover :fv 9]
-              [:fmenu-emul-shadow-hover :fe 9]])))))
+              [:tab-expr [:fx 4]]
+              [:tab-eval [:fv 4]]
+              [:tab-emul [:fe 4]]
+              [:tab-expr-hover [:fx 6]]
+              [:tab-eval-hover [:fv 6]]
+              [:tab-emul-hover [:fe 6]]
+              [:icon-expr [:fx 26]]
+              [:icon-eval [:fv 26]]
+              [:icon-emul [:fe 26]]
+              [:fmenu-expr [:fx 5]]
+              [:fmenu-eval [:fv 5]]
+              [:fmenu-emul [:fe 5]]
+              [:fmenu-expr-shadow [:fx 7]]
+              [:fmenu-eval-shadow [:fv 7]]
+              [:fmenu-emul-shadow [:fe 7]]
+              [:fmenu-expr-shadow-hover [:fx 9]]
+              [:fmenu-eval-shadow-hover [:fv 9]]
+              [:fmenu-emul-shadow-hover [:fe 9]]])))))
 
 
 ;; Output
 
 (def output
   (merge scales
-         {:light light-mode-scales
-          :dark dark-mode-scales}
+         {:light light-mode-colors
+          :dark dark-mode-colors}
          {:semantic semantic-colors}))
 
 
@@ -220,12 +233,12 @@
         cs-props (str/join "\n" (map (fn [[_ cs]]
                                        (c/scale->css-properties cs opts))
                                      scales))
-        cs-light1 (c/scale->css-vars light-mode-scales 1)
+        cs-light1 (c/scale->css-vars light-mode-colors 1)
         ;; cs-light-props (str/join "\n" (map (fn [[k cs]]
         ;;                                      (scale->css-properties cs opts))
-        ;;                                    light-mode-scales))
-        cs-dark1 (c/scale->css-vars dark-mode-scales 1)
-        cs-dark2 (c/scale->css-vars dark-mode-scales 2)
+        ;;                                    light-mode-colors))
+        cs-dark1 (c/scale->css-vars dark-mode-colors 1)
+        cs-dark2 (c/scale->css-vars dark-mode-colors 2)
         semantic1-inner (c/scale->css-vars semantic-colors 1 :inner)
         semantic1-outer (c/scale->css-vars semantic-colors 1 :outer)
         ;; semantic-props (scale->css-properties semantic-colors opts)
@@ -261,77 +274,3 @@
      ".inner {\n"
      semantic1-inner "\n"
      "}\n\n")))
-
-
-
-
-
-;; Semantic colors
-
-;; fg-outer
-;; bg-outer
-;; fg-outer-primary
-;; bg-outer-primary
-
-;; ? awkward → should refactor this sometime
-(comment
-  (def semantic-colors
-    (let [CSS-BG "background-color"
-          CSS-FG "color"
-          cs-range (range 0 (inc 31))
-          schema [ ;; Syntax explanation:
-                  ;; [ <name> <scale> <scale-index> <css-prop-map> ]
-                  ;; css-prop-map: { "css-prop-name" <color-alias> }
-                  ;; color-alias: "foo" | nil (→ same as <name>)
-                  [:bg :n 1 {CSS-BG ""}]
-                  [:fg :n 28 {CSS-FG ""}]
-                  [:primary :m 21 {CSS-BG nil}]
-                  [:primary-fg :m 0 {CSS-FG nil}]
-                  [:secondary :n 5 {CSS-BG nil}]
-                  [:secondary-fg :n 27 {CSS-FG nil}]
-                  [:destructive :e 23 {CSS-BG nil}]
-                  [:destructive-fg :e 0 {CSS-FG nil}]
-                  [:accent :n 5 {CSS-BG nil}]
-                  [:accent-fg :n 28 {CSS-FG nil}]
-                  [:input :n 11 {CSS-BG nil}]
-                  [:input-fg :n 27 {CSS-FG nil}]
-                  [:muted :n 8 {CSS-BG nil}]
-                  [:muted-fg :n 14 {CSS-FG nil}]
-                  [:popover :n 1 {CSS-BG nil}]
-                  [:popover-fg :n 28 {CSS-FG nil}]
-                  [:card :n 1 {CSS-BG nil}]
-                  [:card-fg :n 28 {CSS-FG nil}]
-                  [:border :n 11 {CSS-BG nil "border-color" ""}]
-                  [:border-fg :n 20 {CSS-FG nil}]
-                  [:tab-expr :fx 4]
-                  [:tab-eval :fv 4]
-                  [:tab-emul :fe 4]
-                  [:tab-expr-hover :fx 6]
-                  [:tab-eval-hover :fv 6]
-                  [:tab-emul-hover :fe 6]
-                  [:icon-expr :fx 26]
-                  [:icon-eval :fv 26]
-                  [:icon-emul :fe 26]
-                  [:fmenu-expr :fx 5]
-                  [:fmenu-eval :fv 5]
-                  [:fmenu-emul :fe 5]
-                  [:fmenu-expr-shadow :fx 7]
-                  [:fmenu-eval-shadow :fv 7]
-                  [:fmenu-emul-shadow :fe 7]
-                  [:fmenu-expr-shadow-hover :fx 9]
-                  [:fmenu-eval-shadow-hover :fv 9]
-                  [:fmenu-emul-shadow-hover :fe 9]]
-          make-color-kvs (fn [prefix f]
-                           (map (fn [[k scale i css-prop-map]]
-                                  [(keyword (str prefix (name k)))
-                                   [(c/css-var (str "col-" prefix) (name k))
-                                    (str "var("
-                                         (c/css-var (str "col-" (name scale))
-                                                    (f i)) ")")
-                                    (or css-prop-map {})]])
-                                schema))
-          outer-offset (comp (partial min (last cs-range))
-                             (partial + 2))
-          semantic-inner (make-color-kvs "inner-" identity)
-          semantic-outer (make-color-kvs "outer-" outer-offset)]
-      (into (into (sorted-map) semantic-inner) semantic-outer))))

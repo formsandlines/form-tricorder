@@ -87,7 +87,8 @@
     ($ ErrorBoundary
        (d/div
         {:class (str "App " (styles))
-         :style {:color-scheme (name appearance)}}
+         :style {:color-scheme (name appearance)}
+         }
          (d/div
            {:class (item-styles)}
            ($ Header))

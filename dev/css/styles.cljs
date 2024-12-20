@@ -12,10 +12,6 @@
 
 (defn num-key [n] (str/replace (str n) "." "-"))
 
-(def key-comparator
-  (c/make-key-comparator
-   #(parse-double (str/replace (name %) "-" "."))))
-
 (defn make-dim-scale
   "Generates a dimension scale with a `step` value added to the next number, which is interpreted as `from-unit`. Returns a map with `from-unit` as key and a tuple of a `prefix`'d CSS custom property name and the scale value converted to `to-unit`.
   - units can be `:px` or `:rem`"
@@ -34,8 +30,7 @@
                         n-key (keyword (num-key n-from))
                         n-val (str n-to (name to-unit))]]
               [n-key [(c/css-var prefix (name n-key)) n-val]])]
-    (into (sorted-map-by key-comparator)
-          kvs)))
+    (into {} kvs)))
 
 (def dim-props
   {:space (make-dim-scale 3 :px :px "sp-")
@@ -51,8 +46,7 @@
   (merge
    (c/with-props
      {:font-size
-      (array-map
-       ;; double-stranded modular scale
+      {;; double-stranded modular scale
        ;; ratio: 1:√3 (1.732), bases: 16, 14
        ;; https://www.modularscale.com/?16,14&px&1.732
        :1 "0.875rem" ;; 14px  sm
@@ -77,14 +71,13 @@
        :7xl  "4.5rem"   ;; 72px  ~7
        :8xl  "6rem"     ;; 96px  ~8
        :9xl  "8rem"     ;; 128px
-       )}
+       }}
      "fs")))
 
 (def leading-props
   (c/with-props
     {:line-height
-     (array-map
-      :3  ".75rem"
+     {:3  ".75rem"
       :4  "1rem"
       :5  "1.25rem"
       :6  "1.5rem"
@@ -97,14 +90,13 @@
       :normal  "1.5"
       :relaxed "1.625"
       :snug    "1.375"
-      :tight   "1.25")}
+      :tight   "1.25"}}
     "lh"))
 
 (def weight-props
   (c/with-props
     {:font-weight
-     (array-map
-      :thin       "100"
+     {:thin       "100"
       :extralight "200"
       :light      "200" ;; was 300
       :normal     "400"
@@ -112,45 +104,42 @@
       :semibold   "800" ;; was 600
       :bold       "800" ;; was 700
       :extrabold  "900" ;; was 800
-      :black      "900")}
+      :black      "900"}}
     "weight"))
 
 (def border-props
   (c/with-props
     {:border-width
-     (array-map
-      :0 "0px"
+     {:0 "0px"
       :_ "1px"
       :2 "2px"
       :3 "3px"
       :4 "4px"
-      :8 "8px")}
+      :8 "8px"}}
     "border"))
 
 (def radius-props
   (c/with-props
     {:radius
-     (array-map
-      :sm   "0.125rem" ;; 2px
+     {:sm   "0.125rem" ;; 2px
       :_    "0.25rem"  ;; 4px
       :md   "0.375rem" ;; 6px
       :lg   "0.5rem"   ;; 8px
       :full "9999px"
-      :none "0px")}
+      :none "0px"}}
     "rad"))
 
 ;; (def shadow-props
 ;;   (c/with-props
 ;;     {:shadow
-;;      (array-map
-;;       :sm "0 1px 2px 0 rgb(0 0 0 / 0.05)"
+;;      {:sm "0 1px 2px 0 rgb(0 0 0 / 0.05)"
 ;;       :base "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"
 ;;       :md "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)"
 ;;       :lg "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)"
 ;;       :xl "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)"
 ;;       :2xl "0 25px 50px -12px rgb(0 0 0 / 0.25)"
 ;;       :inner "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)"
-;;       :none "0 0 #0000")}))
+;;       :none "0 0 #0000"}}))
 
 ;; Output
 
@@ -228,23 +217,3 @@
      prop-vars "\n"
      "}\n\n")))
 
-
-
-(comment
-
-  (type {:a 1})
-
-  (update-vals (array-map
-          :a 1
-          :b 2
-          :c 3
-          :d 4
-          :e 5
-          :f 6
-          :g 7
-          :h 8
-          :i 9)
-         inc)
-
-
-  )

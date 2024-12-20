@@ -108,7 +108,7 @@
       (keyword (str prefix suffix)))))
 
 (def style-aliases
-  (into (array-map)
+  (into {}
         (reduce-kv
          (fn [aliases group-k style-props]
            (reduce-kv
@@ -130,12 +130,14 @@
           (colors/output :light)))))
 
 (def color-aliases
-  (into (array-map)
+  (into {}
         (reduce-kv
          (fn [aliases style-k [css-var _ css-prop]]
-           (conj aliases
-                 [style-k
-                  {css-prop (c/css-eval-var css-var)}]))
+           (if css-prop
+             (conj aliases
+                   [style-k
+                    {css-prop (c/css-eval-var css-var)}])
+             aliases))
          []
          (colors/output :semantic))))
 
@@ -173,6 +175,58 @@
      [:8xl :none]
      [:9xl :none]])))
 
+
+;; functions for complex CSS
+(defn make-ring
+  "Creates a ring around a UI component for keyboard navigation."
+  [{:keys [w col offset-w offset-col inset?]
+    :or {w 2
+         col "var(--col-ring)"
+         offset-w 2
+         offset-col "var(--col-bg)"
+         inset? false}}]
+  (let [inset (when inset? "inset ")
+        spread (str (+ w offset-w) "px")]
+    {:--ring-shadow (str inset "0 0 0 " spread " " col)
+     :--ring-offset-shadow
+     (if (and offset-w (> offset-w 0))
+       (let [offset-spread (str offset-w "px")]
+         (str inset "0 0 0 " offset-spread " " offset-col))
+       "0 0 #0000")
+     :box-shadow "var(--ring-offset-shadow), var(--ring-shadow), 0 0 #0000"})) ;; var(---shadow, 0 0 #0000)
+
+(defn make-checkerboard
+  "Creates a background with checkerboard pattern to demonstrate transparency."
+  [{:keys [col size]
+    :or {col "var(--col-n12)"
+         size "60px"}}]
+  {:--opc1 "26%"
+   :--opc2 "75%"
+   :--col col
+   :--size size
+   :background-color "var(--col-n14)"
+   ;; Checkerboard pattern to mock transparency
+   ;; Source: https://gist.github.com/dfrankland/f6fed3e3ccc42e3de482b324126f9542?permalink_comment_id=5160713#gistcomment-5160713
+   :background-image "
+linear-gradient(45deg, var(--col) var(--opc1), transparent var(--opc1)),
+linear-gradient(135deg, var(--col) var(--opc1), transparent var(--opc1)),
+linear-gradient(45deg, transparent var(--opc2), var(--col) var(--opc2)),
+linear-gradient(135deg, transparent var(--opc2), var(--col) var(--opc2))"
+   :background-size "var(--size) var(--size)"
+   :background-position "0 0,
+calc(var(--size) / 2) 0,
+calc(var(--size) / 2) calc(-1 * (var(--size) / 2)),
+0px calc(var(--size) / 2)"})
+
+(defn make-outline
+  [{:keys [col w offset style]
+    :or {w "2px"
+         offset "2px"
+         style "solid"}}]
+  {:outline (str/join " " [col style w])
+   :outline-offset offset})
+
+
 (def special-aliases
   {:overlay-bg
    {:background-color "color-mix(in srgb, var(--col-fg) 60%, transparent)"
@@ -181,6 +235,7 @@
     :z-index "98"
     :inset "0"
     :animation "overlay-show 150ms cubic-bezier(0.16, 1, 0.3, 1)"}
+
    :overlay-content
    {:position "fixed"
     :z-index "99"
@@ -189,37 +244,40 @@
     :transform "translate(-50%, -50%)"
     :box-shadow "0 3px 5px 0px color-mix(in srgb, var(--col-fg) 30%, transparent)"
     :animation "content-show 150ms cubic-bezier(0.16, 1, 0.3, 1)"}
-   :checkerboard
-   {:--opc1 "26%"
-    :--opc2 "75%"
-    :--col "var(--col-n12)"
-    :--size "60px"
-    :background-color "var(--col-n14)"
-    ;; Checkerboard pattern to mock transparency
-    ;; Source: https://gist.github.com/dfrankland/f6fed3e3ccc42e3de482b324126f9542?permalink_comment_id=5160713#gistcomment-5160713
-    :background-image "
-linear-gradient(45deg, var(--col) var(--opc1), transparent var(--opc1)),
-linear-gradient(135deg, var(--col) var(--opc1), transparent var(--opc1)),
-linear-gradient(45deg, transparent var(--opc2), var(--col) var(--opc2)),
-linear-gradient(135deg, transparent var(--opc2), var(--col) var(--opc2))"
-    :background-size "var(--size) var(--size)"
-    :background-position "0 0,
-calc(var(--size) / 2) 0,
-calc(var(--size) / 2) calc(-1 * (var(--size) / 2)),
-0px calc(var(--size) / 2)"}})
+
+   :checkerboard (make-checkerboard {})
+
+   ;; ? too specific
+   :transition-colors
+   {:--duration "150ms"
+    :transition-property
+    "color, background-color, border-color, text-decoration-color"
+    :transition-timing-function "cubic-bezier(0.4, 0, 0.2, 1)"
+    :transition-duration "var(--duration)"}
+
+   :ring (make-ring {})
+
+   :outline-none (make-outline {:col "transparent"})
+
+   ;; ? needed
+   ;; ! no default for `--clamp-n`
+   ;; :line-clamp
+   ;; {:overflow "hidden"
+   ;;  :display "-webkit-box"
+   ;;  :-webkit-box-orient "vertical"
+   ;;  :-webkit-line-clamp "var(--clamp-n)"}
+
+   :line-clamp-none
+   {:overflow "visible"
+    :display "block"
+    :-webkit-box-orient "horizontal"
+    :-webkit-line-clamp "none"}
+
+   })
 
 (def output
-  (into
-   (sorted-map-by (c/make-key-comparator name))
-   [style-aliases
-    color-aliases
-    text-aliases
-    special-aliases]))
-
-
-(comment
-  (into (sorted-map-by (c/make-key-comparator name))
-        (for [c (take 5 [\a \b \c \d \e \f \g \h \i \j \k \l \m \n \o \p \q \r \s \t \u \v \w \x \y \z])
-              n (range 2)]
-          [(keyword (str c n)) n])))
+  (merge style-aliases
+         color-aliases
+         text-aliases
+         special-aliases))
 

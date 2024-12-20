@@ -1,5 +1,6 @@
 (ns css.common
   (:require
+   ;; [clojure.walk :as walk]
    [clojure.string :as str]))
 
 (defn linear-map
@@ -11,39 +12,58 @@
            (- dmax dmin)))
      rmin))
 
-(defn sort-map-by-keys
-  "Sorts a map `m` by matching a vector `order` of its maps."
-  [m order]
-  (let [sorted-keys (sort (fn [k1 k2]
-                            (let [index1 (.indexOf order k1)
-                                  index2 (.indexOf order k2)]
-                              (compare index1 index2)))
-                          (keys m))]
-    (apply array-map (mapcat (fn [k] [k (m k)]) sorted-keys))))
+;; (defn sort-map-by-keys
+;;   "Sorts a map `m` by matching a vector `order` of its maps."
+;;   [m order]
+;;   (let [sorted-keys (sort (fn [k1 k2]
+;;                             (let [index1 (.indexOf order k1)
+;;                                   index2 (.indexOf order k2)]
+;;                               (compare index1 index2)))
+;;                           (keys m))]
+;;     (apply array-map (mapcat (fn [k] [k (m k)]) sorted-keys))))
 
-(comment
-  (sort-map-by-keys
-   {:b 2, :a 1, :d 4, :c 3}
-   [:a :b :c :d]) ;; => {:a 1, :b 2, :c 3, :d 4}
-  )
+;; (defn deep-order-maps [v]
+;;   (walk/postwalk (fn [x]
+;;                    (cond->> x
+;;                      (map? x) (into (sorted-map))))
+;;                  v))
+
+;; (comment
+;;   (sort-map-by-keys
+;;    {:b 2, :a 1, :d 4, :c 3}
+;;    [:a :b :c :d]) ;; => {:a 1, :b 2, :c 3, :d 4}
+;;   )
+
+;; (defn transform-nested-map
+;;   "Transforms the innermost values of a nested map `m` by a given function `f`, which is provided with a vector of all keys from the root up to the value and the value itself.
+;;   - takes an optional `keep-order?` boolean to restore the order of the keys in the original map (note: use `array-map` to create maps that retain their order)"
+;;   ([m f] (transform-nested-map m f false))
+;;   ([m f keep-order?]
+;;    (letfn [(collect-path [path v]
+;;              (if (map? v)
+;;                (let [m-transformed
+;;                      (reduce-kv (fn [acc k v]
+;;                                   (assoc acc k (collect-path (conj path k) v)))
+;;                                 {}
+;;                                 v)]
+;;                  (if keep-order?
+;;                    (sort-map-by-keys m-transformed (keys v))
+;;                    m-transformed))
+;;                (f path v)))]
+;;      (collect-path [] m))))
 
 (defn transform-nested-map
   "Transforms the innermost values of a nested map `m` by a given function `f`, which is provided with a vector of all keys from the root up to the value and the value itself.
   - takes an optional `keep-order?` boolean to restore the order of the keys in the original map (note: use `array-map` to create maps that retain their order)"
-  ([m f] (transform-nested-map m f false))
-  ([m f keep-order?]
-   (letfn [(collect-path [path v]
-             (if (map? v)
-               (let [m-transformed
-                     (reduce-kv (fn [acc k v]
-                                  (assoc acc k (collect-path (conj path k) v)))
-                                {}
-                                v)]
-                 (if keep-order?
-                   (sort-map-by-keys m-transformed (keys v))
-                   m-transformed))
-               (f path v)))]
-     (collect-path [] m))))
+  [m f]
+  (letfn [(collect-path [path v]
+            (if (map? v)
+              (reduce-kv (fn [acc k v]
+                           (assoc acc k (collect-path (conj path k) v)))
+                         {}
+                         v)
+              (f path v)))]
+    (collect-path [] m)))
 
 (def no-k :_) ;; empty key
 
@@ -61,8 +81,7 @@
                      (str prefix (when-let [s (last path-s)]
                                    (str "-" s)))
                      (str/join "-" (remove nil? path-s))))
-         v]))
-    true)))
+         v])))))
 
 (defn format-number [num places]
   (.toFixed num places))
@@ -77,9 +96,9 @@
   [rem]
   (* base-fontsize rem))
 
-(defn make-key-comparator
-  [k->n]
-  (fn [a b] (compare (k->n a) (k->n b))))
+;; (defn make-key-comparator
+;;   [k->n]
+;;   (fn [a b] (compare (k->n a) (k->n b))))
 
 (defn css-var
   [prefix label]
@@ -91,12 +110,12 @@
 
 (def css-indent "    ")
 
-(defn scale->css-vars
-  [scale indents]
-  (str/join "\n"
-            (map #(str (str/join (repeat indents css-indent))
-                       (str/join ": " (take 2 %)) ";")
-                 (vals scale))))
+;; (defn scale->css-vars
+;;   [scale indents]
+;;   (str/join "\n"
+;;             (map #(str (str/join (repeat indents css-indent))
+;;                        (str/join ": " (take 2 %)) ";")
+;;                  (vals scale))))
 
 (defn scale->css-vars
   ([scale indents] (scale->css-vars scale indents nil))

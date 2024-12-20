@@ -12,6 +12,7 @@
 
 node_modules/
 .shadow-cljs/
+.nbb/
 
 .DS_Store
 .backups/

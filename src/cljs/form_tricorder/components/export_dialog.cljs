@@ -58,9 +58,8 @@
         ($d Trigger
             {:as-child true}
             ($ Button
-               {:variant "outline"
-                :layer "inner"
-                :size "sm"}
+               {:variant :outline
+                :size :sm}
                "Export"))
         ($d Portal
             ($d Overlay
@@ -145,7 +144,7 @@
                  ($d Close
                      {:as-child true}
                      ($ Button
-                        {:variant "outline"}
+                        {:variant :outline}
                         "Cancel"))
                  ($d Close
                      {:as-child true
