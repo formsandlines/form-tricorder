@@ -3144,6 +3144,12 @@
     initial-value: 13rem;
 }
 
+@property --sz-icon-sm {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 1rem;
+}
+
 @property --sz-66-5 {
     syntax: "<length>";
     inherits: true;
@@ -4831,6 +4837,7 @@
     --sz-3-5: 0.625rem;
     --sz-2-5: 0.4375rem;
     --sz-69-5: 13rem;
+    --sz-icon-sm: 1rem;
     --sz-66-5: 12.4375rem;
     --sz-59: 11.0625rem;
     --sz-92-5: 17.3125rem;

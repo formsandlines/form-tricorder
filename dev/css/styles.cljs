@@ -34,7 +34,8 @@
 
 (def dim-props
   {:space (make-dim-scale 3 :px :px "sp-")
-   :sizes (make-dim-scale 3 :px :rem "sz-")})
+   :sizes (merge (make-dim-scale 3 :px :rem "sz-")
+                 {:icon-sm ["--sz-icon-sm" "1rem"]})})
 
 (def font-props
   (c/with-props

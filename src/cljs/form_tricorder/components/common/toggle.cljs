@@ -3,121 +3,81 @@
    [helix.core :refer [defnc fnc $ <>]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [shadow.css :refer (css)]
    [clojure.string :as string]
-   [form-tricorder.utils :refer [let+]]
+   [form-tricorder.utils :refer [let+ unite]]
    [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-toggle" :as TogglePrimitive]))
 
 (def r) ;; hotfix for linting error in let+
 
+(def Root (.-Root TogglePrimitive))
 
-(def Root
-  (st/styled (.-Root TogglePrimitive)
-          {:touch-action "manipulation"
-           :display "inline-flex"
-           :justify-content "center"
-           :align-items "center"
-           :border-radius "$md"
-           :_text ["$sm"]
-           :font-weight "$normal"
-           :_transition_colors []
-           
-           "&:focus-visible"
-           {:_outlineNone []}
-           "&:disabled"
-           {:pointer-events "none"
-            :opacity "0.5"}
-           "&:hover"
-           {:cursor "pointer"}
+(def $base
+  (css
+   :text-sm :weight-normal :transition-colors
+   {:touch-action "manipulation"
+    :display "inline-flex"
+    :justify-content "center"
+    :align-items "center"}
+   ["&:focus-visible"
+    :outline-none :ring]
+   ["&:disabled"
+    {:pointer-events "none"
+     :opacity "0.5"}]
+   ["&:hover"
+    {:cursor "pointer"}]))
 
-           :variants
-           {:variant
-            {:default
-             {:background-color "transparent"}
+(def $$variants
+  {:variant {:primary
+             (css
+              {:background-color "transparent"}
+              ["&:hover"
+               :bg-accent :fg-accent]
+              ["&[data-state=on]"
+               :bg-accent :fg])
              :outline
-             {:border-width 1
-              :background-color "transparent"}}
+             (css
+              :border
+              {:background-color "transparent"
+               :border-color "var(--col-bg-input)"}
+              ["&:hover"
+               :bg-accent :fg-accent]
+              ["&[data-state=on]"
+               :bg-accent :fg-accent])
 
-            :size
-            {:default
-             {:height "$10"
-              :_paddingX "$3"}
-             :sm
-             {:height "$9"
-              :_paddingX "$2-5"}
-             :lg
-             {:height "$11"
-              :_paddingX "$5"}
-             :icon
-             {:padding "0"
-              :height "$10"
-              :width "$10"}
-             :icon-sm
-             {:padding "0"
-              :height "$9"
-              :width "$9"}}}
+             :formula-input/submit-mode
+             (css
+              {:background-color "transparent"}
+              ["&:hover"
+               {:background-color "var(--col-m5)"}]
+              ["&[data-state=on]"
+               {:background-color "var(--col-m5)"}])}
 
-           :compoundVariants
-           [{:variant :default
-             :layer :outer
-             :css {"&:hover"
-                   {:background-color "$outer-accent"
-                    :color "$outer-accent-fg"}
-                   "&:focus-visible"
-                   {:_ringOuter []}
-                   "&[data-state=on]"
-                   {:background-color "$outer-accent"
-                    :color "$outer-fg"}}}
-            {:variant :default
-             :layer :inner
-             :css {"&:hover"
-                   {:background-color "$inner-accent"
-                    :color "$inner-accent-fg"}
-                   "&:focus-visible"
-                   {:_ringInner []}
-                   "&[data-state=on]"
-                   {:background-color "$inner-accent"
-                    :color "$inner-fg"}}}
+   :size {:sm (css :h-9 :px-2-5 :rounded-md)
+          :md (css :h-10 :px-3 :rounded-md)
+          :lg (css :h-11 :px-5 :rounded-md)
+          :icon (css :size-10 :p-0 :rounded-md)
+          :icon-sm (css :size-9 :p-0 :rounded-md)
 
-            {:variant :outline
-             :layer :outer
-             :css {:border-color "$outer-input"
-                   "&:hover"
-                   {:background-color "$outer-accent"
-                    :color "$outer-accent-fg"}
-                   "&:focus-visible"
-                   {:_ringOuter []}
-                   "&[data-state=on]"
-                   {:background-color "$outer-accent"
-                    :color "$outer-fg"}}}
-            {:variant :outline
-             :layer :inner
-             :css {:border-color "$inner-input"
-                   "&:hover"
-                   {:background-color "$inner-accent"
-                    :color "$inner-accent-fg"}
-                   "&:focus-visible"
-                   {:_ringInner []}
-                   "&[data-state=on]"
-                   {:background-color "$inner-accent"
-                    :color "$inner-fg"}}}]
+          :formula-input/submit-mode
+          (css :size-8 :p-0 :rounded-full)}})
 
-           :defaultVariants
-           {:variant "default"
-            :size "default"
-            :layer :outer}}))
+(defn $$styles
+  [variant size]
+  (unite $base
+         (get-in $$variants [:variant (or variant :primary)])
+         (get-in $$variants [:size (or size :md)])))
 
 (defnc Toggle
   [props ref]
   {:wrap [(react/forwardRef)]}
-  (let+ [{:keys [class className layer variant size]
+  (let+ [{:keys [class className variant size]
           :rest r} props]
     ($d Root
-      {:class (string/join " " (remove nil? [className class]))
-       :variant (or variant js/undefined)
-       :size (or size js/undefined)
-       :layer (or layer js/undefined)
-       :ref ref
-       & r})))
+        {:class (unite ($$styles variant size)
+                       className class)
+         :ref ref
+         & r})))
 

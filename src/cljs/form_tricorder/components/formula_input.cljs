@@ -3,12 +3,12 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [shadow.css :refer (css)]
    [form-tricorder.re-frame-adapter :as rf]
    ;; [form-tricorder.re-frame-adapter :as rf]
    ;; [form-tricorder.icons :refer [InputHelpIcon]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
-   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :refer [log]]
    ["@codemirror/state" :refer [EditorState StateField StateEffect]]
    ["@codemirror/view" :refer [EditorView keymap placeholder
@@ -21,67 +21,6 @@
    ["@radix-ui/react-icons" :refer [LinkNone1Icon LinkBreak1Icon ResetIcon]]
    ;; ["@radix-ui/react-icons" :refer [QuestionMarkCircledIcon]]
    ))
-
-(def styles
-  (st/css {:display "flex"
-        :align-items "stretch"
-        :justify-content "space-between"
-        :min-height "$10"
-        }))
-
-(def input-styles
-  (st/css {:fontFamily "$mono"
-        :background-color "$inner-bg"
-        ;; :color "$inner-fg"
-        :width "100%"
-        :border-radius "$2"
-        ;; :backgroundColor "transparent"
-        ;; :appearance "none"
-        ;; :border-width "0"
-        ;; :padding "$3" ; "0.6rem"
-        ;; :flex "1 1 auto"
-        }))
-
-(def button-wrapper-styles
-  (st/css {
-        :padding "$1-5"
-        ;; :align-items "center"
-        }))
-
-(def button-styles
-  (st/css {:height "$7"
-        :width "$7" ;; "$icon-input" ; "1.9rem"
-        :touch-action "manipulation"
-        :display "inline-flex"
-        :justify-content "center"
-        :align-items "center"
-        :white-space "nowrap"
-        :color "$m16"
-
-        :_transition_colors []
-        "&:focus-visible"
-        {:_outlineNone []}
-        "&:disabled"
-        {:pointer-events "none"
-         :opacity "0.5"}
-        "&:hover"
-        {:cursor "pointer"}
-
-        "& svg"
-        {:width "100%"
-         :height "100%"}
-
-        ;; :outline "none"
-        ;; :border "none"
-        ;; :borderRadius "$round"
-        ;; :background "none"
-        ;; "& svg"
-        ;; {:width "100%"
-        ;;  :height "100%"
-        ;;  :fill "$n300"
-        ;;  "&:hover"
-        ;;  {:fill "$n200"}}
-        }))
 
 (def ^js ft-theme
   (.baseTheme EditorView
@@ -106,8 +45,7 @@
                 "&dark.cm-focused .cm-matchingBracket"
                 {:backgroundColor "#46495C"}
                 "&dark.cm-focused .cm-nonmatchingBracket"
-                {:backgroundColor "#7a0000"}
-                })))
+                {:backgroundColor "#7a0000"}})))
 
 
 (def update-darkmode-type (.define StateEffect))
@@ -209,29 +147,32 @@
                                          (of (= appearance :dark)))]})))]
           (.. view (dispatch tsx)))))
     (d/div
-      {:class (str "FormulaInput " (styles))
-       :on-blur (fn [_] (when-not submit-mode
-                         ;; ? just set search params
-                         (apply-input code true)))}
+     {:class (css "FormulaInput"
+                  :min-h-10
+                  {:display "flex"
+                   :align-items "stretch"
+                   :justify-content "space-between"})
+      :on-blur (fn [_] (when-not submit-mode
+                        ;; ? just set search params
+                        (apply-input code true)))}
       (d/div
-        {:class (input-styles)
-         :ref editor})
+       {:class (css
+                :font-mono :bg :rounded-l
+                {:width "100%"
+                 ;; :backgroundColor "transparent"
+                 ;; :appearance "none"
+                 ;; :border-width "0"
+                 ;; :padding "$3" ; "0.6rem"
+                 ;; :flex "1 1 auto"
+                 })
+        :ref editor})
       (d/div
-        {:class ((st/css {:display "flex"
-                       :align-items "center"
-                       :background-color "$inner-bg"
-                       :padding "$1"}))}
+       {:class (css :bg :p-1 :rounded-r
+                    {:display "flex"
+                     :align-items "center"})}
         ($ Toggle
-           {:css (clj->js {:border-radius "$round"
-                           :width "$8"
-                           :height "$8"
-                           "&:hover"
-                           {:background-color "$m5"}
-                           "&[data-state=on]"
-                           {:background-color "$m5"}})
-            :variant "default"
-            :size "icon-sm"
-            :layer "inner"
+           {:variant :formula-input/submit-mode
+            :size :formula-input/submit-mode
             :pressed (not submit-mode)
             :on-pressed-change
             (fn [_]
@@ -239,19 +180,17 @@
               (set-submit-mode (not submit-mode)))}
            ($d (if submit-mode LinkBreak1Icon LinkNone1Icon))))
       (d/div
-        {:class ((st/css {:height "inherit"
-                       :width (if submit-mode "$9-5" 0)
-                       :margin-left (if submit-mode "$1" 0)
-                       :visibility (if submit-mode "visible" "hidden")
-                       :transition "all 0.2s ease-out 0.2s"}))}
+       {:class (css {:height "inherit"
+                     :transition "all 0.2s ease-out 0.2s"})
+        :style {:width (if submit-mode "var(--sz-9-5)" "0")
+                :margin-left (if submit-mode "var(--sp-1)" "0")
+                :visibility (if submit-mode "visible" "hidden")}}
         ($ Button
-           {:css (clj->js {:height "100%"
-                           :width "100%"
-                           :opacity (if submit-mode "1.0" "0.0")
-                           :transition "opacity 0.1s ease-out"})
-            :variant "secondary"
-            :size "icon"
-            :layer "outer"
-            :on-click (fn [_]
-                        (when submit-mode (apply-input code true)))}
+           {:style {:height "100%"
+                    :width "100%"
+                    :opacity (if submit-mode "1.0" "0.0")
+                    :transition "opacity 0.1s ease-out"}
+            :variant :secondary
+            :size :icon
+            :on-click (fn [_] (when submit-mode (apply-input code true)))}
            ($d ResetIcon))))))

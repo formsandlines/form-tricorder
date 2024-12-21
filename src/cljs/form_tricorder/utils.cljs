@@ -1,7 +1,9 @@
 (ns form-tricorder.utils
   (:require
    [helix.hooks :as hooks]
-   [clojure.math :as math])
+   [clojure.string :as string]
+   ;; [clojure.math :as math]
+   )
   (:require-macros [form-tricorder.utils]))
 
 (defn splitv-atv [i v]
@@ -100,6 +102,11 @@
         minutes (pad 2 (.getMinutes date))
         seconds (pad 2 (.getSeconds date))]
     (str year month day "-" hours minutes seconds)))
+
+(defn unite
+  "Convenience function to join strings (e.g. classnames) that may be nil."
+  [& strings]
+  (string/join " " (remove nil? strings)))
 
 (comment
   (pad 2 (.getUTCDate (js/Date.)))

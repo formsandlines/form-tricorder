@@ -54,7 +54,7 @@
   (let [export-ref (hooks/use-ref nil)
         [format set-format] (hooks/use-state "svg")]
     ($d Root
-        {:default-open true}
+        ;; {:default-open true}
         ($d Trigger
             {:as-child true}
             ($ Button

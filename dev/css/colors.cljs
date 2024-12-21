@@ -178,11 +178,13 @@
            ;; css-prop-map: { "css-prop-name" <color-alias> }
            ;; color-alias: "foo" | nil (→ same as <name>)
            (let [CSS-BG :background-color
-                 CSS-FG :color]
+                 CSS-FG :color
+                 CSS-BORDER :border-color]
              [[:bg [:n 1] CSS-BG]
               [:fg [:n 28] CSS-FG]
               [:bg-primary [:m 21] CSS-BG]
               [:fg-primary [:m 0] CSS-FG]
+              ;; [:border-col-primary [:n 11] CSS-BORDER]
               [:bg-secondary [:n 5] CSS-BG]
               [:fg-secondary [:n 27] CSS-FG]
               [:bg-destructive [:e 23] CSS-BG]
@@ -197,7 +199,7 @@
               [:fg-popover [:n 28] CSS-FG]
               [:bg-card [:n 1] CSS-BG]
               [:fg-card [:n 28] CSS-FG]
-              [:border-col [:n 11] :border-color]
+              [:border-col [:n 11] CSS-BORDER]
               ;; [:border-fg :n 20 {CSS-FG nil}]
               [:tab-expr [:fx 4]]
               [:tab-eval [:fv 4]]

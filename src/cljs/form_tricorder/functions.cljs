@@ -174,8 +174,7 @@
         {:style {:display "flex"
                  :gap "4px"
                  :margin-bottom 10}}
-        ($ Toggle {:variant "outline"
-                   :layer "inner"
+        ($ Toggle {:variant :outline
                    ;; :size "md"
                    :on-click (fn [_] (set-psps? (fn [b] (not b))))}
            ($ (if psps? PerspectivesCollapseIcon

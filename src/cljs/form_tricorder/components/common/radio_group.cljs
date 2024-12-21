@@ -3,72 +3,24 @@
    [helix.core :refer [defnc fnc $ <>]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
-   [clojure.string :as string]
-   [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :as st]
+   [shadow.css :refer (css)]
+   [form-tricorder.utils :refer [let+ unite]]
    ["react" :as react]
    ["@radix-ui/react-radio-group" :as RadioGroupPrimitive]
-   ["lucide-react" :refer [Circle]]
+   ["lucide-react" :as icons]
    ;; ["@radix-ui/react-icons" :refer [CircleIcon]]
    ;; ["@stitches/react" :refer [css]]
    ))
 
 (def r) ;; hotfix for linting error in let+
 
-
-(def Root
-  (st/styled (.-Root RadioGroupPrimitive)
-          {:display "grid"
-           :gap 2}))
+(def Root (.-Root RadioGroupPrimitive))
 
 ;;         "ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-(def Item
-  (st/styled (.-Item RadioGroupPrimitive)
-          {:aspect-ratio "1 / 1"
-           :height "$icon-sm" ;; 4
-           :width "$icon-sm" ;; 4
 
-           :border-radius "$full"
-           :border-width "$1"
-           
-           "&:focus-visible"
-           {:_outlineNone []}
-           "&:disabled"
-           {:cursor "not-allowed"
-            :opacity "0.5"}
+(def Item (.-Item RadioGroupPrimitive))
 
-           :variants
-           {:layer
-            {:outer
-             {:border-color "$outer-primary"
-              :color "$outer-primary"
-
-              "&:focus-visible"
-              {:_ringOuter []}}
-
-             :inner
-             {:border-color "$inner-primary"
-              :color "$inner-primary"
-
-              "&:focus-visible"
-              {:_ringInner []}}}}
-
-           :defaultVariants
-           {:layer :outer}}))
-
-(def Indicator
-  (st/styled (.-Indicator RadioGroupPrimitive)
-          {:display "flex"
-           :align-items "center"
-           :justify-content "center"}))
-
-(def IconCircle
-  (st/styled Circle
-          {:height "0.625rem" ;; 2.5
-           :width  "0.625rem" ;; 2.5
-           :fill "currentColor"
-           :color "currentColor"}))
-
+(def Indicator (.-Indicator RadioGroupPrimitive))
 
 (defnc RadioGroup
   [props ref]
@@ -76,7 +28,9 @@
   (let+ [{:keys [class className]
           :rest r} props]
     ($d Root
-      {:class (string/join " " (remove nil? [className class]))
+      {:class (unite className class
+                     (css {:display "grid"
+                           :gap "2"}))
        :ref ref
        & r})))
 
@@ -86,9 +40,25 @@
   (let+ [{:keys [class className layer]
           :rest r} props]
     ($d Item
-      {:class (string/join " " (remove nil? [className class]))
-       :layer (or layer js/undefined)
-       :ref ref
-       & r}
-      ($d Indicator
-        ($d IconCircle)))))
+        {:class (unite className class
+                       (css
+                        :size-icon-sm :rounded-full :border ; :fg-primary
+                        {:aspect-ratio "1 / 1"
+                         :color "var(--col-bg-primary)"
+                         :border-color "var(--col-bg-primary)"}
+                        ["&:focus-visible"
+                         :outline-none :ring]
+                        ["&:disabled"
+                         {:cursor "not-allowed"
+                          :opacity "0.5"}]))
+         :ref ref
+         & r}
+        ($d Indicator
+            {:class (css {:display "flex"
+                          :align-items "center"
+                          :justify-content "center"})}
+            ($d icons/Circle
+                {:class (css {:height "0.625rem" ;; 2.5
+                              :width  "0.625rem" ;; 2.5
+                              :fill "currentColor"
+                              :color "currentColor"})})))))
