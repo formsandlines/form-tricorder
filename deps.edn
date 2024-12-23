@@ -9,12 +9,18 @@
         eu.formsandlines/formform-vis
         {:local/root "../formform-project/formform-vis"}}
  :aliases
- {:build-css
+ {;; This builds the CSS from `shadow-css`. Usually it doesn’t have to be called
+  ;; explicitly, since it gets re-built on file save with `:dev`.
+  :build-css
   {:extra-paths ["dev"]
    :extra-deps {com.thheller/shadow-css {:mvn/version "0.5.0"}}
    :ns-default build
    :exec-fn css-release}
   :dev
+  ;; To develop with CIDER, run `cider-jack-in-cljs`. The browser page has to be
+  ;; loaded and (for whatever reason) a single form must be evaluated in the
+  ;; REPL in order for in-file evaluation to work. To develop .cljs and .clj
+  ;; files in the same session, run `cider-connect-sibling-clj`.
   {:extra-paths ["dev"]
    :extra-deps {binaryage/devtools {:mvn/version "1.0.7"}
                 thheller/shadow-cljs {:mvn/version "2.28.18"}

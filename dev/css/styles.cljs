@@ -94,6 +94,10 @@
       :tight   "1.25"}}
     "lh"))
 
+;; {:sm "1.25em" ;; 20px | was rem
+;;  :base "1.3em"
+;;  :none "1"}
+
 (def weight-props
   (c/with-props
     {:font-weight

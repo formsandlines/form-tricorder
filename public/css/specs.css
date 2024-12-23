@@ -383,13 +383,13 @@
 @property --coral-14 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff7b90;
+    initial-value: #e9939c;
 }
 
 @property --coral-27 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #8b002a;
+    initial-value: #89002e;
 }
 
 @property --coral-31 {
@@ -401,49 +401,49 @@
 @property --coral-18 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ec5e76;
+    initial-value: #d4717e;
 }
 
 @property --coral-12 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff889d;
+    initial-value: #f3a2aa;
 }
 
 @property --coral-11 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff8ea2;
+    initial-value: #f7aab1;
 }
 
 @property --coral-24 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #b22848;
+    initial-value: #a9364d;
 }
 
 @property --coral-10 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff94a8;
+    initial-value: #fcb1b8;
 }
 
 @property --coral-21 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #d14660;
+    initial-value: #c15667;
 }
 
 @property --coral-23 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #bd3351;
+    initial-value: #b24256;
 }
 
 @property --coral-13 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff8197;
+    initial-value: #ee9aa3;
 }
 
 @property --coral-0 {
@@ -455,121 +455,121 @@
 @property --coral-30 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #440000;
+    initial-value: #450000;
 }
 
 @property --coral-4 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffb5c9;
+    initial-value: #ffdcdf;
 }
 
 @property --coral-26 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #9a0435;
+    initial-value: #95173a;
 }
 
 @property --coral-16 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #fc6c83;
+    initial-value: #de828d;
 }
 
 @property --coral-7 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffa5b9;
+    initial-value: #ffc7cc;
 }
 
 @property --coral-1 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffc6d9;
+    initial-value: #fff0f2;
 }
 
 @property --coral-8 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff9fb3;
+    initial-value: #ffc0c5;
 }
 
 @property --coral-22 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #c73d59;
+    initial-value: #ba4c5f;
 }
 
 @property --coral-25 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #a61a3f;
+    initial-value: #a02844;
 }
 
 @property --coral-9 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff99ae;
+    initial-value: #ffb9bf;
 }
 
 @property --coral-20 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #da4f68;
+    initial-value: #c7606f;
 }
 
 @property --coral-17 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #f4657c;
+    initial-value: #d97a85;
 }
 
 @property --coral-28 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #7a001e;
+    initial-value: #790021;
 }
 
 @property --coral-19 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #e3566e;
+    initial-value: #ce6977;
 }
 
 @property --coral-2 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffc0d4;
+    initial-value: #ffe9ec;
 }
 
 @property --coral-5 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffb0c4;
+    initial-value: #ffd5d9;
 }
 
 @property --coral-15 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ff748a;
+    initial-value: #e48a94;
 }
 
 @property --coral-3 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffbbce;
+    initial-value: #ffe3e6;
 }
 
 @property --coral-6 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #ffaabe;
+    initial-value: #ffced3;
 }
 
 @property --coral-29 {
     syntax: "<color>";
     inherits: true;
-    initial-value: #670010;
+    initial-value: #670013;
 }
 @property --seafoam-14 {
     syntax: "<color>";
@@ -1555,14 +1555,12 @@
     --col-icon-eval: var(--col-fv26);
     --col-bg-secondary: var(--col-n5);
     --col-fmenu-emul-shadow-hover: var(--col-fe9);
-    --col-fg-input: var(--col-n27);
     --col-fmenu-expr-shadow: var(--col-fx7);
     --col-fmenu-eval-shadow: var(--col-fv7);
     --col-bg-primary: var(--col-m21);
     --col-fg-secondary: var(--col-n27);
     --col-fg-primary: var(--col-m0);
     --col-tab-eval-hover: var(--col-fv6);
-    --col-bg-input: var(--col-n11);
     --col-tab-expr: var(--col-fx4);
     --col-fmenu-emul-shadow: var(--col-fe7);
     --col-fmenu-emul: var(--col-fe5);
@@ -1575,6 +1573,7 @@
     --col-fg-muted: var(--col-n14);
     --col-tab-emul: var(--col-fe4);
     --col-bg-popover: var(--col-n1);
+    --col-border-col-input: var(--col-n11);
 }
 
 :root[data-theme="dark"] {
@@ -1791,14 +1790,12 @@
     --col-icon-eval: var(--col-fv28);
     --col-bg-secondary: var(--col-n7);
     --col-fmenu-emul-shadow-hover: var(--col-fe11);
-    --col-fg-input: var(--col-n29);
     --col-fmenu-expr-shadow: var(--col-fx9);
     --col-fmenu-eval-shadow: var(--col-fv9);
     --col-bg-primary: var(--col-m23);
     --col-fg-secondary: var(--col-n29);
     --col-fg-primary: var(--col-m2);
     --col-tab-eval-hover: var(--col-fv8);
-    --col-bg-input: var(--col-n13);
     --col-tab-expr: var(--col-fx6);
     --col-fmenu-emul-shadow: var(--col-fe9);
     --col-fmenu-emul: var(--col-fe7);
@@ -1811,6 +1808,7 @@
     --col-fg-muted: var(--col-n16);
     --col-tab-emul: var(--col-fe6);
     --col-bg-popover: var(--col-n3);
+    --col-border-col-input: var(--col-n13);
 }
 
 .inner {
@@ -1831,14 +1829,12 @@
     --col-icon-eval: var(--col-fv26);
     --col-bg-secondary: var(--col-n5);
     --col-fmenu-emul-shadow-hover: var(--col-fe9);
-    --col-fg-input: var(--col-n27);
     --col-fmenu-expr-shadow: var(--col-fx7);
     --col-fmenu-eval-shadow: var(--col-fv7);
     --col-bg-primary: var(--col-m21);
     --col-fg-secondary: var(--col-n27);
     --col-fg-primary: var(--col-m0);
     --col-tab-eval-hover: var(--col-fv6);
-    --col-bg-input: var(--col-n11);
     --col-tab-expr: var(--col-fx4);
     --col-fmenu-emul-shadow: var(--col-fe7);
     --col-fmenu-emul: var(--col-fe5);
@@ -1851,6 +1847,7 @@
     --col-fg-muted: var(--col-n14);
     --col-tab-emul: var(--col-fe4);
     --col-bg-popover: var(--col-n1);
+    --col-border-col-input: var(--col-n11);
 }
 
 

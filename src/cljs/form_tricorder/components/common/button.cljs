@@ -36,8 +36,7 @@
                   ["&:hover"
                    {:background-color "color-mix(in srgb, var(--col-bg-destructive) 85%, var(--col-n30))"}])
              :outline
-             (css :border :bg
-                  {:border-color "var(--col-fg-input)"}
+             (css :border :border-col-input :bg
                   ["&:hover"
                    :bg-accent :fg-accent])
              :secondary

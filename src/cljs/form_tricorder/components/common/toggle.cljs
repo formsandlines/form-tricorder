@@ -39,9 +39,8 @@
                :bg-accent :fg])
              :outline
              (css
-              :border
-              {:background-color "transparent"
-               :border-color "var(--col-bg-input)"}
+              :border :border-col-input
+              {:background-color "transparent"}
               ["&:hover"
                :bg-accent :fg-accent]
               ["&[data-state=on]"

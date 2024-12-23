@@ -147,7 +147,7 @@
                                          (of (= appearance :dark)))]})))]
           (.. view (dispatch tsx)))))
     (d/div
-     {:class (css "FormulaInput"
+     {:class (css "FormulaInput" "inner"
                   :min-h-10
                   {:display "flex"
                    :align-items "stretch"
@@ -180,7 +180,8 @@
               (set-submit-mode (not submit-mode)))}
            ($d (if submit-mode LinkBreak1Icon LinkNone1Icon))))
       (d/div
-       {:class (css {:height "inherit"
+       {:class (css "outer"
+                    {:height "inherit"
                      :transition "all 0.2s ease-out 0.2s"})
         :style {:width (if submit-mode "var(--sz-9-5)" "0")
                 :margin-left (if submit-mode "var(--sp-1)" "0")

@@ -51,8 +51,10 @@
 (def scale-coral-apcach
   (let [n (count crs)]
     (make-scale-apcach contrasts-mirrored
-                       (partial c/linear-map 0 (dec n) 0.18  0.176)  ;; chroma
-                       (partial c/linear-map 0 (dec n) 13.15 13.15) ;; hue
+                       (partial c/linear-map 0 (dec n) 0.047  0.11) ;; chroma
+                       (partial c/linear-map 0 (dec n) 14 13) ;; hue
+                       ;; (partial c/linear-map 0 (dec n) 0.18  0.176)  ;; chroma
+                       ;; (partial c/linear-map 0 (dec n) 13.15 13.15) ;; hue
                        )))
 
 ;; expr mode
@@ -184,23 +186,20 @@
               [:fg [:n 28] CSS-FG]
               [:bg-primary [:m 21] CSS-BG]
               [:fg-primary [:m 0] CSS-FG]
-              ;; [:border-col-primary [:n 11] CSS-BORDER]
               [:bg-secondary [:n 5] CSS-BG]
               [:fg-secondary [:n 27] CSS-FG]
               [:bg-destructive [:e 23] CSS-BG]
               [:fg-destructive [:e 0] CSS-FG]
               [:bg-accent [:n 5] CSS-BG]
               [:fg-accent [:n 28] CSS-FG]
-              [:bg-input [:n 11] CSS-BG]
-              [:fg-input [:n 27] CSS-FG]
               [:bg-muted [:n 8] CSS-BG]
               [:fg-muted [:n 14] CSS-FG]
               [:bg-popover [:n 1] CSS-BG]
               [:fg-popover [:n 28] CSS-FG]
               [:bg-card [:n 1] CSS-BG]
               [:fg-card [:n 28] CSS-FG]
+              [:border-col-input [:n 11] CSS-BORDER]
               [:border-col [:n 11] CSS-BORDER]
-              ;; [:border-fg :n 20 {CSS-FG nil}]
               [:tab-expr [:fx 4]]
               [:tab-eval [:fv 4]]
               [:tab-emul [:fe 4]]

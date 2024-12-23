@@ -1,1 +1,2 @@
+;; Note: use tasks in `bb.edn` to call NBB
 {:paths ["dev"]}

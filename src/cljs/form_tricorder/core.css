@@ -1,0 +1,10 @@
+body {
+    font-family: var(--font-sans);
+    font-weight: var(--weight-normal);
+    // font-size: var(--font-size-base);
+    line-height: 1.3em; // var(--lh-normal)
+}
+
+body a:hover {
+    text-decoration: underline;
+}

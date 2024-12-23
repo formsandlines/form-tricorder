@@ -63,36 +63,36 @@
          :30 ["--night-30" "#121527"],
          :31 ["--night-31" "#000000"]},
  :coral {:0 ["--coral-0" "#ffffff"],
-         :1 ["--coral-1" "#ffc6d9"],
-         :2 ["--coral-2" "#ffc0d4"],
-         :3 ["--coral-3" "#ffbbce"],
-         :4 ["--coral-4" "#ffb5c9"],
-         :5 ["--coral-5" "#ffb0c4"],
-         :6 ["--coral-6" "#ffaabe"],
-         :7 ["--coral-7" "#ffa5b9"],
-         :8 ["--coral-8" "#ff9fb3"],
-         :9 ["--coral-9" "#ff99ae"],
-         :10 ["--coral-10" "#ff94a8"],
-         :11 ["--coral-11" "#ff8ea2"],
-         :12 ["--coral-12" "#ff889d"],
-         :13 ["--coral-13" "#ff8197"],
-         :14 ["--coral-14" "#ff7b90"],
-         :15 ["--coral-15" "#ff748a"],
-         :16 ["--coral-16" "#fc6c83"],
-         :17 ["--coral-17" "#f4657c"],
-         :18 ["--coral-18" "#ec5e76"],
-         :19 ["--coral-19" "#e3566e"],
-         :20 ["--coral-20" "#da4f68"],
-         :21 ["--coral-21" "#d14660"],
-         :22 ["--coral-22" "#c73d59"],
-         :23 ["--coral-23" "#bd3351"],
-         :24 ["--coral-24" "#b22848"],
-         :25 ["--coral-25" "#a61a3f"],
-         :26 ["--coral-26" "#9a0435"],
-         :27 ["--coral-27" "#8b002a"],
-         :28 ["--coral-28" "#7a001e"],
-         :29 ["--coral-29" "#670010"],
-         :30 ["--coral-30" "#440000"],
+         :1 ["--coral-1" "#fff0f2"],
+         :2 ["--coral-2" "#ffe9ec"],
+         :3 ["--coral-3" "#ffe3e6"],
+         :4 ["--coral-4" "#ffdcdf"],
+         :5 ["--coral-5" "#ffd5d9"],
+         :6 ["--coral-6" "#ffced3"],
+         :7 ["--coral-7" "#ffc7cc"],
+         :8 ["--coral-8" "#ffc0c5"],
+         :9 ["--coral-9" "#ffb9bf"],
+         :10 ["--coral-10" "#fcb1b8"],
+         :11 ["--coral-11" "#f7aab1"],
+         :12 ["--coral-12" "#f3a2aa"],
+         :13 ["--coral-13" "#ee9aa3"],
+         :14 ["--coral-14" "#e9939c"],
+         :15 ["--coral-15" "#e48a94"],
+         :16 ["--coral-16" "#de828d"],
+         :17 ["--coral-17" "#d97a85"],
+         :18 ["--coral-18" "#d4717e"],
+         :19 ["--coral-19" "#ce6977"],
+         :20 ["--coral-20" "#c7606f"],
+         :21 ["--coral-21" "#c15667"],
+         :22 ["--coral-22" "#ba4c5f"],
+         :23 ["--coral-23" "#b24256"],
+         :24 ["--coral-24" "#a9364d"],
+         :25 ["--coral-25" "#a02844"],
+         :26 ["--coral-26" "#95173a"],
+         :27 ["--coral-27" "#89002e"],
+         :28 ["--coral-28" "#790021"],
+         :29 ["--coral-29" "#670013"],
+         :30 ["--coral-30" "#450000"],
          :31 ["--coral-31" "#000000"]},
  :seafoam {:0 ["--seafoam-0" "#ffffff"],
            :1 ["--seafoam-1" "#f1fff7"],
@@ -587,9 +587,6 @@
     :bg-destructive ["--col-bg-destructive"
                      {:inner "var(--col-e23)", :outer "var(--col-e25)"}
                      :background-color],
-    :bg-input ["--col-bg-input"
-               {:inner "var(--col-n11)", :outer "var(--col-n13)"}
-               :background-color],
     :bg-muted ["--col-bg-muted"
                {:inner "var(--col-n8)", :outer "var(--col-n10)"}
                :background-color],
@@ -605,6 +602,9 @@
     :border-col ["--col-border-col"
                  {:inner "var(--col-n11)", :outer "var(--col-n13)"}
                  :border-color],
+    :border-col-input ["--col-border-col-input"
+                       {:inner "var(--col-n11)", :outer "var(--col-n13)"}
+                       :border-color],
     :fg ["--col-fg" {:inner "var(--col-n28)", :outer "var(--col-n30)"} :color],
     :fg-accent ["--col-fg-accent"
                 {:inner "var(--col-n28)", :outer "var(--col-n30)"} :color],
@@ -612,8 +612,6 @@
               :color],
     :fg-destructive ["--col-fg-destructive"
                      {:inner "var(--col-e0)", :outer "var(--col-e2)"} :color],
-    :fg-input ["--col-fg-input"
-               {:inner "var(--col-n27)", :outer "var(--col-n29)"} :color],
     :fg-muted ["--col-fg-muted"
                {:inner "var(--col-n14)", :outer "var(--col-n16)"} :color],
     :fg-popover ["--col-fg-popover"
