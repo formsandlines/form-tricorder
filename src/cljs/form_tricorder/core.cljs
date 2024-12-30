@@ -109,4 +109,3 @@
   (rf/dispatch-sync [:initialize-db])
   (.render root ($ StrictMode ($ App))))
 
-(print "test cljs/shadow")

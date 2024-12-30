@@ -4958,7 +4958,7 @@
                 "color-mix(in srgb, var(--col-fg) 60%, transparent)",
               :inset "0",
               :position "fixed",
-              :z-index "98"},
+              :z-index "50"},
  :overlay-content
    {:animation "content-show 150ms cubic-bezier(0.16, 1, 0.3, 1)",
     :box-shadow
@@ -4967,7 +4967,7 @@
     :position "fixed",
     :top "50%",
     :transform "translate(-50%, -50%)",
-    :z-index "99"},
+    :z-index "50"},
  :p-0 {:padding "var(--sp-0)"},
  :p-0-5 {:padding "var(--sp-0-5)"},
  :p-1 {:padding "var(--sp-1)"},

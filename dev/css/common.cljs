@@ -117,6 +117,7 @@
 ;;                        (str/join ": " (take 2 %)) ";")
 ;;                  (vals scale))))
 
+#_
 (defn scale->css-vars
   ([scale indents] (scale->css-vars scale indents nil))
   ([scale indents val-k]
@@ -126,6 +127,24 @@
                                          [(first %) (get (second %) val-k)]
                                          (take 2 %))) ";")
                   (vals scale)))))
+
+(defn scale->css-vars
+  ([scale indents] (scale->css-vars scale indents nil))
+  ([scale indents val-k]
+   (str/join
+    "\n"
+    (map (fn [[k v]]
+           (str (str/join (repeat indents css-indent))
+                (str k ": " (cond (and (map? v) val-k) (get v val-k)
+                                  (and (map? v)
+                                       (find v :light)
+                                       (find v :dark))
+                                  (str "light-dark("
+                                       (v :light) ", " (v :dark)
+                                       ")")
+                                  :else v))
+                ";"))
+         (vals scale)))))
 
 (defn scale->css-properties
   [scale {:keys [syntax inherits? init] :or {inherits? true}}]

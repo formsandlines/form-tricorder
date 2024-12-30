@@ -232,13 +232,13 @@ calc(var(--size) / 2) calc(-1 * (var(--size) / 2)),
    {:background-color "color-mix(in srgb, var(--col-fg) 60%, transparent)"
     ;; :backdrop-filter "blur(3px)"
     :position "fixed"
-    :z-index "98"
+    :z-index "50"
     :inset "0"
     :animation "overlay-show 150ms cubic-bezier(0.16, 1, 0.3, 1)"}
 
    :overlay-content
    {:position "fixed"
-    :z-index "99"
+    :z-index "50"
     :top "50%"
     :left "50%"
     :transform "translate(-50%, -50%)"

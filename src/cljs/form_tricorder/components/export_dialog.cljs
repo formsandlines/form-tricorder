@@ -7,15 +7,11 @@
    ["react" :as react]
    [shadow.css :refer (css)]
    ;; [garden.color :as gc]
-   [form-tricorder.utils :refer [let+]]
-   [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.stitches-config :as st]
    [form-tricorder.components.common.button :refer [Button]]
-   [form-tricorder.components.common.label :refer [Label]]
-   [form-tricorder.components.common.radio-group
-    :refer [RadioGroup RadioGroupItem]]
    ["@radix-ui/react-dialog" :as Dialog]
-   [form-tricorder.utils :as utils]))
+   [form-tricorder.utils :refer [unite]]))
+
+(def r) ;; hotfix for linting error in let+
 
 (def Root (.-Root Dialog))
 (def Trigger (.-Trigger Dialog))
@@ -27,138 +23,123 @@
 (def Close (.-Close Dialog))
 
 
+(defnc ExportTrigger
+  [{:keys []}]
+  ($d Trigger
+    {:as-child true}
+    ($ Button
+       {:variant :outline
+        :size :sm}
+       "Export")))
+
+(defnc ExportTitle
+  [{:keys [title]}]
+  ($d Title
+    {:class
+     (css :text-lg :mb-4)}
+    (or title "Export figure…")))
+
 (defnc ExportPreview
-  [{:keys [vis-id vis-props]} ref]
-  {:wrap [(react/forwardRef)]}
-  (let [dna (vis-props :dna)]
-    (hooks/use-effect
-      []
-      (let [webc-el @ref]
-        (aset webc-el "dna" dna)))
+  [{:keys [children class]}]
+  (d/div
+    {:class
+     (unite (css "ExportPreview"
+                 :px-4
+                 :py-4
+                 :rounded-sm
+                 :checkerboard
+                 {:max-height "400px"
+                  :overflow "auto"
+                  :display "flex"
+                  :align-items "center"
+                  :white-space "nowrap"
+                  :flex-wrap "nowrap"})
+            class)}
     (d/div
-      {:class
-       (css "ExportPreview"
-            :px-2
-            :py-8
-            :rounded-sm
-            :checkerboard
-            {:display "flex"
-             :justify-content "center"
-             :align-items "center"})}
-      ($ vis-id
-         {:ref ref
-          & vis-props}))))
+      {:class (css {:margin-left "auto"
+                    :margin-right "auto"
+                    :margin-top "auto"
+                    :margin-bottom "auto"})}
+      children)))
+
+
+(defnc ExportItem
+  [{:keys [title children class]}]
+  (d/div
+    {:class (unite "ExportItem" class)}
+    (d/h3
+      {:class (css :font-size-sm :fg-muted :mb-4)}
+      title)
+    children))
+
+(defnc ExportGroup
+  [{:keys [orientation children class] :or {orientation :vertical}}]
+  (d/div
+    {:class (unite "ExportGroup" class)
+     :data-orientation (name orientation)}
+    (d/div
+      {:class (str (css "ExportGroup-items"
+                        :gap-4
+                        {:display "flex"}
+                        ["& > *" :border-col])
+                   " " (case orientation
+                         :horizontal
+                         (css
+                           {:flex-direction "row"}
+                           ["& > *"
+                            :border-l :pl-4
+                            {:flex "1"}]
+                           ["& > *:first-child"
+                            :pl-0
+                            {:border-left "none"}])
+                         :vertical
+                         (css
+                           {:flex-direction "column"}
+                           ["& > *"
+                            :border-t :pt-2]
+                           ["& > *:first-child"
+                            :pt-0
+                            {:border-top "none"}])))}
+      children)))
+
+(defnc ExportOptions
+  [{:keys [children class]}]
+  (d/div
+    {:class (unite (css "ExportOptions"
+                        :mt-6)
+                   class)}
+    children))
 
 (defnc ExportDialog
-  [{:keys [save-svg save-img get-svg-el vis-id vis-props]}]
-  (let [export-ref (hooks/use-ref nil)
-        [format set-format] (hooks/use-state "svg")]
-    ($d Root
-        ;; {:default-open true}
-        ($d Trigger
-            {:as-child true}
-            ($ Button
-               {:variant :outline
-                :size :sm}
-               "Export"))
-        ($d Portal
-            ($d Overlay
-                {:class (css "inner" :overlay-bg)})
-            ($d Content
-                {:class
-                 (css "outer"
-                      :bg :fg :p-8-5 :rounded-md
-                      :overlay-content
-                      {:width "90vw"})}
-                ($d Title
-                    {:class
-                     (css :text-lg :mb-4)}
-                    "Export figure…")
-                ;; ($d Description
-                ;;   "Set some options.")
-                ($ ExportPreview
-                   {:vis-id vis-id
-                    :vis-props vis-props
-                    :ref export-ref})
-                (d/div
-                 {:class
-                  (css "ModalOptions"
-                       :mt-6
-                       {:display "flex"}
-                       ["& > *"
-                        :py-0 :px-4 :border-l :border-col
-                        {:flex "1"}]
-                       ["& > *:first-child"
-                        :pl-0
-                        {:border-left "none"}]
-                       ["& > *:last-child"
-                        :pr-0]
-                       ["& > * h3"
-                        :font-size-sm :border-col :mb-4]
-                       ["& .FileFormat"
-                        :gap-10
-                        {:display "flex"}]
-                       ["& .FileFormat > *"
-                        :gap-3
-                        {:display "flex"
-                         :align-items "center"}])}
-                 (d/div
-                  (d/h3 "File format:")
-                  ($ RadioGroup
-                     {:class "FileFormat"
-                      ;; :defaultValue "svg"
-                      :value format
-                      :onValueChange set-format}
-                     (d/div
-                      ($ RadioGroupItem
-                         {:id "png"
-                          :layer "outer"
-                          :value "png"})
-                      ($ Label
-                         {:htmlFor "png"}
-                         "PNG"))
-                     (d/div
-                      ($ RadioGroupItem
-                         {:id "svg"
-                          :layer "outer"
-                          :value "svg"})
-                      ($ Label
-                         {:htmlFor "svg"}
-                         "SVG")))
-                  (d/div
-                   {:class (css :mt-4)}
-                   (d/h3
-                    "Dimensions:")
-                   (d/div
-                    )))
-                 (d/div
-                  (d/h3 "Appearance:"))
-                 (d/div
-                  (d/h3 "Caption:")))
-                (d/div
-                 {:class
-                  (css "ModalActions"
+  [{:keys [title children on-export class]}]
+  ($d Root
+    {:class (or class "")
+     :default-open true}
+    ($ ExportTrigger)
+    ($d Portal
+      ($d Overlay
+        {:class (css "inner" :overlay-bg)})
+      ($d Content
+        {:class (css "outer"
+                     :bg :fg :p-8-5 :rounded-md
+                     :overlay-content
+                     {:width "90vw"})}
+        ($ ExportTitle {:title title})
+        ;; ($d Description
+        ;;   "Set some options.")
+        children
+        (d/div
+          {:class (css "ModalActions"
                        :gap-4 :mt-4
                        {:display "flex"
                         :justify-content "end"})}
-                 ($d Close
-                     {:as-child true}
-                     ($ Button
-                        {:variant :outline}
-                        "Cancel"))
-                 ($d Close
-                     {:as-child true
-                      :on-click
-                      (fn [e]
-                        (let [el (.. export-ref -current)
-                              make-filename (fn [ext] (str (utils/get-timestamp) "_"
-                                                          vis-id ext))]
-                          (js/setTimeout
-                           (fn []
-                             (let [svg-el (get-svg-el el)]
-                               (case format
-                                 "png" (save-img svg-el (make-filename ".png") {})
-                                 "svg" (save-svg svg-el (make-filename ".svg") {}))))
-                           1000)))}
-                     ($ Button
-                        "Download"))))))))
+          ($d Close
+            {:as-child true}
+            ($ Button
+               {:variant :outline}
+               "Cancel"))
+          ($d Close
+            {:as-child true
+             :on-click on-export}
+            ($ Button
+               "Download")))))))

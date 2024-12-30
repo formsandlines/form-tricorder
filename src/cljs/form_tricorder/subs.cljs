@@ -115,7 +115,7 @@
  :input/->dna-view
  :<- [:input/->dna]
  (fn [dna [_ type]]
-   (when (= :not-found dna)
+   (when-not dna ;; TODO: improve error handling
      (throw (ex-info "formDNA data missing!" {})))
    (let [dna-view (case type
                     :nmui (calc/dna->digits calc/nmui-code dna)
@@ -124,14 +124,23 @@
      dna-view)))
 
 
-;; (rf/reg-sub
-;;  :input/->vmap
-;;  :<- [:input/->value]
-;;  (fn [value _]
-;;    ;; (println "computing vmap")
-;;    (cond
-;;      (nil? value) (throw (ex-info "Unknown expression value!" {}))
-;;      :else (->> value (into {}) calc/vdict->vmap))))
+(rf/reg-sub
+ :input/->vmap
+ :<- [:input/->dna]
+ (fn [dna _]
+   ;; (println "computing vmap")
+   (when-not dna
+     (throw (ex-info "formDNA data missing!" {})))
+   (calc/dna->vmap dna)))
+
+(rf/reg-sub
+ :input/->vmap-psps
+ :<- [:input/->dna]
+ (fn [dna _]
+   ;; (println "computing vmap")
+   (when-not dna
+     (throw (ex-info "formDNA data missing!" {})))
+   (calc/vmap-perspectives (calc/dna-perspectives dna))))
 
 
 (rf/reg-sub

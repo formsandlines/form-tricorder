@@ -10,7 +10,6 @@
    [css.styles :as styles]
    [css.aliases :as aliases]))
 
-
 (.writeFileSync fs "dev/css/colors.edn"
                 (with-out-str (pprint/pprint colors/output)))
 

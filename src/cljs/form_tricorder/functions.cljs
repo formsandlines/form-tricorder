@@ -5,6 +5,7 @@
    [helix.dom :as d :refer [$d]]
    [garden.core :as garden]
    ["react" :as react]
+   [shadow.css :refer (css)]
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
@@ -12,18 +13,26 @@
    [clojure.string :as string]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core]
-   [formform-vis.utils :refer [save-svg save-img]]
+   [formform-vis.utils :refer [save-svg save-img scale-svg ->attr]]
    [form-tricorder.icons :refer [PerspectivesExpandIcon
                                  PerspectivesCollapseIcon]]
-   [form-tricorder.components.export-dialog :refer [ExportDialog]]
+   [form-tricorder.components.export-dialog
+    :refer [ExportDialog ExportPreview ExportOptions
+            ExportGroup ExportItem]]
+   [form-tricorder.components.common.input :refer [Input]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
+   [form-tricorder.components.common.label :refer [Label]]
+   [form-tricorder.components.common.radio-group
+    :refer [RadioGroup RadioGroupItem]]
+   [form-tricorder.components.common.checkbox :refer [Checkbox]]
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
    [form-tricorder.stitches-config :as st]
-   [form-tricorder.utils :as utils :refer [clj->js*]]))
+   [form-tricorder.utils :as utils :refer [clj->js* let+]]))
 
+(def r) ;; hotfix for linting error in let+
 
 (defn expr->json
   [expr]
@@ -137,79 +146,271 @@
 ;;         ["td"
 ;;          {:border-top "1px solid var(--colors-inner_n200)"}]]))
 
+
+(defnc VmapPsps
+  [{:keys [data varorder set-make-export-preview]}]
+  (let [webc-ref (hooks/use-ref nil)]
+    (hooks/use-effect
+      [data]
+      (let [webc-el @webc-ref]
+        (aset webc-el "varorder" varorder)
+        (aset webc-el "vmapPsps" data)))
+    (d/div
+      {:class "VmapPsps"}
+      ($ :ff-vmap-psps {:ref webc-ref
+                        "bg-color" (->attr "var(--colors-outer-bg)")
+                        :padding (->attr 6)}))))
+
+(defnc Vmap
+  [{:keys [data varorder set-make-export-preview]}]
+  (let [webc-ref (hooks/use-ref nil)]
+    (hooks/use-effect
+      [data]
+      (let [webc-el @webc-ref]
+        (aset webc-el "varorder" varorder)
+        (aset webc-el "vmap" data)))
+    (d/div
+      {:class "Vmap"}
+      ($ :ff-vmap {:ref webc-ref
+                   "bg-color" (->attr "var(--colors-outer-bg)")
+                   :padding (->attr 6)}))))
+
 (def vmap-export-css
   (garden/css
    [[":host"
-     {:font-family "var(--fonts-mono)"
-      :font-size "var(--fontSizes-xs)"
-      :color "var(--colors-m0)"}]]))
+     {:color "var(--col-fg)"
+      :fill "currentcolor"}]]))
+
+(defnc F-Vmap-preview
+  [{:keys [psps? vis-id data varorder negative? scale
+           default-caption? custom-caption-input]} ref]
+  {:wrap [(react/forwardRef)]}
+  (hooks/use-effect
+    [varorder data]
+    (let [webc-el @ref]
+      (aset webc-el "varorder" varorder)
+      (aset webc-el (if psps? "vmapPsps" "vmap") data)))
+  ($ ExportPreview
+     {:class (if negative?
+               (css {:color-scheme "dark"})
+               (css {:color-scheme "light"}))}
+     ($ vis-id
+        {:ref ref
+         :cellsize (->attr (* scale 12))
+         "full-svg" (->attr true)
+         "no-caption" (->attr (not default-caption?))
+         :label (->attr custom-caption-input)
+         :styles (->attr vmap-export-css)
+         "caption-attrs" (->attr {:font-family "var(--fonts-mono)"
+                                  :font-size "var(--fontSizes-xs)"})
+
+         ;; "bg-color" (str "\"" "var(--colors-m29)" "\"")
+         })))
+
+(defnc F-Vmap--export
+  [{:keys [psps? data varorder]}]
+  (let [vis-id (if psps? "ff-vmap-psps" "ff-vmap")
+        export-ref (hooks/use-ref nil)
+        [format set-format] (hooks/use-state "svg")
+        [scale set-scale] (hooks/use-state 1.0)
+        [negative? set-negative?] (hooks/use-state false)
+        [default-caption? set-default-caption?] (hooks/use-state true)
+        [custom-caption? set-custom-caption?] (hooks/use-state false)
+        [custom-caption-input set-custom-caption-input] (hooks/use-state "")]
+    ($ ExportDialog
+       {:title "Export vmap…"
+        :on-export
+        (fn [e]
+          (let [el (.. export-ref -current)
+                make-filename (fn [ext] (str (utils/get-timestamp) "_"
+                                            vis-id ext))
+                get-svg-el #(.. % -shadowRoot
+                                (getElementById (if psps?
+                                                  "psps-figure"
+                                                  "vmap-figure")))]
+            (js/setTimeout
+             (fn []
+               (let [svg-el (get-svg-el el)]
+                 (case format
+                   "png" (save-img svg-el (make-filename ".png") {})
+                   "svg" (save-svg svg-el (make-filename ".svg") {}))))
+             1000)))}
+       ($ F-Vmap-preview
+          {:ref export-ref
+           :psps? psps?
+           :vis-id vis-id
+           :data data
+           :varorder varorder
+           :scale scale
+           :negative? negative?
+           :default-caption? default-caption?
+           :custom-caption-input (when custom-caption? custom-caption-input)})
+       ($ ExportOptions
+          ($ ExportGroup
+             {:orientation :horizontal}
+             ($ ExportGroup
+                {:orientation :vertical}
+                ($ ExportItem
+                   {:title "File format:"}
+                   ($ RadioGroup
+                      {:class (css "FileFormat"
+                                   :gap-10
+                                   {:display "flex"}
+                                   ["& > *"
+                                    :gap-3
+                                    {:display "flex"
+                                     :align-items "center"}])
+                       ;; :defaultValue "svg"
+                       :value format
+                       :onValueChange set-format}
+                      (d/div
+                        ($ RadioGroupItem
+                           {:id "png"
+                            :layer "outer"
+                            :value "png"})
+                        ($ Label
+                           {:htmlFor "png"}
+                           "PNG"))
+                      (d/div
+                        ($ RadioGroupItem
+                           {:id "svg"
+                            :layer "outer"
+                            :value "svg"})
+                        ($ Label
+                           {:htmlFor "svg"}
+                           "SVG"))))
+                ($ ExportItem
+                   {:title "Scale:"}
+                   ;; {:class (css :mt-4)}
+                   (let [scales [0.5 1.0 2.0 3.0 4.0 5.0]
+                         scale->label (zipmap scales
+                                              ["Size ×0.5 (small)"
+                                               "Size ×1 (standard)"
+                                               "Size ×2 (medium)"
+                                               "Size ×3 (large)"
+                                               "Size ×4 (extralarge)"
+                                               "Size ×5 (print)"])]
+                     ($d Select
+                       {:id "varorder-select"
+                        :value scale
+                        :onValueChange (fn [v] (set-scale v))}
+                       ($ SelectTrigger
+                          { ;; :style {:width 200}
+                           :layer "outer"}
+                          ($d SelectValue
+                            {:placeholder "Select scale…"}
+                            (scale->label scale)))
+                       ($ SelectContent
+                          {:layer "outer"}
+                          (for [x scales
+                                :let [label (scale->label x)]]
+                            ($ SelectItem
+                               {:key label
+                                :value x
+                                :layer "outer"}
+                               label)))))))
+             ($ ExportItem
+                {:title "Appearance:"}
+                (d/div
+                  {:class (css :gap-3
+                               {:display "flex"
+                                :align-items "center"})}
+                  ($ Checkbox
+                     {:id "negative"
+                      :checked negative?
+                      :onCheckedChange #(set-negative? (not negative?))
+                      :layer "outer"})
+                  ($ Label
+                     {:htmlFor "negative"}
+                     "negative")))
+             ($ ExportItem
+                {:title "Caption:"}
+                (d/div
+                  {:class (css :gap-3
+                               {:display "flex"
+                                :flex-direction "column"})}
+                  (d/div
+                    {:class (css :gap-3
+                                 {:display "flex"
+                                  :align-items "center"})}
+                    ($ Checkbox
+                       {:id "default-caption"
+                        :checked default-caption?
+                        :onCheckedChange #(set-default-caption?
+                                           (not default-caption?))
+                        :layer "outer"})
+                    ($ Label
+                       {:htmlFor "default-caption"}
+                       "variable order"))
+                  (d/div
+                    {:class (css :gap-3
+                                 {:display "flex"
+                                  :align-items "center"})}
+                    ($ Checkbox
+                       {:id "custom-caption"
+                        :checked custom-caption?
+                        :onCheckedChange #(set-custom-caption?
+                                           (not custom-caption?))
+                        :layer "outer"})
+                    ($ Label
+                       {:htmlFor "custom-caption"}
+                       "custom label:"))
+                  ($ Input
+                     {:type "text"
+                      :value custom-caption-input
+                      :disabled (not custom-caption?)
+                      :onChange #(set-custom-caption-input
+                                  (.. % -target -value))
+                      :placeholder "Custom text"}))))))))
 
 (defnc F-Vmap--init
-  [_]
+  []
   (let [[psps? set-psps?] (hooks/use-state false)
-        ref (hooks/use-ref nil)
         varorder (rf/subscribe [:input/varorder])
-        dna (rf/subscribe [:input/->dna])
-        ;; make-preview (fn [varorder dna]
-        ;;                (fnc [_ preview-ref]
-        ;;                  {:wrap [(react/forwardRef)]}
-        ;;                  (let [preview-ref (hooks/use-ref nil)]
-        ;;                    ($ :ff-vmap
-        ;;                       {:ref preview-ref
-        ;;                        :varorder varorder
-        ;;                        :dna dna}))))
-        ;; (fn []
-        ;;   (let [el (js/document.createElement "ff-vmap")]
-        ;;     (.setAttribute el "full-svg" "true")
-        ;;     (aset el "varorder" varorder)
-        ;;     (aset el "dna" dna)
-        ;;     el))
-        ]
-    (hooks/use-effect
-      [dna psps?]
-      (let [webc-el @ref]
-        (aset webc-el "dna" dna)))
-    (d/div {:class "Vmap"}
+        vmap (when-not psps? (rf/subscribe [:input/->vmap]))
+        vmap-psps (when psps? (rf/subscribe [:input/->vmap-psps]))]
+    (d/div
+      {:class (css :gap-2
+                   {:display "flex"
+                    :flex-direction "column"})}
       (d/div
-        {:style {:display "flex"
-                 :gap "4px"
-                 :margin-bottom 10}}
+        {:class (css :mb-3 :gap-1
+                     {:display "flex"})}
         ($ Toggle {:variant :outline
-                   ;; :size "md"
                    :on-click (fn [_] (set-psps? (fn [b] (not b))))}
-           ($ (if psps? PerspectivesCollapseIcon
-                  PerspectivesExpandIcon))
-           (d/span
-             {:style {:margin-left "0.2rem"}}
+           ($ (if psps? PerspectivesCollapseIcon PerspectivesExpandIcon))
+           (d/span {:class (css :ml-1)}
              "Perspectives"))
-        ($ ExportDialog
-           {:save-svg save-svg
-            :save-img save-img
-            :get-svg-el #(.. % -shadowRoot
-                             (getElementById (if psps?
-                                               "psps-figure"
-                                               "vmap-figure")))
-            :vis-id (if psps? "ff-vmap-psps" "ff-vmap")
-            :vis-props {:varorder varorder
-                        :dna dna
-                        :full-svg true
-                        :styles (str \" vmap-export-css \")
-                        ;; "bg-color" (str "\"" "var(--colors-m29)" "\"")
-                        }}))
-      (if psps?
-        ($ :ff-vmap-psps {:ref ref
-                          ;; "full-svg" (str true)
-                          "bg-color" (str "\"" "var(--colors-outer-bg)" "\"")
-                          :padding 6
-                          :varorder (str varorder)})
-        ($ :ff-vmap {:ref ref
-                     ;; "full-svg" (str true)
-                     "bg-color" (str "\"" "var(--colors-outer-bg)" "\"")
-                     :padding 6
-                     :varorder (str varorder)})))))
+        ($ F-Vmap--export
+           {:data (if psps? vmap-psps vmap)
+            :varorder varorder
+            :psps? psps?}))
+      ($ (if psps? VmapPsps Vmap)
+         {:data (if psps? vmap-psps vmap)
+          :varorder varorder}))))
+
+#_#_
+(defnc Title
+  [{:keys [children]}]
+  (d/h2
+    {:class (css :fg-primary)}
+    children))
+
+(defnc SlotTest
+  [{:keys [title footer children]}]
+  (<>
+    (d/div {:class (css :bg-primary)}
+      (when title title))
+    children
+    (when footer footer)))
 
 (defmethod gen-component :vmap
   [_ args]
+  #_
+  ($ SlotTest
+     {:title ($ Title "title")
+      :footer (d/p "footer")}
+     (d/div "test"))
   ($ F-Vmap--init {& args}))
 
 

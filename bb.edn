@@ -1,32 +1,18 @@
-{:paths ["src" "dev"]
+{:paths ["src" "dev" "bb"]
  :deps {zprint/zprint {:mvn/version "1.2.9"}}
  :tasks
- {css-defs
+ {:requires ([tasks])
+
+  css-defs
   {:doc "Builds all style definitions and CSS variables.
 Writes files: `colors.edn`, `styles.edn`, `aliases.edn`and `specs.css`"
    :task (shell {:dir "."} "npx nbb dev/css/core.cljs")}
+
   css
   {:doc "Calls `bb css-defs` and re-formats the .edn output files.
 Keys are being sorted and the data looks better."
-   :requires ([zprint.core :as zp])
-   :task (do (run 'css-defs)
-             ;; pretty-print edn files, sorting map keys
-             (let [path "dev/css/"
-                   files ["colors.edn" "styles.edn" "aliases.edn"]
-                   ;; for some keys I want an explicit ordering sequence
-                   ;; especially since :1,:10,:2 should be :1 :2 … :10
-                   key-order (concat
-                              (for [prefix ["" "n" "m" "e" "fx" "fv" "fe"]
-                                    n (range 32)]
-                                (keyword (str prefix n)))
-                              [:sand :night :coral :seafoam :lavender :mauve
-                               :light :dark
-                               :semantic])]
-               (doseq [fname files]
-                 (zp/zprint-file (str path fname) fname
-                                 (str path fname)
-                                 {:map {:sort? true
-                                        :key-order key-order}}))))}
+   :task (tasks/css-repl)}
+
   css-repl
   {:doc "Starts up an NBB nREPL server to develop the style definitions.
 

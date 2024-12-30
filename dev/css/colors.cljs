@@ -228,18 +228,25 @@
           :dark dark-mode-colors}
          {:semantic semantic-colors}))
 
+(def light-dark-colors
+  (merge-with (fn [[k1 v1] [k2 v2]]
+                (assert (= k1 k2))
+                [k1 {:light v1 :dark v2}])
+              light-mode-colors
+              dark-mode-colors))
 
 (def css-output
   (let [opts {:syntax "<color>" :inherits true}
         cs-props (str/join "\n" (map (fn [[_ cs]]
                                        (c/scale->css-properties cs opts))
                                      scales))
-        cs-light1 (c/scale->css-vars light-mode-colors 1)
+        cs-light-dark (c/scale->css-vars light-dark-colors 1)
+        ;; cs-light1 (c/scale->css-vars light-mode-colors 1)
         ;; cs-light-props (str/join "\n" (map (fn [[k cs]]
         ;;                                      (scale->css-properties cs opts))
         ;;                                    light-mode-colors))
-        cs-dark1 (c/scale->css-vars dark-mode-colors 1)
-        cs-dark2 (c/scale->css-vars dark-mode-colors 2)
+        ;; cs-dark1 (c/scale->css-vars dark-mode-colors 1)
+        ;; cs-dark2 (c/scale->css-vars dark-mode-colors 2)
         semantic1-inner (c/scale->css-vars semantic-colors 1 :inner)
         semantic1-outer (c/scale->css-vars semantic-colors 1 :outer)
         ;; semantic-props (scale->css-properties semantic-colors opts)
@@ -251,22 +258,23 @@
      ;; semantic-props "\n\n"
 
      ;; User-controlled dark mode overrides
-     "@media (prefers-color-scheme: dark) {\n"
-     c/css-indent ":root {\n"
-     cs-dark2 "\n"
-     "\n" c/css-indent "}\n"
-     "}\n\n"
+     ;; "@media (prefers-color-scheme: dark) {\n"
+     ;; c/css-indent ":root {\n"
+     ;; cs-dark2 "\n"
+     ;; "\n" c/css-indent "}\n"
+     ;; "}\n\n"
 
      ;; App-controlled light mode overrides
      ":root {\n"
-     cs-light1 "\n"
+     ;; cs-light1 "\n"
+     cs-light-dark "\n"
      semantic1-inner "\n"
      "}\n\n"
 
      ;; App-controlled dark mode overrides
-     ":root[data-theme=\"dark\"] {\n"
-     cs-dark1 "\n"
-     "}\n\n"
+     ;; ":root[data-theme=\"dark\"] {\n"
+     ;; ;; cs-dark1 "\n"
+     ;; "}\n\n"
 
      ;; Semantic colors shift with layers
      ".outer {\n"
