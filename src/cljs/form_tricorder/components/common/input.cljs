@@ -3,79 +3,41 @@
    [helix.core :refer [defnc fnc $ <>]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
-   [clojure.string :as string]
-   [form-tricorder.utils :refer [let+]]
-   [form-tricorder.stitches-config :as st]
+   [shadow.css :refer (css)]
+   [form-tricorder.utils :refer [let+ unite]]
    ["react" :as react]))
 
 (def r) ;; hotfix for linting error in let+
 
-
-(def dInput
-  (st/styled "input"
-          {:display "flex"
-           :height "$10"
-           :width "100%"
-           :border-radius "$md"
-           :border-width "$1"
-           :_paddingX "$3"
-           :_paddingY "$2"
-           :_text ["$sm"]
-
-           "&[type=file]"
-           {:_paddingY 0}
-
-           "&[type=file]::-webkit-file-upload-button, &[type=file]::file-selector-button"
-           {:color "currentcolor"
-            :border-width "0px"
-            :background-color "transparent"
-            :_text ["$sm"]
-            :font-weight "$medium"
-
-            :height "100%"
-            :display "inline-flex"
-            :align-items "center"
-            :cursor "pointer"}
-
-           "&:focus-visible"
-           {:_outlineNone []}
-           "&:disabled"
-           {:cursor "not-allowed"
-            :opacity "0.5"}
-
-           :variants
-           {:layer
-            {:outer
-             {:border-color "$outer-input"
-              :background-color "$outer-bg"
-
-              "&::placeholder"
-              {:color "$outer-muted-fg"}
-              "&:focus-visible"
-              {:_ringOuter []}}
-
-             :inner
-             {:border-color "$inner-input"
-              :background-color "$inner-bg"
-
-              "&::placeholder"
-              {:color "$inner-muted-fg"}
-              "&:focus-visible"
-              {:_ringInner []}}}}
-
-           :defaultVariants
-           {:layer :outer}}))
-
+(def $styles
+  (css
+    :h-10 :rounded-md :border :px-3 :py-2 :text-sm
+    :border-col-input :bg
+    {:display "flex"
+     :width "100%"}
+    ["&[type=file]" :py-0]
+    ["&[type=file]::-webkit-file-upload-button, &[type=file]::file-selector-button"
+     :text-sm :weight-medium
+     {:color "currentcolor"
+      :border-width "0px"
+      :background-color "transparent"
+      :height "100%"
+      :display "inline-flex"
+      :align-items "center"
+      :cursor "pointer"}]
+    ["&:focus-visible" :outline-none :ring]
+    ["&:disabled"
+     {:cursor "not-allowed"
+      :opacity "0.5"}]
+    ["&::placeholder" :fg-muted]))
 
 (defnc Input
   [props ref]
   {:wrap [(react/forwardRef)]}
-  (let+ [{:keys [class className type layer]
+  (let+ [{:keys [class className type]
           :rest r} props]
-    ($d dInput
-      {:class
-       (string/join " " (remove nil? [className class]))
-       :layer (or layer js/undefined)
+    (d/input
+      {:class (unite className class $styles)
        :type type
        :ref ref
        & r})))

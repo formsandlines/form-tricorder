@@ -175,14 +175,14 @@
                    "bg-color" (->attr "var(--colors-outer-bg)")
                    :padding (->attr 6)}))))
 
-(def vmap-export-css
-  (garden/css
-   [[":host"
-     {:color "var(--col-fg)"
-      :fill "currentcolor"}]]))
+;; (def vmap-export-css
+;;   (garden/css
+;;    [[":host"
+;;      {:color "var(--col-n31)"
+;;       :fill "currentcolor"}]]))
 
 (defnc F-Vmap-preview
-  [{:keys [psps? vis-id data varorder negative? scale
+  [{:keys [psps? vis-id data varorder negative? bg-color padding scale
            default-caption? custom-caption-input]} ref]
   {:wrap [(react/forwardRef)]}
   (hooks/use-effect
@@ -196,16 +196,18 @@
                (css {:color-scheme "light"}))}
      ($ vis-id
         {:ref ref
-         :cellsize (->attr (* scale 12))
+         ;; :cellsize (->attr (* scale 12))
+         "fig-scale" scale
          "full-svg" (->attr true)
          "no-caption" (->attr (not default-caption?))
          :label (->attr custom-caption-input)
-         :styles (->attr vmap-export-css)
-         "caption-attrs" (->attr {:font-family "var(--fonts-mono)"
-                                  :font-size "var(--fontSizes-xs)"})
-
-         ;; "bg-color" (str "\"" "var(--colors-m29)" "\"")
-         })))
+         ;; :styles (->attr vmap-export-css)
+         "caption-attrs"
+         (->attr {:font-family "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+                  :font-size "12px"
+                  :fill (if negative? "#ffffff" "#000000")})
+         "fig-padding" (->attr padding)
+         "fig-bg-color" (->attr bg-color)})))
 
 (defnc F-Vmap--export
   [{:keys [psps? data varorder]}]
@@ -214,6 +216,9 @@
         [format set-format] (hooks/use-state "svg")
         [scale set-scale] (hooks/use-state 1.0)
         [negative? set-negative?] (hooks/use-state false)
+        [background? set-background?] (hooks/use-state false)
+        [padding set-padding] (hooks/use-state 0)
+        [bg-color set-bg-color] (hooks/use-state "#ffffff")
         [default-caption? set-default-caption?] (hooks/use-state true)
         [custom-caption? set-custom-caption?] (hooks/use-state false)
         [custom-caption-input set-custom-caption-input] (hooks/use-state "")]
@@ -243,6 +248,8 @@
            :varorder varorder
            :scale scale
            :negative? negative?
+           :bg-color (when background? bg-color)
+           :padding padding
            :default-caption? default-caption?
            :custom-caption-input (when custom-caption? custom-caption-input)})
        ($ ExportOptions
@@ -314,15 +321,64 @@
                 (d/div
                   {:class (css :gap-3
                                {:display "flex"
-                                :align-items "center"})}
-                  ($ Checkbox
-                     {:id "negative"
-                      :checked negative?
-                      :onCheckedChange #(set-negative? (not negative?))
-                      :layer "outer"})
-                  ($ Label
-                     {:htmlFor "negative"}
-                     "negative")))
+                                :flex-direction "column"})}
+                  (d/div
+                    {:class (css :gap-3
+                                 {:display "flex"
+                                  :align-items "center"})}
+                    ($ Checkbox
+                       {:id "negative"
+                        :checked negative?
+                        :onCheckedChange #(set-negative? (not negative?))
+                        :layer "outer"})
+                    ($ Label
+                       {:htmlFor "negative"}
+                       "negative"))
+                  (d/div
+                    {:class (css :gap-3
+                                 {:display "flex"
+                                  :flex-direction "row"})}
+                    (d/div
+                      {:class (css :gap-3
+                                   {:display "flex"
+                                    :align-items "center"})}
+                      ($ Checkbox
+                         {:id "background"
+                          :checked background?
+                          :onCheckedChange #(set-background? (not background?))
+                          :layer "outer"})
+                      ($ Label
+                         {:htmlFor "background"}
+                         "background:"))
+                    ;; ? browser support
+                    (d/input
+                      {:type "color"
+                       :value bg-color
+                       :onChange #(set-bg-color (.. % -target -value))
+                       :disabled (not background?)}))
+                  (d/div
+                    {:class (css :gap-3
+                                 {:display "flex"
+                                  :flex-direction "row"
+                                  :align-items "center"
+                                  :margin-left "var(--sizes-icon-sm)"
+                                  :padding-left "var(--sp-3)"})}
+                    ($ Label
+                       {:htmlFor "padding"}
+                       "padding:")
+                    ($ Input
+                       {:class (css :w-20)
+                        :id "padding"
+                        :type "number"
+                        :step "1"
+                        :min "0"
+                        :max "99"
+                        :value padding
+                        :onChange
+                        #(set-padding
+                          (try (parse-long (.. % -target -value))
+                               (catch js/Error e
+                                 (js/console.error e))))}))))
              ($ ExportItem
                 {:title "Caption:"}
                 (d/div
