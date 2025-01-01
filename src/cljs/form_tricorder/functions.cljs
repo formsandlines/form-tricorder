@@ -273,7 +273,6 @@
                       (d/div
                         ($ RadioGroupItem
                            {:id "png"
-                            :layer "outer"
                             :value "png"})
                         ($ Label
                            {:htmlFor "png"}
@@ -281,7 +280,6 @@
                       (d/div
                         ($ RadioGroupItem
                            {:id "svg"
-                            :layer "outer"
                             :value "svg"})
                         ($ Label
                            {:htmlFor "svg"}
@@ -302,19 +300,16 @@
                         :value scale
                         :onValueChange (fn [v] (set-scale v))}
                        ($ SelectTrigger
-                          { ;; :style {:width 200}
-                           :layer "outer"}
                           ($d SelectValue
                             {:placeholder "Select scale…"}
                             (scale->label scale)))
                        ($ SelectContent
-                          {:layer "outer"}
+                          {:class "outer"}
                           (for [x scales
                                 :let [label (scale->label x)]]
                             ($ SelectItem
                                {:key label
-                                :value x
-                                :layer "outer"}
+                                :value x}
                                label)))))))
              ($ ExportItem
                 {:title "Appearance:"}
@@ -329,8 +324,7 @@
                     ($ Checkbox
                        {:id "negative"
                         :checked negative?
-                        :onCheckedChange #(set-negative? (not negative?))
-                        :layer "outer"})
+                        :onCheckedChange #(set-negative? (not negative?))})
                     ($ Label
                        {:htmlFor "negative"}
                        "negative"))
@@ -345,8 +339,8 @@
                       ($ Checkbox
                          {:id "background"
                           :checked background?
-                          :onCheckedChange #(set-background? (not background?))
-                          :layer "outer"})
+                          :onCheckedChange #(set-background?
+                                             (not background?))})
                       ($ Label
                          {:htmlFor "background"}
                          "background:"))
@@ -393,8 +387,7 @@
                        {:id "default-caption"
                         :checked default-caption?
                         :onCheckedChange #(set-default-caption?
-                                           (not default-caption?))
-                        :layer "outer"})
+                                           (not default-caption?))})
                     ($ Label
                        {:htmlFor "default-caption"}
                        "variable order"))
@@ -406,8 +399,7 @@
                        {:id "custom-caption"
                         :checked custom-caption?
                         :onCheckedChange #(set-custom-caption?
-                                           (not custom-caption?))
-                        :layer "outer"})
+                                           (not custom-caption?))})
                     ($ Label
                        {:htmlFor "custom-caption"}
                        "custom label:"))
@@ -519,18 +511,16 @@
        :value current-code
        :onValueChange (fn [v] (set-code v))}
       ($ SelectTrigger
-         {:layer "inner"
-          :style {:width "10rem"}}
+         {:style {:width "10rem"}}
          ($d SelectValue
            (code->str current-code)))
       ($ SelectContent
-         {:layer "inner"}
+         {:class "inner"}
          (for [c encodings
                :let [label (code->str c)]]
            ($ SelectItem
               {:key c
-               :value c
-               :layer "inner"}
+               :value c}
               label))))))
 
 (defnc F-FDNA--init

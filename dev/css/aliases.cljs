@@ -259,13 +259,12 @@ calc(var(--size) / 2) calc(-1 * (var(--size) / 2)),
 
    :outline-none (make-outline {:col "transparent"})
 
-   ;; ? needed
    ;; ! no default for `--clamp-n`
-   ;; :line-clamp
-   ;; {:overflow "hidden"
-   ;;  :display "-webkit-box"
-   ;;  :-webkit-box-orient "vertical"
-   ;;  :-webkit-line-clamp "var(--clamp-n)"}
+   :line-clamp
+   {:overflow "hidden"
+    :display "-webkit-box"
+    :-webkit-box-orient "vertical"
+    :-webkit-line-clamp "var(--clamp-n)"}
 
    :line-clamp-none
    {:overflow "visible"

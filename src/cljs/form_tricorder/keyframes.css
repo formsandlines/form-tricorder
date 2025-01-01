@@ -17,3 +17,22 @@
 	transform: translate(-50%, -50%) scale(1);
     }
 }
+
+@keyframes collapsible-slide-out {
+    from {
+	width: 0;
+    }
+    to {
+	width: var(--radix-collapsible-content-width);
+    }
+}
+
+@keyframes collapsible-slide-in {
+    from {
+	width: var(--radix-collapsible-content-width);
+    }
+    to {
+	width: 0;
+    }
+}
+

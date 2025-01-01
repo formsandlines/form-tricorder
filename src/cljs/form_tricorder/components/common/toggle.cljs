@@ -6,7 +6,6 @@
    [shadow.css :refer (css)]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+ unite]]
-   [form-tricorder.stitches-config :as st]
    ["react" :as react]
    ["@radix-ui/react-toggle" :as TogglePrimitive]))
 

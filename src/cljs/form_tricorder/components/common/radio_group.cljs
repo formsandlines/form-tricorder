@@ -9,17 +9,12 @@
    ["@radix-ui/react-radio-group" :as RadioGroupPrimitive]
    ["lucide-react" :as icons]
    ;; ["@radix-ui/react-icons" :refer [CircleIcon]]
-   ;; ["@stitches/react" :refer [css]]
    ))
 
 (def r) ;; hotfix for linting error in let+
 
 (def Root (.-Root RadioGroupPrimitive))
-
-;;         "ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-
 (def Item (.-Item RadioGroupPrimitive))
-
 (def Indicator (.-Indicator RadioGroupPrimitive))
 
 (defnc RadioGroup
@@ -28,7 +23,7 @@
   (let+ [{:keys [class className]
           :rest r} props]
     ($d Root
-      {:class (unite className class
+      {:class (unite className class "peer"
                      (css {:display "grid"
                            :gap "2"}))
        :ref ref
@@ -37,10 +32,10 @@
 (defnc RadioGroupItem
   [props ref]
   {:wrap [(react/forwardRef)]}
-  (let+ [{:keys [class className layer]
+  (let+ [{:keys [class className]
           :rest r} props]
     ($d Item
-        {:class (unite className class
+        {:class (unite className class "peer" ;; `.peer` is for labels, etc.
                        (css
                         :size-icon-sm :rounded-full :border ; :fg-primary
                         {:aspect-ratio "1 / 1"

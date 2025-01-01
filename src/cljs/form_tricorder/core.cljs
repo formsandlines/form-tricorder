@@ -1,5 +1,6 @@
 (ns form-tricorder.core
-  {:shadow.css/include ["form_tricorder/core.css"]}
+  {:shadow.css/include ["form_tricorder/core.css"
+                        "form_tricorder/keyframes.css"]}
   (:require
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]

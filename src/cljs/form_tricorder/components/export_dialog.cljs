@@ -1,5 +1,4 @@
 (ns form-tricorder.components.export-dialog
-  {:shadow.css/include ["form_tricorder/keyframes.css"]}
   (:require
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
@@ -114,7 +113,8 @@
   [{:keys [title children on-export class]}]
   ($d Root
     {:class (or class "")
-     :default-open true}
+     ;; :default-open true
+     }
     ($ ExportTrigger)
     ($d Portal
       ($d Overlay
