@@ -3,22 +3,12 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [shadow.css :refer (css)]
    [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.components.function-tabs :refer [FunctionTabs]]
    [form-tricorder.components.common.button :refer [Button]]
-   [form-tricorder.stitches-config :as st]
    ["@radix-ui/react-icons" :refer [Cross2Icon]]
    ))
-
-(def styles
-  (st/css {:position "relative"
-        :overflow-y "auto"
-        :display "flex"}))
-
-(def close-button-styles
-  (st/css {:position "absolute"
-        :top "$4"
-        :right "$4"}))
 
 (defnc ViewPane
   [{:keys [id only-child?]}]
@@ -29,19 +19,18 @@
         handle-remove-view #(rf/dispatch
                              [:views/remove {:view-index id}])]
     (d/div
-      {:class (str "ViewPane " (styles))}
+      {:class (css "ViewPane"
+                   {:position "relative"
+                    :overflow-y "auto"
+                    :display "flex"})}
       (d/div
         {:class "ViewPaneControls"}
         (when-not only-child?
           ($ Button
-             {:st/css (clj->js {:position "absolute"
-                             :width "$6"
-                             :height "$6"
-                             :top "$4"
-                             :right "$4"})
-              :variant "secondary"
-              :size "icon"
-              :layer "inner"
+             {:class (css :top-4 :right-4
+                          {:position "absolute"})
+              :variant :secondary
+              :size :icon-sm
               :on-click handle-remove-view}
              ($d Cross2Icon)))
         ($ FunctionTabs

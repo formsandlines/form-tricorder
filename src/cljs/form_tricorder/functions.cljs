@@ -29,7 +29,6 @@
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
-   [form-tricorder.stitches-config :as st]
    [form-tricorder.utils :as utils :refer [clj->js* let+]]))
 
 (def r) ;; hotfix for linting error in let+
@@ -52,11 +51,8 @@
 
 (defnc F-EDN
   [{:keys [expr]}]
-  (let [styles (st/css {:font-family "$mono"
-                     ;; :background-color "$inner_hl"
-                     })]
-    (d/pre {:class (styles)}
-           (d/code (prn-str expr)))))
+  (d/pre {:class (css :font-mono)}
+    (d/code (prn-str expr))))
 
 (defnc F-EDN--init
   [args]
@@ -74,13 +70,9 @@
 
 (defnc F-JSON
   [{:keys [expr]}]
-  (let [styles (st/css {:font-family "$mono"
-                     :font-size "$1"
-                     ;; :background-color "$inner_hl"
-                     })]
-    (d/pre {:class (styles)}
-           (d/code (.stringify js/JSON (expr->json expr)
-                               js/undefined 2)))))
+  (d/pre {:class (css :font-mono :font-size-1)}
+    (d/code (.stringify js/JSON (expr->json expr)
+                        js/undefined 2))))
 
 (defnc F-JSON--init
   [args]
@@ -156,9 +148,9 @@
         (aset webc-el "varorder" varorder)
         (aset webc-el "vmapPsps" data)))
     (d/div
-      {:class "VmapPsps"}
+      {:class "VmapPsps outer"}
       ($ :ff-vmap-psps {:ref webc-ref
-                        "bg-color" (->attr "var(--colors-outer-bg)")
+                        "bg-color" (->attr "var(--col-bg)")
                         :padding (->attr 6)}))))
 
 (defnc Vmap
@@ -170,9 +162,9 @@
         (aset webc-el "varorder" varorder)
         (aset webc-el "vmap" data)))
     (d/div
-      {:class "Vmap"}
+      {:class "Vmap outer"}
       ($ :ff-vmap {:ref webc-ref
-                   "bg-color" (->attr "var(--colors-outer-bg)")
+                   "bg-color" (->attr "var(--col-bg)")
                    :padding (->attr 6)}))))
 
 ;; (def vmap-export-css
@@ -467,34 +459,31 @@
 
 (defnc F-FDNA
   [{:keys [dna]}]
-  (let [styles (st/css {:font-family "$mono"
-                     :font-size "$xs"
-                     "& code" {:word-wrap "break-word"
-                               :letter-spacing "0.05em"
-                               :display "flex"
-                               "& > *"
-                               {:padding "0.1rem 0"}
-                               ".dna"
-                               {:display "inline-flex"
-                                :flex-wrap "wrap"
-                                "& > span"
-                                {:padding "0 0.1rem"}
-                                "& > span:nth-child(odd)"
-                                {:color "$n29"
-                                 :background-color "$n3"}
-                                "& > span:nth-child(even)"
-                                {:color "$m29"
-                                 :background-color "$m3"}}}})]
-    (d/div {:class (styles)}
-      (d/code
-        (d/span "::")
-        (d/span
-          {:class "dna"}
-          (for [[group i] (map vector (partition-all 4 dna) (range))
-                :let [s (string/join "" group)]]
-            (d/span
-              {:key (str i)}
-              s)))))))
+  (d/div {:class (css :font-mono :font-size-xs)}
+    (d/code
+      {:class (css {:word-wrap "break-word"
+                    :letter-spacing "0.05em"
+                    :display "flex"}
+                   ["& > *"
+                    {:padding "0.1rem 0"}])}
+      (d/span "::")
+      (d/span
+        {:class (css "dna"
+                     {:display "inline-flex"
+                      :flex-wrap "wrap"}
+                     ["& > span"
+                      {:padding "0 0.1rem"}]
+                     ["& > span:nth-child(odd)"
+                      {:color "var(--col-n29)"
+                       :background-color "var(--col-n3)"}]
+                     ["& > span:nth-child(even)"
+                      {:color "var(--col-m29)"
+                       :background-color "var(--col-m3)"}])}
+        (for [[group i] (map vector (partition-all 4 dna) (range))
+              :let [s (string/join "" group)]]
+          (d/span
+            {:key (str i)}
+            s))))))
 
 (defn code->str
   [c]

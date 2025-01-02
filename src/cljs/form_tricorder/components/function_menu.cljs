@@ -3,137 +3,116 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [shadow.css :refer (css)]
    ;; [form-tricorder.re-frame-adapter :as rf]
    [form-tricorder.model :as model :refer [modes]]
-   [form-tricorder.stitches-config :as st]
-   [form-tricorder.utils :refer [log]]
+   [form-tricorder.utils :refer [log unite]]
    [form-tricorder.icons :refer [function-icon]]
    ["@radix-ui/react-menubar" :as Menubar]))
 
 
-(def Root
-  (st/styled (.-Root Menubar)
-          {:display "flex"
-           :column-gap "$2" ; "4px"
-           :box-sizing "border-box"}))
+(def Root (.-Root Menubar))
+(def Menu (.-Menu Menubar))
+(def Portal (.-Portal Menubar))
+(def Trigger (.-Trigger Menubar))
+(def Content (.-Content Menubar))
+(def Item (.-Item Menubar))
 
-(def Menu
-  (st/styled (.-Menu Menubar)
-          {}))
+(def $trigger-styles-base
+  (css :px-2 :pt-7 :font-sans :weight-normal :font-size-2
+       :fg :rounded-sm
+       {:padding-bottom "calc(var(--sp-2) - 1px)"
+        :flex "1"
+        :display "inline-block"
+        ;; :outline "none"
+        ;; :position "relative"
+        :border "none"
+        :text-align "right"
+        :cursor "pointer"}))
 
-(def Trigger
-  (st/styled (.-Trigger Menubar)
-          (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
-            {:flex "1"
-             :display "inline-block"
-             ;; :outline "none"
-             ;; :position "relative"
-             :border "none"
-             :padding "$7 $2 calc($2 - 1px) $2"
-             :font-family "$base"
-             :font-weight "$normal"
-             :font-size "$2"
-             :text-align "right"
-             :color "$outer-fg"
-             :cursor "pointer"
-             ;; :box-shadow (str "inset 0 -20px 20px -8px $colors$outer-fmenu-base"
-             ;;                  ", " shadow)
-             :border-radius "$2"
-             "&:focus"
-             {}
-             ;; "&:hover"
-             ;; {:box-shadow (str "inset 0 -20px 20px -8px $colors$outer-fmenu-glow"
-             ;;                   ", " shadow)}
-             :variants
-             {:type
-              (into {}
-                    (for [{:keys [id]} modes]
-                      [id {:background-color (str "$outer-fmenu-" (name id))
-                           :box-shadow (str "inset 0 -20px 20px -8px $colors$outer-fmenu-" (name id) "-shadow, " shadow)
-                           "&:hover"
-                           {:box-shadow (str "inset 0 -20px 20px -8px $colors$outer-fmenu-" (name id) "-shadow-hover, " shadow)
-}
-                           }]))}})))
+(def $$trigger-style-variants
+  {:expr (css {:background-color "var(--col-fmenu-expr)"
+               :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow), var(--shadow-fmenu)"}
+              ["&:hover"
+               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow-hover), var(--shadow-fmenu)"}])
 
-(def Portal
-  (st/styled (.-Portal Menubar)
-          {}))
+   :eval (css {:background-color "var(--col-fmenu-eval)"
+               :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow), var(--shadow-fmenu)"}
+              ["&:hover"
+               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow-hover), var(--shadow-fmenu)"}])
 
-(def Content
-  (st/styled (.-Content Menubar)
-          (let [shadow "0 1px 1px 0px rgba(0,0,0, .4)"]
-            {:display "flex"
-             :flex-direction "column"
-             ;; :margin-left "$2"
-             ;; :margin-top "$2"
-             :width "var(--radix-menubar-trigger-width)"
-             :padding "0 0 $5 0"
-             :background "$outer-bg"
-             :box-shadow shadow
-             :border-bottom-left-radius "$2"
-             :border-bottom-right-radius "$2"
-             })))
+   :emul (css {:background-color "var(--col-fmenu-emul)"
+               :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow), var(--shadow-fmenu)"}
+              ["&:hover"
+               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow-hover), var(--shadow-fmenu)"}])})
 
-(def Item
-  (st/styled (.-Item Menubar)
-          {
-           :display "flex"
-           ;; :justify-content "space-between"
-           :margin "$1 0 0 0"
-           :padding "$2 $3"
-           :font-family "$base"
-           :font-size "$1"
-           :cursor "pointer"
+(defn $$trigger-styles
+  [mode]
+  (unite $trigger-styles-base
+         (get $$trigger-style-variants mode)))
 
-           "& > *:last-child"
-           {:margin-left "$4"
-            :margin-right "$4"}
 
-           ;; :variants
-           ;; {:type
-           ;;  (into {}
-           ;;        (for [{:keys [id color]} modes]
-           ;;          [id {:background-color (:base color)}]))}
+(def $item-styles-base
+  (css :mt-1 :py-2 :px-3 :font-sans :font-size-1
+       {:display "flex"
+        ;; :justify-content "space-between"
+        :cursor "pointer"}
+       ["& > *:last-child"
+        :mx-4]))
 
-           :variants
-           {:type {:a {} :b {} :c {}}
-            :subtype {:a {} :b {} :c {}}}
-           :compoundVariants
-           (vec (for [{mode-id :id items :items} modes
-                      {func-id :id color :color} items]
-                  {:type (name mode-id)
-                   :subtype (name func-id)
-                   ;; color is actually always the same for one mode
-                   ;; so this is mostly obsolete, but more flexible for now
-                   :css {:background-color (str "$inner-tab-" (name mode-id))
-                         "&:hover"
-                         {:background-color (str "$inner-tab-" (name mode-id) "-hover")}}}))
-           }))
+(def $$item-style-variants
+  {:expr (css {:background-color "var(--col-tab-expr)"}
+              ["&:hover"
+               {:background-color "var(--col-tab-expr-hover)"}])
+
+   :eval (css {:background-color "var(--col-tab-eval)"}
+              ["&:hover"
+               {:background-color "var(--col-tab-eval-hover)"}])
+
+   :emul (css {:background-color "var(--col-tab-emul)"}
+              ["&:hover"
+               {:background-color "var(--col-tab-emul-hover)"}])})
+
+(defn $$item-styles
+  [mode]
+  (unite $item-styles-base
+         (get $$item-style-variants mode)))
 
 
 (defnc FunctionMenu
   [{:keys [handle-click]}]
   ($d Root
-    {:class "FunctionMenu"
+    {:class (css "FunctionMenu" "outer"
+                 :gap-2
+                 {:display "flex"
+                  :column-gap "$2"
+                  :box-sizing "border-box"})
      :loop true}
     (for [{mode-id :id label :label items :items} modes
           :let [id-str (name mode-id)]]
       ($d Menu
         {:key id-str}
         ($d Trigger
-          {:type id-str} label)
+          {:class ($$trigger-styles mode-id)}
+          label)
         ($d Portal
           ($d Content
-            {:sideOffset 2
+            {:class (css "outer"
+                         :bg :rounded-b-sm
+                         {:display "flex"
+                          :flex-direction "column"
+                          :width "var(--radix-menubar-trigger-width)"
+                          :padding "0 0 var(--space-5) 0"
+                          :box-shadow "var(--shadow-fmenu)"})
+             :sideOffset 2
              :align "start"
              :alignOffset 0
              :loop true}
             (for [{:keys [id label]} items
                   :let [id-str (name id)]]
               ($d Item
-                {:key     id-str
-                 :type    (name mode-id)
-                 :subtype id-str
+                {:class ($$item-styles mode-id)
+                 :key   id-str
                  :onSelect 
                  (fn [e] (let [win-e  (.-event js/window)
                               shift? (if win-e

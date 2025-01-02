@@ -12,9 +12,8 @@
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
    ;; [form-tricorder.utils :refer [log]]
-   [form-tricorder.stitches-config :as st]
-   [form-tricorder.foobar :refer [Foobar]]
-   [form-tricorder.colortest :refer [Colortest]]
+   ;; [form-tricorder.test.comptest :refer [Foobar]]
+   ;; [form-tricorder.test.colortest :refer [Colortest]]
    [form-tricorder.components.common.alert
     :refer [Alert AlertDescription AlertTitle]]
    [form-tricorder.components.header :refer [Header]]
@@ -49,15 +48,8 @@
   (let [appearance (rf/subscribe [:theme/appearance])]
     (hooks/use-effect
       [appearance]
-      (do
-        (let [root-el (.. js/document -documentElement)]
-          (.setAttribute root-el "data-theme" (name appearance))
-          (aset (.-style root-el) "color-scheme" (name appearance)))
-        (if (= appearance :dark)
-          (do (.add js/document.body.classList st/dark-theme)
-              (.remove js/document.body.classList st/light-theme))
-          (do (.add js/document.body.classList st/light-theme)
-              (.remove js/document.body.classList st/dark-theme)))))
+      (let [root-el (.. js/document -documentElement)]
+        (aset (.-style root-el) "color-scheme" (name appearance))))
     ($ ErrorBoundary
        (let [$item-styles (css ["&:last-child"
                                 {:flex "1"}])]
@@ -67,7 +59,8 @@
                        {:display "flex"
                         :height "100vh"
                         :flex-direction "column"})
-           :style {:color-scheme (name appearance)}}
+           ;; :style {:color-scheme (name appearance)}
+           }
           (d/div
            {:class $item-styles}
            ($ Header))

@@ -6,7 +6,6 @@
    [shadow.css :refer (css)]
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+ unite]]
-   [form-tricorder.stitches-config :as st]
    ["@radix-ui/react-select" :as SelectPrimitive]
    ;; ["lucide-react" :refer [Check ChevronDown ChevronUp]]
    ["@radix-ui/react-icons" :as icons]

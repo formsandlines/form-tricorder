@@ -10,7 +10,6 @@
    ["@radix-ui/react-checkbox" :as CheckboxPrimitive]
    ["lucide-react" :as icons]
    ;; ["@radix-ui/react-icons" :refer [CheckIcon]]
-   ;; ["@stitches/react" :refer [css]]
    ))
 
 (def r) ;; hotfix for linting error in let+

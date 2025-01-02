@@ -2,7 +2,8 @@
   (:require
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.dom :as d :refer [$d]]
-   [form-tricorder.stitches-config :as st]))
+   [shadow.css :refer (css)]
+   [form-tricorder.utils :refer [let+ unite]]))
 
 ;; RegEx to convert paths to Helix components:
 ;; ^.+\sd=(".+?")\stransform=(".+?").+$
@@ -55,25 +56,27 @@
          :y1 0 :y2 0}))))
 
 
-(defn ficon-params
-  [mode-id]
-  {:size 24})
+(defn ficon-params [mode-id] {:size 24})
 
-(def FunctionIcon
-  (st/styled "svg"
-          { ;; :opacity "0.7"
-           "& .ficon-area" {:fill "currentcolor"
-                            :fill-opacity "0.5"}
-           "& .ficon-line" {:fill "none"
-                            :stroke "currentcolor"
-                            ;; :stroke-opacity "0.8"
-                            :stroke-width "2px"}
-           :variants
-           {:mode
-            {:expr {:color "$inner-icon-expr"}
-             :eval {:color "$inner-icon-eval"}
-             :emul {:color "$inner-icon-emul"}}}
-           }))
+(def $func-icon-styles-base
+  (css
+   ;; {:opacity "0.7"}
+   ["& .ficon-area" {:fill "currentcolor"
+                     :fill-opacity "0.5"}]
+   ["& .ficon-line" {:fill "none"
+                     :stroke "currentcolor"
+                     ;; :stroke-opacity "0.8"
+                     :stroke-width "2px"}]))
+
+(def $$func-icon-style-variants
+  {:expr (css {:color "var(--col-icon-expr)"})
+   :eval (css {:color "var(--col-icon-eval)"})
+   :emul (css {:color "var(--col-icon-emul)"})})
+
+(defn $$func-icon-styles
+  [mode]
+  (unite $func-icon-styles-base
+         (get $$func-icon-style-variants mode)))
 
 (defmulti function-icon (fn [func-id] func-id))
 
@@ -84,72 +87,17 @@
 
 (defmethod function-icon :lifeform
   [_]
-  (let [{:keys [size]} (ficon-params :emul)]
-    ($ FunctionIcon
-       {:xmlns "http://www.w3.org/2000/svg",
-        :viewBox (str "0 0 " size " " size),
-        :mode "emul"
-        :width (str size "px"),
-        :height (str size "px")}
-       (d/rect
-         {:class "ficon-area"
-          :x "9", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "16"})
-       (d/rect
-         {:class "ficon-area"
-          :x "9", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "2"})
-       (d/rect
-         {:class "ficon-area"
-          :x "16", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "9"})
-       (d/rect
-         {:class "ficon-area"
-          :x "2", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "9"})
-       (d/ellipse
-         {:class "ficon-line"
-          :cx "12", 
-          :cy "12", 
-          :rx "2", 
-          :ry "2"}))))
-
-(defmethod function-icon :mindform
-  [_]
-  (let [{:keys [size]} (ficon-params :emul)]
-    ($ FunctionIcon
-      {:xmlns "http://www.w3.org/2000/svg",
+  (let [mode :emul
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
        :viewBox (str "0 0 " size " " size),
-       :mode "emul"
        :width (str size "px"),
        :height (str size "px")}
       (d/rect
         {:class "ficon-area"
-	:x "16", 
-         :width "6", 
-         :height "6", 
-         :rx "1", 
-         :ry "1", 
-         :y "9"})
-      (d/rect
-        {:class "ficon-area"
-	:x "16", 
+         :x "9", 
          :width "6", 
          :height "6", 
          :rx "1", 
@@ -157,7 +105,64 @@
          :y "16"})
       (d/rect
         {:class "ficon-area"
-	:x "16", 
+         :x "9", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "2"})
+      (d/rect
+        {:class "ficon-area"
+         :x "16", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "9"})
+      (d/rect
+        {:class "ficon-area"
+         :x "2", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "9"})
+      (d/ellipse
+        {:class "ficon-line"
+         :cx "12", 
+         :cy "12", 
+         :rx "2", 
+         :ry "2"}))))
+
+(defmethod function-icon :mindform
+  [_]
+  (let [mode :emul
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
+       :viewBox (str "0 0 " size " " size),
+       :width (str size "px"),
+       :height (str size "px")}
+      (d/rect
+        {:class "ficon-area"
+         :x "16", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "9"})
+      (d/rect
+        {:class "ficon-area"
+         :x "16", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "16"})
+      (d/rect
+        {:class "ficon-area"
+         :x "16", 
          :width "6", 
          :height "6", 
          :rx "1", 
@@ -177,65 +182,67 @@
 
 (defmethod function-icon :selfi
   [_]
-  (let [{:keys [size]} (ficon-params :emul)]
-    ($ FunctionIcon
-       {:xmlns "http://www.w3.org/2000/svg",
-        :viewBox (str "0 0 " size " " size),
-        :mode "emul"
-        :width (str size "px"),
-        :height (str size "px")}
-       (d/rect
-         {:class "ficon-area"
-          :x "2", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "2"})
-       (d/rect
-         {:class "ficon-area"
-          :x "9", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "2"})
-       (d/rect
-         {:class "ficon-area"
-          :x "16", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "2"})
-       (d/rect
-         {:class "ficon-area"
-          :x "9", 
-          :width "6", 
-          :height "6", 
-          :rx "1", 
-          :ry "1", 
-          :y "9"})
-       (d/g
-         {:class "ficon-line"
-          :style {:stroke-width "1.8px"
-                  :stroke-linecap "round"}}
-         (d/path
-           {:d "M 18.001 13.999 L 18.001 18.999"})
-         (d/path
-           {:style {:transform-origin "19.501px 19.499px"},
-            :d "M 21.001 17.999 L 18.001 21"})
-         (d/path
-           {:style {:transform-origin "16.5px 19.499px"},
-            :d "M 15 17.999 L 18 21"})))))
+  (let [mode :emul
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
+       :viewBox (str "0 0 " size " " size),
+       :width (str size "px"),
+       :height (str size "px")}
+      (d/rect
+        {:class "ficon-area"
+         :x "2", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "2"})
+      (d/rect
+        {:class "ficon-area"
+         :x "9", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "2"})
+      (d/rect
+        {:class "ficon-area"
+         :x "16", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "2"})
+      (d/rect
+        {:class "ficon-area"
+         :x "9", 
+         :width "6", 
+         :height "6", 
+         :rx "1", 
+         :ry "1", 
+         :y "9"})
+      (d/g
+        {:class "ficon-line"
+         :style {:stroke-width "1.8px"
+                 :stroke-linecap "round"}}
+        (d/path
+          {:d "M 18.001 13.999 L 18.001 18.999"})
+        (d/path
+          {:style {:transform-origin "19.501px 19.499px"},
+           :d "M 21.001 17.999 L 18.001 21"})
+        (d/path
+          {:style {:transform-origin "16.5px 19.499px"},
+           :d "M 15 17.999 L 18 21"})))))
 
 (defmethod function-icon :vmap
   [_]
-  (let [{:keys [size]} (ficon-params :eval)]
-    ($ FunctionIcon
-      {:xmlns "http://www.w3.org/2000/svg",
+  (let [mode :eval
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
        :viewBox (str "0 0 " size " " size),
-       :mode "eval"
        :width (str size "px"),
        :height (str size "px")}
       (d/rect
@@ -284,11 +291,12 @@
 
 (defmethod function-icon :vtable
   [_]
-  (let [{:keys [size]} (ficon-params :eval)]
-    ($ FunctionIcon
-      {:xmlns "http://www.w3.org/2000/svg",
+  (let [mode :eval
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
        :viewBox (str "0 0 " size " " size),
-       :mode "eval"
        :width (str size "px"),
        :height (str size "px")}
       (d/path
@@ -309,11 +317,12 @@
 
 (defmethod function-icon :depthtree
   [_]
-  (let [{:keys [size]} (ficon-params :expr)]
-    ($ FunctionIcon
-      {:xmlns "http://www.w3.org/2000/svg",
+  (let [mode :expr
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
        :viewBox (str "0 0 " size " " size),
-       :mode "expr"
        :width (str size "px"),
        :height (str size "px")}
       (d/rect
@@ -335,11 +344,12 @@
 
 (defmethod function-icon :graphs
   [_]
-  (let [{:keys [size]} (ficon-params :expr)]
-    ($ FunctionIcon
-      {:xmlns "http://www.w3.org/2000/svg",
+  (let [mode :expr
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
        :viewBox (str "0 0 " size " " size),
-       :mode "expr"
        :width (str size "px"),
        :height (str size "px")}
       (d/ellipse
@@ -358,11 +368,12 @@
 
 (defmethod function-icon :hooks
   [_]
-  (let [{:keys [size]} (ficon-params :expr)]
-    ($ FunctionIcon
-      {:xmlns "http://www.w3.org/2000/svg",
+  (let [mode :expr
+        {:keys [size]} (ficon-params mode)]
+    (d/svg
+      {:class ($$func-icon-styles mode)
+       :xmlns "http://www.w3.org/2000/svg",
        :viewBox (str "0 0 " size " " size),
-       :mode "expr"
        :width (str size "px"),
        :height (str size "px")}
       (d/path

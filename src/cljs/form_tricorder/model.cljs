@@ -1,6 +1,4 @@
-(ns form-tricorder.model
-  (:require
-   [form-tricorder.icons :as icons]))
+(ns form-tricorder.model)
 
 (def expr-items
   [{:id    :hooks

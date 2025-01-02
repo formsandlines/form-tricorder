@@ -55,7 +55,8 @@
    :size {:sm (css :h-9 :px-3 :py-3 :rounded)
           :md (css :h-10 :px-4 :py-3)
           :lg (css :h-11 :px-6 :py-3 :rounded-md)
-          :icon (css :size-10 :p-0)}})
+          :icon (css :size-10 :p-0)
+          :icon-sm (css :size-6 :p-0)}})
 
 (defn $$styles
   [variant size]

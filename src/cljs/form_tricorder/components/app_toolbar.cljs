@@ -3,8 +3,9 @@
    [helix.core :refer [defnc fnc $ <> provider]]
    [helix.hooks :as hooks]
    [helix.dom :as d :refer [$d]]
+   [shadow.css :refer (css)]
    [form-tricorder.re-frame-adapter :as rf]
-   [form-tricorder.stitches-config :as st]
+   [form-tricorder.utils :refer [unite]]
    [form-tricorder.icons :refer [SunIcon MoonIcon SwapIcon
                                  ViewVerticalIcon
                                  ViewHorizontalIcon
@@ -12,116 +13,69 @@
    ["@radix-ui/react-toolbar" :as Toolbar]
    #_["@radix-ui/react-icons" :refer []]))
 
-;; Shared styles
+(def Root (.-Root Toolbar))
 
-;; Styled Components
+;; TODO: refactor components & styles
 
-(def Root
-  (st/styled (.-Root Toolbar)
-          {:display "flex"
-           :min-width "max-content"
-           :height "100%"
-           :column-gap "$1" ; "4px"
-           :align-items "stretch"
-           :font-size "$sm"
-           :color "$outer-fg"
+(def $common-button-styles
+  (css :rounded-sm :transition-colors :p-1
+       {:touch-action "manipulation"
+        :display "inline-flex"
+        :justify-content "center"
+        :align-items "center"
+        :white-space "nowrap"
+        :outline "none"
+        :cursor "pointer"
+        :border "none"
+        :background "none"
+        :color "var(--col-bg-primary)" ; "$m27"
+        }
+       ["&:hover"
+        :bg-accent :fg-accent]))
 
-           "& .icon"
-           {:width "$icon-toolbar" ; "1.2rem" ; "auto"
-            :height "100%"
-            :fill "$m21"
-            }
-           ;; "& *:hover > .icon"
-           ;; {:fill "$m800"}
-           "& *:disabled"
-           {:pointer-events "none"
-            :cursor "not-allowed"}
-           "& *:disabled > .icon"
-           {:fill "$outer-muted" ;; $n300
-            }}))
+(def $common-item-styles
+  (css {:flex "0 0 auto"}
+       ;; ["&:focus"
+       ;;  {:outline "solid"}]
+       ;; ["&:focus-visible"
+       ;;  {:outline "none"}]
+       ["&:focus-visible"
+        :outline-none :ring
+        ;; {:_ring [2 "$colors$ring" 1 "$colors$outer-bg"]}
+        ]))
 
-(def buttonStyles
-  {:touch-action "manipulation"
+(def Button (.-Button Toolbar))
+(def $button-styles
+  (unite $common-item-styles $common-button-styles))
 
-   :display "inline-flex"
-   :justify-content "center"
-   :align-items "center"
-   :white-space "nowrap"
-   :border-radius "$sm"
-   :_transition_colors []
+(def TextButton (.-Button Toolbar))
+(def $text-button-styles
+  (unite $common-item-styles $common-button-styles
+         (css :px-1-5 :py-1
+              ["&:disabled"
+               {:opacity "0.5"}])))
 
-   :outline "none"
-   :cursor "pointer"
-   :border "none"
-   :padding "$1" ; "0.2rem"
-   :background "none"
-   :color "$m27"
+(def Separator (.-Separator Toolbar))
+(def $separator-styles
+  (unite $common-item-styles
+         (css :my-0 :mx-1
+              {:width "1px"
+               :background-color "var(--col-n8)"})))
 
-   "&:hover"
-   {:background-color "$outer-accent" ;; inner-bg
-    :color "$outer-accent-fg" ;; outer_m200
-    }})
+(def ToggleGroup (.-ToggleGroup Toolbar))
+(def $toggle-group-styles
+  (unite $common-item-styles
+         (css :gap-1
+              {:display "flex"
+               :min-width "max-content"})))
 
-(def itemStyles
-  {:flex "0 0 auto"
+(def ToggleItem (.-ToggleItem Toolbar))
+(def $toggle-item-styles
+  (unite $common-item-styles $common-button-styles))
 
-   ;; "&:focus"
-   ;; {:outline "solid"}
-   ;; "&:focus-visible"
-   ;; {:outline "none"}
-
-   "&:focus-visible"
-   {:_outlineNone []
-    :_ring [2 "$colors$ring" 1 "$colors$outer-bg"]}})
-
-(def Button
-  (st/styled (.-Button Toolbar)
-          (merge itemStyles
-                 buttonStyles
-                 {})))
-
-(def TextButton
-  (st/styled (.-Button Toolbar)
-          (merge itemStyles
-                 buttonStyles
-                 {:padding "$1 $1-5"
-
-                  "&:disabled"
-                  {:opacity "0.5"}})))
-
-(def Separator
-  (st/styled (.-Separator Toolbar)
-          (merge itemStyles
-                 {:width "$px"
-                  :background-color "$n8"
-                  :margin "0 $1"})))
-
-(def ToggleGroup
-  (st/styled (.-ToggleGroup Toolbar)
-          (merge itemStyles
-                 {:display "flex"
-                  :min-width "max-content"
-                  :column-gap "$1" ; "4px"
-                  })))
-
-(def ToggleItem
-  (st/styled (.-ToggleItem Toolbar)
-          (merge itemStyles
-                 buttonStyles
-                 {})))
-
-; (def Link
-;   (st/styled (.-Link Toolbar)
-;           (merge itemStyles
-;                  linkStyles)))
-
-(def SourceLink
-  (st/styled (.-Link Toolbar)
-          (merge itemStyles
-                 buttonStyles
-                 ;; {:display "block"
-                 ;;  :padding "$1 0"}
-                 )))
+(def SourceLink (.-Link Toolbar))
+(def $source-link-styles
+  (unite $common-item-styles $common-button-styles))
 
 ;; Components
 
@@ -136,45 +90,77 @@
         #(rf/dispatch [:views/swap])
         handle-toggle-appearance
         #(rf/dispatch [:theme/set-appearance {:next-appearance %}])]
-    ($d Root {:orientation "horizontal"
-              :aria-label "App toolbar"}
-        ($d ToggleGroup
-          {:type "single"
-           :value (name frame-orientation)
-           :on-value-change #(handle-frame-orientation (keyword %))}
-          ($d ToggleItem
-            {:value "cols"
-             :disabled (= frame-orientation :cols)}
-            ($ ViewVerticalIcon))
-          ($d ToggleItem
-            {:value "rows"
-             :disabled (= frame-orientation :rows)}
-            ($ ViewHorizontalIcon)))
-        ($d Button
-          {:disabled (not view-split?)
-           :on-click (fn [_] (handle-swap))}
-          ($ SwapIcon))
-        ($d Separator)
-        ($d ToggleGroup
-          {:type "single"
-           :value (name appearance)
-           :on-value-change #(handle-toggle-appearance (keyword %))}
-          ($d ToggleItem
-            {:value "light"
-             :disabled (= appearance :light)}
-            ($ SunIcon))
-          ($d ToggleItem
-            {:value "dark"
-             :disabled (= appearance :dark)}
-            ($ MoonIcon)))
-        ($d Separator)
-        ($d TextButton {:on-click (fn [_] (js/console.log "Clicked about"))}
-            "about")
-        ($d TextButton {:on-click (fn [_] (js/console.log "Clicked help"))}
-            "help")
-        ($d Separator)
-        ($d SourceLink
-          {:href "https://github.com/formsandlines/form-tricorder"
-           :target "_blank"}
-          ($ SourceIcon)))))
+    ($d Root
+      {:class (css :font-size-sm :fg :gap-1
+                   {:display "flex"
+                    :min-width "max-content"
+                    :height "100%"
+                    :align-items "stretch"}
+                   ["& .icon"
+                    :w-icon-sm ;; 18px ?
+                    {:height "100%"
+                     :fill "var(--col-m21)"}]
+                   ;; ["& *:hover > .icon"
+                   ;;  {:fill "$m800"}]
+                   ["& *:disabled"
+                    {:pointer-events "none"
+                     :cursor "not-allowed"}]
+                   ["& *:disabled > .icon"
+                    {:fill "var(--col-bg-muted)"}])
+       :orientation "horizontal"
+       :aria-label "App toolbar"}
+      ($d ToggleGroup
+        {:class $toggle-group-styles
+         :type "single"
+         :value (name frame-orientation)
+         :on-value-change #(handle-frame-orientation (keyword %))}
+        ($d ToggleItem
+          {:class $toggle-item-styles
+           :value "cols"
+           :disabled (= frame-orientation :cols)}
+          ($ ViewVerticalIcon))
+        ($d ToggleItem
+          {:class $toggle-item-styles
+           :value "rows"
+           :disabled (= frame-orientation :rows)}
+          ($ ViewHorizontalIcon)))
+      ($d Button
+        {:class $button-styles
+         :disabled (not view-split?)
+         :on-click (fn [_] (handle-swap))}
+        ($ SwapIcon))
+      ($d Separator
+        {:class $separator-styles})
+      ($d ToggleGroup
+        {:class $toggle-group-styles
+         :type "single"
+         :value (name appearance)
+         :on-value-change #(handle-toggle-appearance (keyword %))}
+        ($d ToggleItem
+          {:class $toggle-item-styles
+           :value "light"
+           :disabled (= appearance :light)}
+          ($ SunIcon))
+        ($d ToggleItem
+          {:class $toggle-item-styles
+           :value "dark"
+           :disabled (= appearance :dark)}
+          ($ MoonIcon)))
+      ($d Separator
+        {:class $separator-styles})
+      ($d TextButton
+        {:class $text-button-styles
+         :on-click (fn [_] (js/console.log "Clicked about"))}
+        "about")
+      ($d TextButton
+        {:class $text-button-styles
+         :on-click (fn [_] (js/console.log "Clicked help"))}
+        "help")
+      ($d Separator
+        {:class $separator-styles})
+      ($d SourceLink
+        {:class $source-link-styles
+         :href "https://github.com/formsandlines/form-tricorder"
+         :target "_blank"}
+        ($ SourceIcon)))))
 

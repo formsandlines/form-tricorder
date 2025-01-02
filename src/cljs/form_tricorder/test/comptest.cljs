@@ -1,4 +1,4 @@
-(ns form-tricorder.foobar
+(ns form-tricorder.test.comptest
   (:require
    [helix.core :refer [defnc fnc $ <>]]
    ;; [helix.hooks :as hooks]
@@ -14,8 +14,7 @@
     :refer [RadioGroup RadioGroupItem]]
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
-            SelectGroup SelectLabel]]
-   [form-tricorder.stitches-config :as st]))
+            SelectGroup SelectLabel]]))
 
 (def l "inner")
 

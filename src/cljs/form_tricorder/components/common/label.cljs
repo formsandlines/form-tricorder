@@ -7,9 +7,7 @@
    [clojure.string :as string]
    [form-tricorder.utils :refer [let+ unite]]
    ["react" :as react]
-   ["@radix-ui/react-label" :as LabelPrimitive]
-   ;; ["@stitches/react" :refer [css]]
-   ))
+   ["@radix-ui/react-label" :as LabelPrimitive]))
 
 (def r) ;; hotfix for linting error in let+
 

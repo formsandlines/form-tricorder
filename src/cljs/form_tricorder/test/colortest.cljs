@@ -1,4 +1,4 @@
-(ns form-tricorder.colortest
+(ns form-tricorder.test.colortest
   (:require
    [helix.core :refer [defnc fnc $ <>]]
    ;; [helix.hooks :as hooks]
