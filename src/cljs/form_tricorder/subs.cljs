@@ -2,6 +2,7 @@
   (:require
    [formform.calc :as calc]
    [formform.expr :as expr]
+   [formform.io :as io]
    [re-frame.core :as rf]))
 
 
@@ -67,6 +68,12 @@
    (let [input (:input db)]
      [(get input :expr :not-found)
       (get input :varorder nil)])))
+
+(rf/reg-sub
+ :input/->expr-json ;; legacy format → remove later
+ :<- [:input/expr]
+ (fn [expr _]
+   (clj->js (io/uniform-expr {:legacy? true} expr))))
 
 (rf/reg-sub
  :input/->sorted-varorder

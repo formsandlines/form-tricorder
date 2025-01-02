@@ -6,9 +6,6 @@
    [garden.core :as garden]
    ["react" :as react]
    [shadow.css :refer (css)]
-   [formform.calc :as calc]
-   [formform.expr :as expr]
-   [formform.io :as io]
    [clojure.math]
    [clojure.string :as string]
    [form-tricorder.re-frame-adapter :as rf]
@@ -29,13 +26,9 @@
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
-   [form-tricorder.utils :as utils :refer [clj->js* let+]]))
+   [form-tricorder.utils :as utils :refer [let+]]))
 
 (def r) ;; hotfix for linting error in let+
-
-(defn expr->json
-  [expr]
-  (clj->js* (io/uniform-expr {:legacy? true} expr)))
 
 (defmulti gen-component (fn [func-id _] func-id))
 
@@ -69,15 +62,15 @@
 ;; JSON
 
 (defnc F-JSON
-  [{:keys [expr]}]
-  (d/pre {:class (css :font-mono :font-size-1)}
-    (d/code (.stringify js/JSON (expr->json expr)
+  [{:keys [expr-json]}]
+  (d/pre {:class (css :font-mono :text-xs)}
+    (d/code (.stringify js/JSON expr-json
                         js/undefined 2))))
 
 (defnc F-JSON--init
   [args]
-  (let [expr (rf/subscribe [:input/expr])]
-    ($ F-JSON {:expr expr
+  (let [expr-json (rf/subscribe [:input/->expr-json])]
+    ($ F-JSON {:expr-json expr-json
                & args})))
 
 (defmethod gen-component :json
@@ -91,31 +84,30 @@
 (def vtable-css
   (garden/css
    [[":host"
-     {:font-family "var(--fonts-mono)"
-      :font-size "var(--fontSizes-1)"}]
+     {:font-family "var(--font-mono)"
+      :font-size "var(--fs-1)"}]
     ["th"
-     {:font-weight "var(--fontWeights-medium)"
-      :border-top "1px solid var(--colors-inner-fg)"
-      :border-bottom "1px solid var(--colors-inner-fg)"}]
+     {:font-weight "var(--weight-medium)"
+      :border-top "1px solid var(--col-fg)"
+      :border-bottom "1px solid var(--col-fg)"}]
     ["tr:hover td"
-     {:background-color "var(--colors-n3)"}]
+     {:background-color "var(--col-n3)"}]
     ["td"
-     {:border-top "1px solid var(--colors-inner-muted)"}]]))
+     {:border-top "1px solid var(--col-bg-muted)"}]]))
 
 (defnc F-Vtable--init
   [_]
   (let [ref (hooks/use-ref nil)
         varorder (rf/subscribe [:input/varorder])
-        results  (rf/subscribe [:input/->value])
-        css vtable-css]
+        results (rf/subscribe [:input/->value])]
     (hooks/use-effect
       [results]
       (let [webc-el @ref]
         (aset webc-el "results" results)))
-    (d/div {:class "Vtable"}
+    (d/div {:class "Vtable inner"}
       ($ :ff-vtable {:ref ref
-                     :styles (str \" css \")
-                     :varorder varorder}))))
+                     :styles (->attr vtable-css)
+                     :varorder (->attr varorder)}))))
 
 (defmethod gen-component :vtable
   [_ args]
@@ -124,20 +116,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; vmap visualization
-
-;; (def vtable-css
-;;   (css [[":host"
-;;          {:font-family "var(--fonts-mono)"
-;;           :font-size "var(--fontSizes-1)"}]
-;;         ["th"
-;;          {:font-weight "var(--fontWeights-medium)"
-;;           :border-top "1px solid var(--colors-inner_fg)"
-;;           :border-bottom "1px solid var(--colors-inner_fg)"}]
-;;         ["tr:hover td"
-;;          {:background-color "var(--colors-inner_hl)"}]
-;;         ["td"
-;;          {:border-top "1px solid var(--colors-inner_n200)"}]]))
-
 
 (defnc VmapPsps
   [{:keys [data varorder set-make-export-preview]}]
@@ -529,11 +507,6 @@
   [_ args]
   ($ F-FDNA--init {& args}))
 
-(comment
-  (expr/op-get (expr/eval->expr-all {:varorder nil} [] {}) :dna)
-  ;; => "[:fdna [a] ::MIUN]"
-  ;; => [:fdna [a] [:M :I :U :N]]
-  ,)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Visualization
@@ -541,16 +514,16 @@
 (defnc F-Graph--init
   [{:keys [type]}]
   (let [ref (hooks/use-ref nil)
-        expr       (rf/subscribe [:input/expr])
+        expr-json  (rf/subscribe [:input/->expr-json])
         appearance (rf/subscribe [:theme/appearance])
         theme (if (= :dark appearance) "dark" "light")]
     (hooks/use-effect
-      [expr appearance]
+      [expr-json appearance]
       (let [webc-el @ref]
-        (aset webc-el "expr" expr)))
+        (aset webc-el "json" expr-json)))
     ($ :ff-fgraph {:ref ref
-                   :type type
-                   :theme theme})))
+                   :type (->attr type)
+                   :theme (->attr theme)})))
 
 (defmethod gen-component :depthtree
   [_ args]
@@ -568,86 +541,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SelFi CA
 
-(comment
-  (def KRGB {:N "#000000"
-             :U "#FF0000"
-             :I "#00FF00"
-             :M "#0000FF"})
-  
-  (defn sys-ini
-    [ini-ptn res]
-    (condp ini-ptn =
-      :random (vec (repeatedly res calc/rand-const))
-      (throw (ex-info "Unknown ini pattern" {}))))
-
-  (defn sys-next
-    [gen-prev rules umwelt]
-    (let [p 0
-          q (dec (count gen-prev))]
-      (into []
-            (for [i (range (count gen-prev))]
-              (let [L (if (> i p) (- i 1) q)
-                    E i
-                    R (if (< i q) (+ i 1) p)]
-                (rules
-                 (mapv gen-prev
-                       (condp = umwelt
-                         :e   [E]
-                         :lr  [L R]
-                         :ler [L E R]
-                         (throw (ex-info "Invalid cell neighbourhood" {}))))))))))
-
-  (defn emulate
-    [rules umwelt num evolution]
-    (let [prev-gen (last evolution)
-          next-gen (sys-next prev-gen rules umwelt)]
-      (if (<= num 1)
-        evolution
-        (recur rules umwelt (dec num) (conj evolution next-gen)))))
-
-  (defnc F-Selfi
-    [{:keys [res vis-limit ini-ptn rules umwelt cell-size]}]
-    (let [canvas-ref (hooks/use-ref nil)
-          ;; evolution is cached in app-db to prevent long delays when
-          ;; component gets remounted (cannot use-memo here)
-          evol-cache (rf/subscribe [:cache/retrieve :selfi-evolution])
-          evolution (if evol-cache
-                      evol-cache
-                      (rf/dispatch
-                       [:cache/update
-                        {:key :selfi-evolution
-                         :update-fn #(emulate rules umwelt vis-limit
-                                              [(sys-ini ini-ptn res)])}]))
-          draw (hooks/use-callback
-                 :auto-deps
-                 (fn [context cw ch]
-                   (.clearRect context 0 0 cw ch)
-                   (aset context "fillStyle" "black")
-                   (.fillRect context 0 0 cw ch)
-                   (doseq [[i gen] (map-indexed vector evolution)
-                           [j val] (map-indexed vector gen)
-                           :let [x (* j cell-size)
-                                 y (* i cell-size)]]
-                     (aset context "fillStyle" (KRGB val))
-                     (.fillRect context x y cell-size cell-size))))]
-      (hooks/use-effect
-        [draw]
-        (let [canvas @canvas-ref
-              cw (.-width canvas)
-              ch (.-height canvas)
-              context (.getContext canvas "2d")]
-          (draw context cw ch)))
-      (d/canvas {:ref canvas-ref
-                 :width  (* res cell-size)
-                 :height (* vis-limit cell-size)}))))
-
 (defnc F-Selfi--init
   [_]
   (let [ref (hooks/use-ref nil)
         rules-fn (rf/subscribe [:input/->selfi-rules-fn])
-        umwelt   (rf/subscribe [:input/->selfi-umwelt])
-        ;; dna      (rf/subscribe [:input/->dna])
-        ]
+        umwelt   (rf/subscribe [:input/->selfi-umwelt])]
     (hooks/use-effect
       [rules-fn umwelt]
       (let [webc-el @ref]
@@ -655,10 +553,10 @@
         (aset webc-el "umwelt" umwelt)))
     (d/div {:class "Selfi"}
       ($ :ff-selfi {:ref ref
-                    :res 100
-                    "ini-ptn" :random
-                    "vis-limit" 200
-                    :cellsize 4}))))
+                    :res (->attr 100)
+                    "ini-ptn" (->attr :random)
+                    "vis-limit" (->attr 200)
+                    :cellsize (->attr 4)}))))
 
 (defmethod gen-component :selfi
   [_ args]

@@ -29,7 +29,6 @@
     "@radix-ui/react-toggle": "^1.1.1",
     "@radix-ui/react-toggle-group": "^1.1.1",
     "@radix-ui/react-toolbar": "^1.1.1",
-    "@stitches/react": "^1.2.8",
     "boxmodel-layout-for-d3": "1.2.2",
     "d3": "^5.16.0",
     "lucide-react": "^0.451.0",

@@ -77,9 +77,6 @@ importers:
       '@radix-ui/react-toolbar':
         specifier: ^1.1.1
         version: 1.1.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@stitches/react':
-        specifier: ^1.2.8
-        version: 1.2.8(react@18.3.1)
       boxmodel-layout-for-d3:
         specifier: 1.2.2
         version: 1.2.2
@@ -616,11 +613,6 @@ packages:
   '@remix-run/router@1.19.2':
     resolution: {integrity: sha512-baiMx18+IMuD1yyvOGaHM9QrVUPGGG0jC+z+IPHnRJWUAUvaKuWKyE8gjDj2rzv3sz9zOGoRSPgeBVHRhZnBlA==}
     engines: {node: '>=14.0.0'}
-
-  '@stitches/react@1.2.8':
-    resolution: {integrity: sha512-9g9dWI4gsSVe8bNLlb+lMkBYsnIKCZTmvqvDG+Avnn69XfmHZKiaMrx7cgTaddq7aTPPmXiTsbFcUy0xgI4+wA==}
-    peerDependencies:
-      react: '>= 16.3.0'
 
   apca-w3@0.1.9:
     resolution: {integrity: sha512-Zrf6AeBeQjNe/fxK7U1jCo5zfdjDl6T4/kdw5Xlky3G7u+EJTZkyItjMYQGtwf9pkftsINxcYyOpuLkzKf1ITQ==}
@@ -1688,10 +1680,6 @@ snapshots:
   '@radix-ui/rect@1.1.0': {}
 
   '@remix-run/router@1.19.2': {}
-
-  '@stitches/react@1.2.8(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
 
   apca-w3@0.1.9:
     dependencies:
