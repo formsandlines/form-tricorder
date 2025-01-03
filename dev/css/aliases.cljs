@@ -93,6 +93,9 @@
     "rounded-bl" [:border-bottom-left-radius]
     "rounded-br" [:border-bottom-right-radius]}
 
+   :shadow
+   {"shadow" [:box-shadow]}
+
    ;; singleton groups
    :font         {"font" [:font-family]}
    :font-size    {"font-size" [:font-size]}

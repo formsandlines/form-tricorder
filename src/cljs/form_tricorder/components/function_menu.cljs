@@ -19,15 +19,18 @@
 (def Item (.-Item Menubar))
 
 (def $trigger-styles-base
-  (css :px-2 :pt-7 :font-sans :weight-normal :font-size-2
+  (css :px-4 :pt-6 :font-sans :weight-normal :font-size-2
        :fg :rounded-sm
        {:padding-bottom "calc(var(--sp-2) - 1px)"
         :flex "1"
-        :display "inline-block"
+        ;; :display "inline-block"
+        :display "inline-flex"
+        :justify-content "space-between"
         ;; :outline "none"
         ;; :position "relative"
         :border "none"
-        :text-align "right"
+        ;; :text-align "left"
+        ;; :text-align "right"
         :cursor "pointer"}))
 
 (def $$trigger-style-variants
@@ -53,7 +56,7 @@
 
 
 (def $item-styles-base
-  (css :mt-1 :py-2 :px-3 :font-sans :font-size-1
+  (css :mt-1 :py-2 :pl-3 :pr-0 :font-sans :font-size-1
        {:display "flex"
         ;; :justify-content "space-between"
         :cursor "pointer"}
@@ -78,28 +81,39 @@
   (unite $item-styles-base
          (get $$item-style-variants mode)))
 
+(def $keybind-styles
+  (css ["& > .keybind"
+        {:opacity "0.25"
+         ;; :text-decoration "underline"
+         }]))
 
 (defnc FunctionMenu
-  [{:keys [handle-click]}]
+  [{:keys [handle-select-fn keybind-mode-value]}]
   ($d Root
     {:class (css "FunctionMenu" "outer"
                  :gap-2
                  {:display "flex"
                   :column-gap "$2"
                   :box-sizing "border-box"})
+     :value keybind-mode-value
      :loop true}
-    (for [{mode-id :id label :label items :items} modes
+    (for [{mode-id :id label :label items :items keybind :keybind} modes
           :let [id-str (name mode-id)]]
       ($d Menu
-        {:key id-str}
+        {:key id-str
+         :value id-str
+}
         ($d Trigger
-          {:class ($$trigger-styles mode-id)}
-          label)
+          {:id (str "mode-" id-str)
+           :class (unite ($$trigger-styles mode-id)
+                         $keybind-styles)}
+          (d/span label) (d/span {:class "keybind"} keybind))
         ($d Portal
           ($d Content
             {:class (css "outer"
                          :bg :rounded-b-sm
                          {:display "flex"
+                          :z-index "3"
                           :flex-direction "column"
                           :width "var(--radix-menubar-trigger-width)"
                           :padding "0 0 var(--space-5) 0"
@@ -108,19 +122,25 @@
              :align "start"
              :alignOffset 0
              :loop true}
-            (for [{:keys [id label]} items
+            (for [{:keys [id label keybind]} items
                   :let [id-str (name id)]]
               ($d Item
                 {:class ($$item-styles mode-id)
                  :key   id-str
                  :onSelect 
-                 (fn [e] (let [win-e  (.-event js/window)
-                              shift? (if win-e
-                                       (.-shiftKey win-e)
+                 (fn [e] (let [window-e (.-event js/window)
+                              shift? (if window-e
+                                       (.-shiftKey window-e)
                                        false)]
-                          (handle-click id shift?)))}
-                (d/div {:style {:width "24px"
-                                :height "24px"}}
+                          (handle-select-fn id shift?)))}
+                (d/div {:class (css {:width "24px"
+                                     :height "24px"})}
                   (function-icon id))
-                (d/div label)))))))))
+                (d/div
+                  {:class (unite (css {:display "flex"
+                                       :flex "1"
+                                       :justify-content "space-between"})
+                                 $keybind-styles)}
+                  (d/span label)
+                  (d/span {:class "keybind"} keybind))))))))))
 

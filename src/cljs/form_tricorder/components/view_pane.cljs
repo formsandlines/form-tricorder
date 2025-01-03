@@ -28,7 +28,9 @@
         (when-not only-child?
           ($ Button
              {:class (css :top-4 :right-4
-                          {:position "absolute"})
+                          {:position "absolute"
+                           :z-index "1"
+                           :outline "0.5rem solid var(--col-bg)"})
               :variant :secondary
               :size :icon-sm
               :on-click handle-remove-view}

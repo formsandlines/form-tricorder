@@ -2,32 +2,42 @@
 
 (def expr-items
   [{:id    :hooks
+    :keybind "⌃h"
     :label "Hooks notation"}
    {:id    :graphs
+    :keybind "⌃g"
     :label "Graph notation"}
    {:id    :depthtree
+    :keybind "⌃t"
     :label "Depth tree"}
    {:id    :edn
+    :keybind "⌃e"
     :label "EDN data format"}
    {:id    :json
+    :keybind "⌃j"
     :label "JSON data format"}])
 
 (def eval-items
   [{:id    :vtable
+    :keybind "⌃t"
     :label "Value table"}
    {:id    :vmap
+    :keybind "⌃v"
     :label "vmap"}
    ;; {:id    :vcube
    ;;  :label "vcube"}
    ;; {:id    :vgraph
    ;;  :label "vgraph (hypercube)"}
    {:id    :fdna
+    :keybind "⌃d"
     :label "formDNA"}])
 
 (def emul-items
   [{:id    :selfi
+    :keybind "⌃s"
     :label "SelFi"}
    {:id    :mindform
+    :keybind "⌃m"
     :label "mindFORM"}
    ;; {:id    :lifeform
    ;;  :label "lifeFORM"}
@@ -36,16 +46,19 @@
 (def modes
   [{:id    :expr
     :label "expression"
+    :keybind "⌃x"
     :color {:base  "$outer-fmenu-expr"
             :hover ""}
     :items expr-items}
    {:id    :eval
     :label "evaluation"
+    :keybind "⌃v"
     :color {:base  "$outer-fmenu-eval"
             :hover ""}
     :items eval-items}
    {:id    :emul
     :label "emulation"
+    :keybind "⌃e"
     :color {:base  "$outer-fmenu-emul"
             :hover ""}
     :items emul-items}])

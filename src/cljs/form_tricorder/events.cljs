@@ -61,6 +61,7 @@
   (let [vars (expr/find-vars expr {:ordered? true})]
     (cond
       (nil? varorder) vars
+      ;; ? use sets to compare
       (= (sort varorder) vars) varorder
       :else (throw (ex-info "Varorder inconsistent with expression variables."
                             {:varorder varorder
@@ -75,52 +76,90 @@
                (assoc-in context [:coeffects :search-params]
                          search-params)))))
 
+(def default-db
+  {:input {:formula ""
+           :expr nil
+           :varorder [""]}
+   :frame {:orientation :cols
+           :windows 1}
+   :views [{:func-id :graphs}]
+   :modes {:calc-config nil}
+   :theme {:appearance :light}
+   :cache {:selfi-evolution {:deps #{:expr :varorder}
+                             :val nil}}
+   :error nil})
+
 (rf/reg-event-fx
  :initialize-db
  [fetch-search-params]
  (fn [{:keys [search-params]} _]
    ;; (println search-params)
-   (let [formula (or (.get search-params "f") "")
-         expr (parse-formula formula)
-         varorder (let [s (.get search-params "vars")]
-                    (conform-varorder
-                     (when s (string/split s ",")) expr))
-         orientation (if-let [ori (keyword (.get search-params "layout"))]
-                       (if (#{:cols :rows} ori)
-                         ori
-                         (throw (ex-info "Invalid frame orientation."
-                                         {:orientation ori})))
-                       :cols)
-         views (if-let [views (.get search-params "views")]
-                 (vec
-                  (for [s (string/split views ",")
-                        :let [view (keyword s)]]
-                    (if (func-ids view)
-                      {:func-id view}
-                      (throw (ex-info "Invalid view-function id."
-                                      {:view view})))))
-                 [{:func-id :vmap}])
-         appearance (if-let [app (keyword (.get search-params "theme"))]
-                      (if (#{:light :dark} app)
-                        app
-                        (throw (ex-info "Invalid theme appearance."
-                                        {:appearance app})))
-                      :light)
+   (try (let [formula (or (.get search-params "f")
+                          (get-in default-db [:input :formula]))
+              expr (parse-formula formula)
+              varorder (let [s (.get search-params "vars")]
+                         (conform-varorder
+                          (when (seq s) (string/split s ",")) expr))
+              orientation (if-let [ori (keyword (.get search-params "layout"))]
+                            (if (#{:cols :rows} ori)
+                              ori
+                              (throw (ex-info "Invalid frame orientation."
+                                              {:orientation ori})))
+                            (get-in default-db [:frame :orientation]))
+              views (if-let [views (.get search-params "views")]
+                      (vec
+                       (for [s (string/split views ",")
+                             :let [view (keyword s)]]
+                         (if (func-ids view)
+                           {:func-id view}
+                           (throw (ex-info "Invalid view-function id."
+                                           {:view view})))))
+                      (get default-db :views))
+              appearance (if-let [app (keyword (.get search-params "theme"))]
+                           (if (#{:light :dark} app)
+                             app
+                             (throw (ex-info "Invalid theme appearance."
+                                             {:appearance app})))
+                           (get-in default-db [:theme :appearance]))
 
-         db {:input {:formula formula
-                     :expr expr
-                     :varorder varorder}
-             :frame {:orientation orientation
-                     :windows (count views)}
-             :views views
-             :modes {:calc-config nil}
-             :theme {:appearance appearance}
-             :cache {:selfi-evolution {:deps #{:expr :varorder}
-                                       :val nil}}
-             :error nil}]
-     ;; (println db)
-     {:db db})))
+              db {:input {:formula formula
+                          :expr expr
+                          :varorder varorder}
+                  :frame {:orientation orientation
+                          :windows (count views)}
+                  :views views
+                  :modes (get default-db :modes)
+                  :theme {:appearance appearance}
+                  :cache (get default-db :cache)
+                  :error (get default-db :error)}]
+          {:db db})
+        (catch js/Error e
+          ;; in case of error, revert to blank config to prevent crash
+          {:db (assoc default-db
+                      :error (ex-message e))}))))
 
+(defn views->str
+  [views]
+  (string/join "," (map (comp name :func-id) views)))
+
+(defn varorder->str
+  [varorder]
+  (string/join "," varorder))
+
+(rf/reg-event-fx
+ :copy-stateful-link
+ (fn [{:keys [db]} [_ {:keys [report-copy-status]}]]
+   (let [views (get db :views)
+         appearance (get-in db [:theme :appearance])
+         orientation (get-in db [:frame :orientation])
+         formula (get-in db [:input :formula])
+         varorder (get-in db [:input :varorder])]
+     {:fx [[:set-search-params [["views" (views->str views)]]]
+           [:set-search-params [["theme" (name appearance)]]]
+           [:set-search-params [["layout" (name orientation)]]]
+           [:set-search-params [["f" formula]]]
+           [:set-search-params [["vars" (varorder->str varorder)]]]
+           [:copy-url report-copy-status]]})))
 
 ;; (def update-expr
 ;;   (rf/->interceptor
@@ -134,15 +173,6 @@
 ;;                                 verorder
 ;;                                 ))]
 ;;                (assoc-in context [:effects :db :input] input)))))
-
-
-(defn views->str
-  [views]
-  (string/join "," (map (comp name :func-id) views)))
-
-(defn varorder->str
-  [varorder]
-  (string/join "," varorder))
 
 
 (rf/reg-event-fx
@@ -167,15 +197,17 @@
                                   :expr     next-expr
                                   :varorder next-varorder))
                          m))))
-         formula-next (get-in db-next [:input :formula])
-         varorder-next (get-in db-next [:input :varorder])]
+         ;; formula-next (get-in db-next [:input :formula])
+         ;; varorder-next (get-in db-next [:input :varorder])
+         ]
      {:db db-next
       :fx (into [[:dispatch [:cache/invalidate
                              {:has-deps #{:formula :expr :varorder}}]]]
-                (when set-search-params?
-                  [[:set-search-params [["f" formula-next]]]
-                   [:set-search-params [["vars"
-                                         (varorder->str varorder-next)]]]]))})))
+                ;; (when set-search-params?
+                ;;   [[:set-search-params [["f" formula-next]]]
+                ;;    [:set-search-params [["vars"
+                ;;                          (varorder->str varorder-next)]]]])
+                )})))
 
 (rf/reg-event-fx
  :input/changed-varorder
@@ -187,14 +219,16 @@
      {:db next-db
       :fx [[:dispatch [:cache/invalidate
                        {:has-deps #{:varorder}}]]
-           [:set-search-params [["vars" (varorder->str next-varorder)]]]]})))
+           ;; [:set-search-params [["vars" (varorder->str next-varorder)]]]
+           ]})))
 
 (rf/reg-event-fx
  :frame/set-orientation
  (fn [{:keys [db]} [_ {:keys [next-orientation]}]]
    {:pre [(#{:rows :cols} next-orientation)]}
    {:db (assoc-in db [:frame :orientation] next-orientation)
-    :fx [[:set-search-params [["layout" (name next-orientation)]]]]}))
+    ;; :fx [[:set-search-params [["layout" (name next-orientation)]]]]
+    }))
 
 
 (rf/reg-event-fx
@@ -205,7 +239,8 @@
      {:db (if (nil? b)
             db
             (assoc db :views views-next))
-      :fx [[:set-search-params [["views" (views->str views-next)]]]]})))
+      ;; :fx [[:set-search-params [["views" (views->str views-next)]]]]
+      })))
 
 (rf/reg-event-fx
  :views/split
@@ -216,7 +251,8 @@
        {:db (-> db
                 (update-in [:frame :windows] inc)
                 (assoc :views views-next))
-        :fx [[:set-search-params [["views" (views->str views-next)]]]]}))))
+        ;; :fx [[:set-search-params [["views" (views->str views-next)]]]]
+        }))))
 
 (rf/reg-event-fx
  :views/set-func-id
@@ -226,7 +262,8 @@
                                 next-id
                                 (keyword next-id)))]
      {:db (assoc db :views views-next)
-      :fx [[:set-search-params [["views" (views->str views-next)]]]]})))
+      ;; :fx [[:set-search-params [["views" (views->str views-next)]]]]
+      })))
 
 (rf/reg-event-fx
  :views/remove
@@ -236,14 +273,16 @@
      {:db (-> db
               (update-in [:frame :windows] dec)
               (assoc :views views-next))
-      :fx [[:set-search-params [["views" (views->str views-next)]]]]})))
+      ;; :fx [[:set-search-params [["views" (views->str views-next)]]]]
+      })))
 
 
 (rf/reg-event-fx
  :theme/set-appearance
  (fn [{db :db} [_ {:keys [next-appearance]}]]
    {:db (assoc-in db [:theme :appearance] next-appearance)
-    :fx [[:set-search-params [["theme" (name next-appearance)]]]]}))
+    ;; :fx [[:set-search-params [["theme" (name next-appearance)]]]]
+    }))
 
 
 ;; NOTE: a proposed feature of re-frame called “flows” might make the need

@@ -41,7 +41,7 @@
     ($d Trigger
       {:class (unite className class
                      (css
-                       :h-10 :px-3 :py-2 :border :rounded-md :text-sm
+                       :h-10 :px-3 :py-2 :border :rounded-sm :text-sm
                        :bg :border-col-input
                        {:display "flex"
                         :width "100%"
@@ -113,7 +113,7 @@
         {:class (unite className class
                        (css
                          :border-col-input :bg-popover :fg-popover
-                         :max-h-96 :min-w-43 :border :rounded-md
+                         :max-h-96 :min-w-43 :border :rounded-sm
                          {:position "relative"
                           :z-index "50"
                           :max-height "$96" ;; 96

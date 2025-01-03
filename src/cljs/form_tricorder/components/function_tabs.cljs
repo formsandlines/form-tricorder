@@ -20,7 +20,7 @@
 
 (def $trigger-styles-base
   (css
-    :rounded-md :text-xs :weight-normal :transition-colors
+    :rounded-sm :text-xs :weight-normal :transition-colors
     :size-12 :p-0 :fg
     {:flex "flex-none"
      :touch-action "manipulation"

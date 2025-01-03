@@ -10,6 +10,7 @@
                                  ViewVerticalIcon
                                  ViewHorizontalIcon
                                  SourceIcon]]
+   [form-tricorder.components.common.tooltip :as tooltip]
    ["@radix-ui/react-toolbar" :as Toolbar]
    #_["@radix-ui/react-icons" :refer []]))
 
@@ -79,6 +80,38 @@
 
 ;; Components
 
+(defnc ButtonCopyLink
+  []
+  (let [[show-tooltip-copied-link?
+         set-show-tooltip-copied-link?] (hooks/use-state false)
+        handle-copy-link
+        #(rf/dispatch [:copy-stateful-link
+                       {:report-copy-status
+                        (fn [[success? err]]
+                          (if success?
+                            (set-show-tooltip-copied-link? success?)
+                            (rf/dispatch [:error/set
+                                          {:error (.toString err)}])))}])]
+    (hooks/use-effect
+     [show-tooltip-copied-link?]
+     (when show-tooltip-copied-link?
+       (let [timeout-id (js/setTimeout
+                         (fn [] (set-show-tooltip-copied-link? false))
+                         800)]
+         (fn [] (js/clearTimeout timeout-id)))))
+    ($d tooltip/Provider
+        {:disableHoverableContent true}
+        ($d tooltip/Root
+            {:open show-tooltip-copied-link?}
+            ($d tooltip/Trigger
+                {:asChild true}
+                ($d TextButton
+                    {:class $text-button-styles
+                     :on-click handle-copy-link}
+                    "copy link"))
+            ($ tooltip/Content
+               (d/p "Link copied!"))))))
+
 (defnc AppToolbar
   []
   (let [view-split? (> (rf/subscribe [:frame/windows]) 1)
@@ -91,76 +124,79 @@
         handle-toggle-appearance
         #(rf/dispatch [:theme/set-appearance {:next-appearance %}])]
     ($d Root
-      {:class (css :font-size-sm :fg :gap-1
-                   {:display "flex"
-                    :min-width "max-content"
-                    :height "100%"
-                    :align-items "stretch"}
-                   ["& .icon"
-                    :w-icon-sm ;; 18px ?
-                    {:height "100%"
-                     :fill "var(--col-m21)"}]
-                   ;; ["& *:hover > .icon"
-                   ;;  {:fill "$m800"}]
-                   ["& *:disabled"
-                    {:pointer-events "none"
-                     :cursor "not-allowed"}]
-                   ["& *:disabled > .icon"
-                    {:fill "var(--col-bg-muted)"}])
-       :orientation "horizontal"
-       :aria-label "App toolbar"}
-      ($d ToggleGroup
-        {:class $toggle-group-styles
-         :type "single"
-         :value (name frame-orientation)
-         :on-value-change #(handle-frame-orientation (keyword %))}
-        ($d ToggleItem
-          {:class $toggle-item-styles
-           :value "cols"
-           :disabled (= frame-orientation :cols)}
-          ($ ViewVerticalIcon))
-        ($d ToggleItem
-          {:class $toggle-item-styles
-           :value "rows"
-           :disabled (= frame-orientation :rows)}
-          ($ ViewHorizontalIcon)))
-      ($d Button
-        {:class $button-styles
-         :disabled (not view-split?)
-         :on-click (fn [_] (handle-swap))}
-        ($ SwapIcon))
-      ($d Separator
-        {:class $separator-styles})
-      ($d ToggleGroup
-        {:class $toggle-group-styles
-         :type "single"
-         :value (name appearance)
-         :on-value-change #(handle-toggle-appearance (keyword %))}
-        ($d ToggleItem
-          {:class $toggle-item-styles
-           :value "light"
-           :disabled (= appearance :light)}
-          ($ SunIcon))
-        ($d ToggleItem
-          {:class $toggle-item-styles
-           :value "dark"
-           :disabled (= appearance :dark)}
-          ($ MoonIcon)))
-      ($d Separator
-        {:class $separator-styles})
-      ($d TextButton
-        {:class $text-button-styles
-         :on-click (fn [_] (js/console.log "Clicked about"))}
-        "about")
-      ($d TextButton
-        {:class $text-button-styles
-         :on-click (fn [_] (js/console.log "Clicked help"))}
-        "help")
-      ($d Separator
-        {:class $separator-styles})
-      ($d SourceLink
-        {:class $source-link-styles
-         :href "https://github.com/formsandlines/form-tricorder"
-         :target "_blank"}
-        ($ SourceIcon)))))
+        {:class (css :font-size-sm :fg :gap-1
+                     {:display "flex"
+                      :min-width "max-content"
+                      :height "100%"
+                      :align-items "stretch"}
+                     ["& .icon"
+                      :w-icon-sm ;; 18px ?
+                      {:height "100%"
+                       :fill "var(--col-m21)"}]
+                     ;; ["& *:hover > .icon"
+                     ;;  {:fill "$m800"}]
+                     ["& *:disabled"
+                      {:pointer-events "none"
+                       :cursor "not-allowed"}]
+                     ["& *:disabled > .icon"
+                      {:fill "var(--col-bg-muted)"}])
+         :orientation "horizontal"
+         :aria-label "App toolbar"}
+        ($ ButtonCopyLink)
+        ($d Separator
+            {:class $separator-styles})
+        ($d ToggleGroup
+            {:class $toggle-group-styles
+             :type "single"
+             :value (name frame-orientation)
+             :on-value-change #(handle-frame-orientation (keyword %))}
+            ($d ToggleItem
+                {:class $toggle-item-styles
+                 :value "cols"
+                 :disabled (= frame-orientation :cols)}
+                ($ ViewVerticalIcon))
+            ($d ToggleItem
+                {:class $toggle-item-styles
+                 :value "rows"
+                 :disabled (= frame-orientation :rows)}
+                ($ ViewHorizontalIcon)))
+        ($d Button
+            {:class $button-styles
+             :disabled (not view-split?)
+             :on-click (fn [_] (handle-swap))}
+            ($ SwapIcon))
+        ($d Separator
+            {:class $separator-styles})
+        ($d ToggleGroup
+            {:class $toggle-group-styles
+             :type "single"
+             :value (name appearance)
+             :on-value-change #(handle-toggle-appearance (keyword %))}
+            ($d ToggleItem
+                {:class $toggle-item-styles
+                 :value "light"
+                 :disabled (= appearance :light)}
+                ($ SunIcon))
+            ($d ToggleItem
+                {:class $toggle-item-styles
+                 :value "dark"
+                 :disabled (= appearance :dark)}
+                ($ MoonIcon)))
+        ($d Separator
+            {:class $separator-styles})
+        ($d TextButton
+            {:class $text-button-styles
+             :on-click (fn [_] (js/console.log "Clicked about"))}
+            "about")
+        ($d TextButton
+            {:class $text-button-styles
+             :on-click (fn [_] (js/console.log "Clicked help"))}
+            "help")
+        ($d Separator
+            {:class $separator-styles})
+        ($d SourceLink
+            {:class $source-link-styles
+             :href "https://github.com/formsandlines/form-tricorder"
+             :target "_blank"}
+            ($ SourceIcon)))))
 

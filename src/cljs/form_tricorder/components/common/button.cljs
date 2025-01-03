@@ -13,7 +13,7 @@
 
 (def $base
   (css
-   :text-sm :weight-normal :rounded-md :transition-colors
+   :text-sm :weight-normal :rounded-sm :transition-colors
    {:touch-action "manipulation"
     :display "inline-flex"
     :justify-content "center"
@@ -52,9 +52,9 @@
                   ["&:hover"
                    {:text-decoration-line "underline"}])}
 
-   :size {:sm (css :h-9 :px-3 :py-3 :rounded)
+   :size {:sm (css :h-9 :px-3 :py-3)
           :md (css :h-10 :px-4 :py-3)
-          :lg (css :h-11 :px-6 :py-3 :rounded-md)
+          :lg (css :h-11 :px-6 :py-3)
           :icon (css :size-10 :p-0)
           :icon-sm (css :size-6 :p-0)}})
 

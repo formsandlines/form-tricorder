@@ -53,11 +53,11 @@
               ["&[data-state=on]"
                {:background-color "var(--col-m5)"}])}
 
-   :size {:sm (css :h-9 :px-2-5 :rounded-md)
-          :md (css :h-10 :px-3 :rounded-md)
-          :lg (css :h-11 :px-5 :rounded-md)
-          :icon (css :size-10 :p-0 :rounded-md)
-          :icon-sm (css :size-9 :p-0 :rounded-md)
+   :size {:sm (css :h-9 :px-2-5 :rounded-sm)
+          :md (css :h-10 :px-3 :rounded-sm)
+          :lg (css :h-11 :px-5 :rounded-sm)
+          :icon (css :size-10 :p-0 :rounded-sm)
+          :icon-sm (css :size-9 :p-0 :rounded-sm)
 
           :formula-input/submit-mode
           (css :size-8 :p-0 :rounded-full)}})
