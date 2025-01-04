@@ -84,7 +84,7 @@
            :windows 1}
    :views [{:func-id :graphs}]
    :modes {:calc-config nil}
-   :theme {:appearance :light}
+   :theme {:appearance :system}
    :cache {:selfi-evolution {:deps #{:expr :varorder}
                              :val nil}}
    :error nil})

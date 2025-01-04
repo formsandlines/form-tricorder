@@ -9,6 +9,11 @@
 ;; Conventions for clarity:
 ;; - qualify keys with by the app-db entry the sub depends on
 ;; - prepend `->` to sub key when the sub computes derived data
+;; - use `report-error` instead of throwing the exception
+
+(defn report-error
+  [err]
+  (rf/dispatch [:error/set {:error err}]))
 
 (rf/reg-sub
  :views/->view
@@ -97,9 +102,9 @@
  :<- [:input/->expr-data]
  (fn [[expr varorder] _]
    (when (= :not-found expr)
-     (throw (ex-info "Expression data missing!" {})))
+     (report-error (ex-info "Expression data missing!" {})))
    (when (nil? varorder)
-     (throw (ex-info "Unknown variable ordering!" {})))
+     (report-error (ex-info "Unknown variable ordering!" {})))
    (let [value (expr/eval-all {:varorder varorder} expr {})]
      ;; (println "computing value")
      (:results value))))
@@ -109,9 +114,9 @@
  :<- [:input/->expr-data]
  (fn [[expr varorder] _]
    (when (= :not-found expr)
-     (throw (ex-info "Expression data missing!" {})))
+     (report-error (ex-info "Expression data missing!" {})))
    (when (nil? varorder)
-     (throw (ex-info "Unknown variable ordering!" {})))
+     (report-error (ex-info "Unknown variable ordering!" {})))
    (let [formDNA (if (expr/formDNA? expr)
                    expr
                    (expr/eval->expr-all {:varorder varorder} expr {}))]
@@ -123,7 +128,7 @@
  :<- [:input/->dna]
  (fn [dna [_ type]]
    (when-not dna ;; TODO: improve error handling
-     (throw (ex-info "formDNA data missing!" {})))
+     (report-error (ex-info "formDNA data missing!" {})))
    (let [dna-view (case type
                     :nmui (calc/dna->digits calc/nmui-code dna)
                     :nuim (calc/dna->digits calc/nuim-code dna)
@@ -135,9 +140,8 @@
  :input/->vmap
  :<- [:input/->dna]
  (fn [dna _]
-   ;; (println "computing vmap")
    (when-not dna
-     (throw (ex-info "formDNA data missing!" {})))
+     (report-error (ex-info "formDNA data missing!" {})))
    (calc/dna->vmap dna)))
 
 (rf/reg-sub
@@ -146,7 +150,7 @@
  (fn [dna _]
    ;; (println "computing vmap")
    (when-not dna
-     (throw (ex-info "formDNA data missing!" {})))
+     (report-error (ex-info "formDNA data missing!" {})))
    (calc/vmap-perspectives (calc/dna-perspectives dna))))
 
 
@@ -156,7 +160,7 @@
  (fn [dna _]
    ;; (println "computing ca rules function")
    (cond
-     (nil? dna) (throw (ex-info "Invalid formDNA" {}))
+     (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
      :else (partial calc/dna-get dna))))
 
 (rf/reg-sub
@@ -165,20 +169,19 @@
  (fn [varorder _]
    ;; (println "computing ca umwelt")
    (cond
-     (nil? varorder) (throw (ex-info "Invalid variable ordering" {}))
+     (nil? varorder) (report-error (ex-info "Invalid variable ordering" {}))
      :else (condp = (count varorder)
+             0 nil ;; constantly returns the FORM value
              1 :e
              2 :lr
              3 :ler
              4 :-lr+
              5 :-ler+
-             (throw (ex-info "Invalid variable count" {}))))))
+             (report-error (ex-info "Invalid variable count" {}))))))
 
 
 (comment
-
   (expr/eval-all [:fdna [] [:M]] {})
   (expr/=>* [:fdna [] [:M]] {})
 
-                                        ;
   )

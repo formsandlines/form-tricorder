@@ -58,7 +58,9 @@
     (hooks/use-effect
       [appearance]
       (let [root-el (.. js/document -documentElement)]
-        (aset (.-style root-el) "color-scheme" (name appearance))))
+        (aset (.-style root-el) "color-scheme" (if (= :system appearance)
+                                                 "light dark"
+                                                 (name appearance)))))
     (hooks/use-effect
       :once
       (let [handle-key-down

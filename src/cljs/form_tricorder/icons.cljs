@@ -66,7 +66,7 @@
    ["& .ficon-line" {:fill "none"
                      :stroke "currentcolor"
                      ;; :stroke-opacity "0.8"
-                     :stroke-width "2px"}]))
+                     :stroke-width "1.5px"}]))
 
 (def $$func-icon-style-variants
   {:expr (css {:color "var(--col-icon-expr)"})
@@ -224,7 +224,7 @@
          :y "9"})
       (d/g
         {:class "ficon-line"
-         :style {:stroke-width "1.8px"
+         :style {:stroke-width "1.4px"
                  :stroke-linecap "round"}}
         (d/path
           {:d "M 18.001 13.999 L 18.001 18.999"})
@@ -279,7 +279,7 @@
          :height "4.242"})
       (d/rect
         {:class "ficon-line"
-         :style {:stroke-width "1.8px"
+         :style {:stroke-width "1.4px"
                  :transform-origin "8.046px 7.873px"} ,
          :transform "matrix(0.707107, -0.707107, 0.707107, 0.707107, 3.954706, 4.127)",
          :x "0.266",
@@ -354,7 +354,7 @@
        :height (str size "px")}
       (d/ellipse
         {:class "ficon-line"
-         :style {:stroke-width "1.8px"}
+         :style {:stroke-width "1.4px"}
          :cx "12",
          :cy "12",
          :rx "11",

@@ -12,7 +12,9 @@
                                  SourceIcon]]
    [form-tricorder.components.common.tooltip :as tooltip]
    ["@radix-ui/react-toolbar" :as Toolbar]
-   #_["@radix-ui/react-icons" :refer []]))
+   ;; ["lucide-react" :as lucide]
+   ["@radix-ui/react-icons" :as radix-icons]
+   ))
 
 (def Root (.-Root Toolbar))
 
@@ -132,14 +134,18 @@
                      ["& .icon"
                       :w-icon-sm ;; 18px ?
                       {:height "100%"
-                       :fill "var(--col-m21)"}]
+                       :color "var(--col-m21)"
+                       :fill "currentColor"
+                       ;; :color "currentColor"
+                       ;; :fill "var(--col-m21)"
+                       }]
                      ;; ["& *:hover > .icon"
                      ;;  {:fill "$m800"}]
                      ["& *:disabled"
                       {:pointer-events "none"
                        :cursor "not-allowed"}]
                      ["& *:disabled > .icon"
-                      {:fill "var(--col-bg-muted)"}])
+                      {:color "var(--col-bg-muted)"}])
          :orientation "horizontal"
          :aria-label "App toolbar"}
         ($ ButtonCopyLink)
@@ -176,12 +182,22 @@
                 {:class $toggle-item-styles
                  :value "light"
                  :disabled (= appearance :light)}
+                ;; ($ radix-icons/SunIcon
+                ;;    {:class "icon"})
                 ($ SunIcon))
             ($d ToggleItem
                 {:class $toggle-item-styles
                  :value "dark"
                  :disabled (= appearance :dark)}
-                ($ MoonIcon)))
+                ;; ($ radix-icons/MoonIcon
+                ;;    {:class "icon"})
+                ($ MoonIcon))
+            ($d ToggleItem
+                {:class $toggle-item-styles
+                 :value "system"
+                 :disabled (= appearance :system)}
+                ($d radix-icons/DesktopIcon ; Half2Icon
+                    {:class "icon"})))
         ($d Separator
             {:class $separator-styles})
         ($d TextButton
