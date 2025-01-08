@@ -2,9 +2,15 @@
   (:require
    [helix.hooks :as hooks]
    [clojure.string :as string]
+   [goog.string :as gstring]
+   [shadow.css :refer (css)]
    ;; [clojure.math :as math]
    )
   (:require-macros [form-tricorder.utils]))
+
+(def $nowrap (css {:white-space "nowrap"}))
+
+(def <&> gstring/unescapeEntities)
 
 (defn splitv-atv [i v]
   {:pre [(vector? v)]}

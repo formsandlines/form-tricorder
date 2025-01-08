@@ -103,12 +103,12 @@
     {:font-weight
      {:thin       "100"
       :extralight "200"
-      :light      "200" ;; was 300
+      :light      "300"
       :normal     "400"
-      :medium     "600" ;; was 500
-      :semibold   "800" ;; was 600
-      :bold       "800" ;; was 700
-      :extrabold  "900" ;; was 800
+      :medium     "500"
+      :semibold   "600"
+      :bold       "700"
+      :extrabold  "800"
       :black      "900"}}
     "weight"))
 

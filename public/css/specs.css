@@ -4099,13 +4099,13 @@
 @property --weight-bold {
     syntax: "<number>";
     inherits: true;
-    initial-value: 800;
+    initial-value: 700;
 }
 
 @property --weight-medium {
     syntax: "<number>";
     inherits: true;
-    initial-value: 600;
+    initial-value: 500;
 }
 
 @property --weight-normal {
@@ -4123,13 +4123,13 @@
 @property --weight-semibold {
     syntax: "<number>";
     inherits: true;
-    initial-value: 800;
+    initial-value: 600;
 }
 
 @property --weight-extrabold {
     syntax: "<number>";
     inherits: true;
-    initial-value: 900;
+    initial-value: 800;
 }
 
 @property --weight-extralight {
@@ -4141,7 +4141,7 @@
 @property --weight-light {
     syntax: "<number>";
     inherits: true;
-    initial-value: 200;
+    initial-value: 300;
 }
 
 @property --weight-black {
@@ -4665,14 +4665,14 @@
     --fs-6: 3rem;
     --fs-5xl: 3rem;
 
-    --weight-bold: 800;
-    --weight-medium: 600;
+    --weight-bold: 700;
+    --weight-medium: 500;
     --weight-normal: 400;
     --weight-thin: 100;
-    --weight-semibold: 800;
-    --weight-extrabold: 900;
+    --weight-semibold: 600;
+    --weight-extrabold: 800;
     --weight-extralight: 200;
-    --weight-light: 200;
+    --weight-light: 300;
     --weight-black: 900;
 
     --rad-sm: 0.125rem;
