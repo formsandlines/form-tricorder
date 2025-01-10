@@ -516,14 +516,54 @@
   (let [ref (hooks/use-ref nil)
         expr-json  (rf/subscribe [:input/->expr-json])
         appearance (rf/subscribe [:theme/appearance])
+        graph-style (rf/subscribe [:modes/graph-style])
+        ;; [styleclass set-styleclass] (hooks/use-state "basic")
         theme (if (= :dark appearance) "dark" "light")]
     (hooks/use-effect
-      [expr-json appearance]
+      [expr-json appearance graph-style]
       (let [webc-el @ref]
         (aset webc-el "json" expr-json)))
-    ($ :ff-fgraph {:ref ref
-                   :type (->attr type)
-                   :theme (->attr theme)})))
+    (d/div
+     (when (= type "pack")
+       (d/div
+        {:class (css {:display "flex"
+                      :align-items "center"})}
+        ($ Label
+           {:htmlFor "styleclass-radio"}
+           "Style:")
+        ($ RadioGroup
+           {:id "styleclass-radio"
+            :class (css "StyleClass"
+                        :gap-4 :ml-2 :p-2 :rounded-md
+                        :border :border-col
+                        {:display "inline-flex"
+                         :align-items "center"}
+                        ["& > *"
+                         :gap-2
+                         {:display "flex"
+                          :align-items "center"}])
+            :value (name graph-style)
+            :onValueChange #(rf/dispatch [:modes/set-graph-style
+                                          {:next-graph-style
+                                           (keyword %)}])}
+           (d/div
+            ($ RadioGroupItem
+               {:id "styleclass-basic"
+                :value "basic"})
+            ($ Label
+               {:htmlFor "styleclass-basic"}
+               "Basic"))
+           (d/div
+            ($ RadioGroupItem
+               {:id "styleclass-gestalt"
+                :value "gestalt"})
+            ($ Label
+               {:htmlFor "styleclass-gestalt"}
+               "Gestalt")))))
+     ($ :ff-fgraph {:ref ref
+                    :type (->attr type)
+                    :styleclass (->attr (name graph-style))
+                    :theme (->attr theme)}))))
 
 (defmethod gen-component :depthtree
   [_ args]

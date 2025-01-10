@@ -58,11 +58,11 @@
 
 (defn conform-varorder
   [varorder expr]
-  (let [vars (expr/find-vars expr {:ordered? true})]
+  (let [vars (-> expr (expr/find-vars {}) utils/sort-varorder)]
     (cond
       (nil? varorder) vars
       ;; ? use sets to compare
-      (= (sort varorder) vars) varorder
+      (= (utils/sort-varorder varorder) vars) varorder
       :else (throw (ex-info "Varorder inconsistent with expression variables."
                             {:varorder varorder
                              :expr-vars vars})))))
@@ -83,7 +83,9 @@
    :frame {:orientation :cols
            :windows 1}
    :views [{:func-id :graphs}]
-   :modes {:calc-config nil}
+   :modes {:expr {:graph-style :basic}
+           :eval nil
+           :emul nil}
    :theme {:appearance :system}
    :cache {:selfi-evolution {:deps #{:expr :varorder}
                              :val nil}}
@@ -115,8 +117,14 @@
                            (throw (ex-info "Invalid view-function id."
                                            {:view view})))))
                       (get default-db :views))
+              modes (if-let [graph-style (keyword
+                                          (.get search-params "graph-style"))]
+                      (if (#{:basic :gestalt} graph-style)
+                        {:expr {:graph-style graph-style}}
+                        (throw (ex-info "Invalid graph-style."
+                                        {:graph-style graph-style}))))
               appearance (if-let [app (keyword (.get search-params "theme"))]
-                           (if (#{:light :dark} app)
+                           (if (#{:light :dark :system} app)
                              app
                              (throw (ex-info "Invalid theme appearance."
                                              {:appearance app})))
@@ -128,7 +136,7 @@
                   :frame {:orientation orientation
                           :windows (count views)}
                   :views views
-                  :modes (get default-db :modes)
+                  :modes (merge (get default-db :modes) modes)
                   :theme {:appearance appearance}
                   :cache (get default-db :cache)
                   :error (get default-db :error)}]
@@ -152,11 +160,13 @@
    (let [views (get db :views)
          appearance (get-in db [:theme :appearance])
          orientation (get-in db [:frame :orientation])
+         graph-style (get-in db [:modes :expr :graph-style])
          formula (get-in db [:input :formula])
          varorder (get-in db [:input :varorder])]
      {:fx [[:set-search-params [["views" (views->str views)]]]
-           [:set-search-params [["theme" (name appearance)]]]
            [:set-search-params [["layout" (name orientation)]]]
+           [:set-search-params [["theme" (name appearance)]]]
+           [:set-search-params [["graph-style" (name graph-style)]]]
            [:set-search-params [["f" formula]]]
            [:set-search-params [["vars" (varorder->str varorder)]]]
            [:copy-url report-copy-status]]})))
@@ -174,7 +184,6 @@
 ;;                                 ))]
 ;;                (assoc-in context [:effects :db :input] input)))))
 
-
 (rf/reg-event-fx
  :input/changed-formula
  [clear-errors]
@@ -187,9 +196,13 @@
                        (if-not (= formula next-formula)
                          (let [next-expr (parse-formula next-formula)
                                next-varorder
-                               (let [vars (expr/find-vars next-expr {:ordered? true})
-                                     current-varorder (get-in db [:input :varorder])]
-                                 (if (= (sort current-varorder) vars)
+                               (let [vars (-> next-expr
+                                              (expr/find-vars {})
+                                              utils/sort-varorder)
+                                     current-varorder (get-in
+                                                       db [:input :varorder])]
+                                 (if (= (utils/sort-varorder current-varorder)
+                                        vars)
                                    current-varorder
                                    vars))]
                            (assoc m
@@ -283,6 +296,11 @@
    {:db (assoc-in db [:theme :appearance] next-appearance)
     ;; :fx [[:set-search-params [["theme" (name next-appearance)]]]]
     }))
+
+(rf/reg-event-fx
+ :modes/set-graph-style
+ (fn [{db :db} [_ {:keys [next-graph-style]}]]
+   {:db (assoc-in db [:modes :expr :graph-style] next-graph-style)}))
 
 
 ;; NOTE: a proposed feature of re-frame called “flows” might make the need

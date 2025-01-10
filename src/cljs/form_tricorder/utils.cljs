@@ -4,6 +4,7 @@
    [clojure.string :as string]
    [goog.string :as gstring]
    [shadow.css :refer (css)]
+   [formform.utils :refer [compare-names]]
    ;; [clojure.math :as math]
    )
   (:require-macros [form-tricorder.utils]))
@@ -66,6 +67,15 @@
 (defn pp-val [v] (-> (name v) .toLowerCase))
 (defn pp-var [s] (if (> (count s) 1) (str "'" s "'") s))
 
+(defn sort-varorder
+  [varorder]
+  (let [vars (set varorder)]
+    (cond
+      (= #{"-" "L" "E" "R" "+"} vars) ["-" "L" "E" "R" "+"]
+      (= #{"-" "L" "R" "+"} vars) ["-" "L" "R" "+"]
+      (= #{"L" "E" "R"} vars) ["L" "E" "R"]
+      (= #{"L" "R"} vars) ["L" "R"]
+      :else (sort compare-names varorder))))
 
 (defn merge-deep
   "Deeply merges all maps recursively nested inside the given input maps."

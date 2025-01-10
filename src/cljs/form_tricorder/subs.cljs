@@ -1,5 +1,6 @@
 (ns form-tricorder.subs
   (:require
+   [form-tricorder.utils :as utils]
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
@@ -38,6 +39,11 @@
  :theme/appearance
  (fn [db _]
    (get-in db [:theme :appearance])))
+
+(rf/reg-sub
+ :modes/graph-style
+ (fn [db _]
+   (get-in db [:modes :expr :graph-style])))
 
 
 (rf/reg-sub
@@ -85,7 +91,7 @@
  :<- [:input/->expr-data]
  (fn [[_ varorder] _]
    ;; (println "sorting: " varorder)
-   (sort varorder)))
+   (utils/sort-varorder varorder)))
 
 (rf/reg-sub
  :input/->varorder-permutations

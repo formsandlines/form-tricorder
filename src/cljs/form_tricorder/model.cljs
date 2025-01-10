@@ -5,8 +5,8 @@
     :keybind "⌃h"
     :label "Hooks notation"}
    {:id    :graphs
-    :keybind "⌃g"
-    :label "Graph notation"}
+    :keybind "⌃c"
+    :label "Circle notation"}
    {:id    :depthtree
     :keybind "⌃t"
     :label "Depth tree"}

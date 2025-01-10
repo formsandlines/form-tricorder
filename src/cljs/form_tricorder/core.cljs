@@ -77,7 +77,7 @@
                     expr-open?
                     (do (case (.-key e)
                           ("h" "H") (call-function :hooks shift?)
-                          ("g" "G") (call-function :graphs shift?)
+                          ("c" "C") (call-function :graphs shift?)
                           ("t" "T") (call-function :depthtree shift?)
                           ("e" "E") (call-function :edn shift?)
                           ("j" "J") (call-function :json shift?)

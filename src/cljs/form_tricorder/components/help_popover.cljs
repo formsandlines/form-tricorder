@@ -68,7 +68,7 @@
 
 (defnc HelpPopover
   [{:keys [children]}]
-  (let [[open? set-open?] (hooks/use-state true)]
+  (let [[open? set-open?] (hooks/use-state false)]
     ($d Root
       {:open open?
        :onOpenChange #(set-open? %)
@@ -275,22 +275,23 @@
                                      ["#ff0044" :U]
                                      ["#00ff5f" :I]]]
                         (<>
-                          (d/dt
-                            (d/svg
-                              {:class (css {:display "inline-block"})
-                               :width rhomb
-                               :height rhomb}
-                              (d/g
-                                {:transform (str "translate (0," (/ rhomb 2)
-                                                 ") rotate(-45,0,0)")}
-                                (d/rect
-                                  {:x 0
-                                   :y 0
-                                   :width square
-                                   :height square
-                                   :fill col})))
-                            " : ")
-                          (d/dd ($ p/Formula (str v)))))))
+                         {:key (name v)}
+                         (d/dt
+                          (d/svg
+                           {:class (css {:display "inline-block"})
+                            :width rhomb
+                            :height rhomb}
+                           (d/g
+                            {:transform (str "translate (0," (/ rhomb 2)
+                                             ") rotate(-45,0,0)")}
+                            (d/rect
+                             {:x 0
+                              :y 0
+                              :width square
+                              :height square
+                              :fill col})))
+                          " : ")
+                         (d/dd ($ p/Formula (str v)))))))
                  ($ p/P "Below the diagram you can see the order in which variables are interpreted in the vmap. A different ordering can be selected using the drop-down menu in the bottom-left corner of the app.")
                  ($ p/P "A vmap of a FORM with more than one variable is called a " (d/em "vmap perspective") ", since it can only represent one unique ordering path coherently. It is often useful to examine multiple different perspectives side by side to spot sub-patterns or symmetries. By clicking on the button above the diagram, you can render all " (d/em "vmap perspectives") " at once. ")
                  ($ p/Note "For more information about the vmap and its applications, please read my " ($ p/A {:href "https://observablehq.com/@formsandlines/recursive-mapping-of-4-valued-forms-with-vmaps"} "introductory notebook") "."))
@@ -314,19 +315,20 @@
                                      ["#ff0044" "u (undetermined)"]
                                      ["#00ff5f" "i (imaginary)"]]]
                         (<>
-                          (d/dt
-                            (d/svg
-                              {:class (css {:display "inline-block"})
-                               :width square
-                               :height square}
-                              (d/rect
-                                {:x 0
-                                 :y 0
-                                 :width square
-                                 :height square
-                                 :fill col}))
-                            " : ")
-                          (d/dd (d/em v))))))
+                         {:key (name v)}
+                         (d/dt
+                          (d/svg
+                           {:class (css {:display "inline-block"})
+                            :width square
+                            :height square}
+                           (d/rect
+                            {:x 0
+                             :y 0
+                             :width square
+                             :height square
+                             :fill col}))
+                          " : ")
+                         (d/dd (d/em v))))))
                  )
                (d/dt "mindFORM")
                (d/dd
