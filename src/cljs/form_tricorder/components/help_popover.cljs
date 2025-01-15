@@ -145,89 +145,118 @@
                 :class (css :pt-1
                             :border-col)}
                "FORMula Notation")
+            ($ p/H3 "Simple Expressions")
             ($ HelpDl
                (d/dt "Empty space")
                (d/dd
-                 ($ p/P ($ p/Formula " ") (<&> "&nbsp;") "⇔ unmarked FORM"))
+                ($ p/P ($ p/Formula " ") (<&> "&nbsp;") "⇔ unmarked FORM"))
                (d/dt "Relation")
                (d/dd
-                 ($ p/P ($ p/Formula "x y …") " (where " ($ p/Formula "x") ", "
-                    ($ p/Formula "y") ", … are expressions)"))
+                ($ p/P ($ p/Formula "x y …") " (where " ($ p/Formula "x") ", "
+                   ($ p/Formula "y") ", … are expressions)"))
                (d/dt "FORM")
                (d/dd
-                 ($ p/P ($ p/Formula "()") ", " ($ p/Formula "(())") ", "
-                    ($ p/Formula "(x y)") ", " ($ p/Formula "(x (y (…))") ", …"))
+                ($ p/P ($ p/Formula "()") ", " ($ p/Formula "(())") ", "
+                   ($ p/Formula "(x y)") ", " ($ p/Formula "(x (y (…))") ", …"))
                (d/dt "Variable")
                (d/dd
-                 ($ p/P ($ p/Formula "name") " (any string of characters)")
-                 ($ p/Ul
-                    (d/li "with subscript: " ($ p/Formula "name_sub"))
-                    (d/li "with spaces: " ($ p/Formula "long name"))))
+                ($ p/P ($ p/Formula "name") " (any string of characters)")
+                ($ p/Ul
+                   (d/li "with subscript: " ($ p/Formula "name_sub"))
+                   (d/li "with spaces: " ($ p/Formula "long name")))))
+            ($ p/H3 "Symbolic Expressions")
+            ($ HelpDl
+               (d/dt "Symbol")
+               (d/dd
+                ($ p/P "Any name prefixed by a colon (e.g. " ($ p/Formula ":foo") ") is a symbol. Symbols must be defined, otherwise they are uninterpretable in evaluation. The symbols listed below are predefined in FORM tricorder.")
+                ($ p/Note "Memory FORMs, which are symbolic expressions themselves, can be used to define custom symbols, e.g. to shorten redundant expressions."))
                (d/dt "Constant")
                (d/dd
-                 ($ p/Dl
-                    (d/dt ($ p/Formula ":N"))
-                    (d/dd " → " (d/em "unmarked")
-                      " ⇔" (<&> "&nbsp;") ($ p/Formula " "))
-                    (d/dt ($ p/Formula ":M"))
-                    (d/dd " → " (d/em "marked")
-                      " ⇔ " ($ p/Formula "()"))
-                    (d/dt ($ p/Formula ":U"))
-                    (d/dd " → " (d/em "undetermined")
-                      " ⇔ " ($ p/Formula "{..@}") " / " ($ p/Formula "{@ ,}"))
-                    (d/dt ($ p/Formula ":I"))
-                    (d/dd " → " (d/em "imaginary")
-                      " ⇔ " ($ p/Formula "{..@.}") " / " ($ p/Formula "{@ }"))))
+                ($ p/Dl
+                   (d/dt ($ p/Formula ":n"))
+                   (d/dd " → " (d/em "unmarked")
+                         " ⇔" (<&> "&nbsp;") ($ p/Formula " "))
+                   (d/dt ($ p/Formula ":m"))
+                   (d/dd " → " (d/em "marked")
+                         " ⇔ " ($ p/Formula "()"))
+                   (d/dt ($ p/Formula ":u"))
+                   (d/dd " → " (d/em "undetermined")
+                         " ⇔ " ($ p/Formula "{..@}") " / " ($ p/Formula "{@ ,}"))
+                   (d/dt ($ p/Formula ":i"))
+                   (d/dd " → " (d/em "imaginary")
+                         " ⇔ " ($ p/Formula "{..@.}") " / " ($ p/Formula "{@ }")))
+                ($ p/H3 "Alternative Symbols")
+                ($ p/Dl
+                   (d/dt ($ p/Formula ":mn"))
+                   (d/dd " → " ($ p/Formula ":u"))
+                   (d/dt ($ p/Formula "(:mn)"))
+                   (d/dd " → " ($ p/Formula ":i"))))
                (d/dt "Unclear FORM")
                (d/dd
-                 ($ p/P ($ p/Formula "/unclear name/"))
-                 ($ p/Ul
-                    (d/li "with subscript: " ($ p/Formula "/name_sub/"))))
+                ($ p/P ($ p/Formula "/unclear name/"))
+                ($ p/Ul
+                   (d/li "with subscript: " ($ p/Formula "/name_sub/"))))
                (d/dt (d/span {:class $nowrap} "self-equivalent") " "
-                 (d/span {:class $nowrap} "re-entry") " FORM")
+                     (d/span {:class $nowrap} "re-entry") " FORM")
                (d/dd 
-                 ($ p/P ($ p/Formula "{<signature/options> a,…,z}"))
-                 ($ p/Ul
-                    (d/li ($ p/Formula "a,…,z") " are left-nested "
-                      (d/em "expressions") ", equivalent to "
-                      ($ p/Formula "(((a) …) z)")))
-                 ($ p/H3 "Signature syntax (more terse):")
-                 ($ p/Dl
-                    (d/dt ($ p/Formula "..@") " / " ($ p/Formula "..@.") " :")
-                    (d/dd (d/em "even / odd") " re-entry number")
-                    (d/dt ($ p/Formula "@_") " :")
-                    (d/dd "outermost FORM is " (d/em "unmarked"))
-                    (d/dt ($ p/Formula "@~") " :")
-                    (d/dd "interpret as "
-                      (d/em "“recursive identity”") " in evaluation"))
-                 ($ p/Note "when combined, " ($ p/Formula "@~")
-                    " belongs together and " ($ p/Formula "_")
-                    " is the last character, e. g. "
-                    ($ p/Formula "{..@~._ …}"))
-                 ($ p/H3 "Options syntax (more explicit):")
-                 ($ p/Dl
-                    (d/dt ($ p/Formula "2r") " / " ($ p/Formula "2r+1") " :")
-                    (d/dd (d/em "even / odd") " re-entry number")
-                    (d/dt ($ p/Formula "open") " :")
-                    (d/dd "outermost FORM is " (d/em "unmarked"))
-                    (d/dt ($ p/Formula "alt") " :")
-                    (d/dd "interpret as "
-                      (d/em "“recursive identity”") " in evaluation"))
-                 ($ p/Note "each option must be followed by a pipe, e. g. "
-                    ($ p/Formula "{2r+1|alt|open| …}"))
-                 ($ p/P
-                    {:class (css :mt-3)}
-                    "Without any signature/options, the re-entry defaults to:")
-                 ($ p/Ul
-                    (d/li "even resolution: "
-                      ($ p/Formula "{,}") " / " ($ p/Formula "{@ ,}") " ⇔ "
-                      ($ p/Formula "{..@ ,}") " / " ($ p/Formula "{2r| ,}"))
-                    (d/li "odd resolution: "
-                      ($ p/Formula "{}") " / " ($ p/Formula "{@ }") " ⇔ "
-                      ($ p/Formula "{..@. }") " / " ($ p/Formula "{2r+1| }")))))
+                ($ p/P ($ p/Formula "{<signature/options> a,…,z}"))
+                ($ p/Ul
+                   (d/li ($ p/Formula "a,…,z") " are left-nested "
+                         (d/em "expressions") ", equivalent to "
+                         ($ p/Formula "(((a) …) z)")))
+                ($ p/H3 "Signature Syntax (more terse):")
+                ($ p/Dl
+                   (d/dt ($ p/Formula "..@") " / " ($ p/Formula "..@.") " :")
+                   (d/dd (d/em "even / odd") " re-entry number")
+                   (d/dt ($ p/Formula "@_") " :")
+                   (d/dd "outermost FORM is " (d/em "unmarked"))
+                   (d/dt ($ p/Formula "@~") " :")
+                   (d/dd "interpret as "
+                         (d/em "“recursive identity”") " in evaluation"))
+                ($ p/Note "when combined, " ($ p/Formula "@~")
+                   " belongs together and " ($ p/Formula "_")
+                   " is the last character, e. g. "
+                   ($ p/Formula "{..@~._ …}"))
+                ($ p/H3 "Options Syntax (more explicit):")
+                ($ p/Dl
+                   (d/dt ($ p/Formula "2r") " / " ($ p/Formula "2r+1") " :")
+                   (d/dd (d/em "even / odd") " re-entry number")
+                   (d/dt ($ p/Formula "open") " :")
+                   (d/dd "outermost FORM is " (d/em "unmarked"))
+                   (d/dt ($ p/Formula "alt") " :")
+                   (d/dd "interpret as "
+                         (d/em "“recursive identity”") " in evaluation"))
+                ($ p/Note "each option must be followed by a pipe, e. g. "
+                   ($ p/Formula "{2r+1|alt|open| …}"))
+                ($ p/P
+                   {:class (css :mt-3)}
+                   "Without any signature/options, the re-entry defaults to:")
+                ($ p/Ul
+                   (d/li "even resolution: "
+                         ($ p/Formula "{,}") " / " ($ p/Formula "{@ ,}") " ⇔ "
+                         ($ p/Formula "{..@ ,}") " / " ($ p/Formula "{2r| ,}"))
+                   (d/li "odd resolution: "
+                         ($ p/Formula "{}") " / " ($ p/Formula "{@ }") " ⇔ "
+                         ($ p/Formula "{..@. }") " / " ($ p/Formula "{2r+1| }"))))
+               (d/dt "formDNA")
+               (d/dd
+                ($ p/P ($ HelpNavLink {:target "#help-fdna"} "formDNA") " can be entered as a " (d/em "symbolic expression") " in two ways:")
+                ($ p/H3 "Expression Form (implicit variable order)")
+                ($ p/P "e.g. " ($ p/Formula "::nnnnununiinnmiun"))
+                ($ p/H3 "Operator Form (explicit variable order)")
+                ($ p/P "e.g. " ($ p/Formula "[:fdna [a,b]::nnnnununiinnmiun]"))
+                ($ p/Note "without an explicit variable order in " (d/em "formDNA") " expressions, the app will interpret them as " ($ p/Formula "v__0") ", " ($ p/Formula "v__1") ", etc."))
+               (d/dt "Memory FORM")
+               (d/dd
+                ($ p/P (d/em "Symbolic expression") " that “remembers” identities as defined in one or more ‘rem’-FORMs and recalls them in their entire sub-expression. " (d/em "Experimental, so use with caution."))
+                ($ p/P ($ p/Formula "[:mem <rem>, … | <expression>]"))
+                ($ p/Ul
+                   (d/li "‘Rems’ are of the form " ($ p/Formula "a = b") ", where " ($ p/Formula "a") " and " ($ p/Formula "b") " are both arbitrary " (d/em "expressions") ".")
+                   (d/li "Examples: " ($ p/Formula "[:mem f = ((f a) b) | f]") ", " ($ p/Formula "[:mem :and = ((a)(b)), :or = a b | :and (:or)]")))
+                ($ p/Note "Later (left-to-right) defined " (d/em "rems") " “remember” associations from earlier ones, but not the other way around. This de-paradoxes recursive rem-definitions.")))
             ($ p/H2
                {:id "help-expr"}
-               "Functions: expression")
+               "Expression Functions")
             ($ HelpDl
                (d/dt "Hook notation")
                (d/dd 
@@ -248,7 +277,7 @@
                  ($ p/P "JSON is a legacy format that is not in use anymore by the current version of formform. However, some visualizations still rely on it, so it may be used for debugging.")))
             ($ p/H2
                {:id "help-eval"}
-               "Functions: evaluation")
+               "Evaluation Functions")
             ($ HelpDl
                (d/dt "Value table")
                (d/dd
@@ -258,22 +287,22 @@
                  ($ p/P "Short for “variable/value-map”. Can be seen as an alternative representation to value tables that is especially useful for pattern recognition.")
                  ($ p/P "Each variable of an expression is represented as a diamond-shaped group that consists of four smaller groups representing its interpretation states in four directions:")
                  ($ p/Dl
-                    (d/dt "← : ")
-                    (d/dd ($ p/Formula ":N") " " (d/em "(unmarked)"))
-                    (d/dt "→ : ")
-                    (d/dd ($ p/Formula ":M") " " (d/em "(marked)"))
-                    (d/dt "↓ : ")
-                    (d/dd ($ p/Formula ":U") " " (d/em "(undetermined)"))
-                    (d/dt "↑ : ")
-                    (d/dd ($ p/Formula ":I") " " (d/em "(imaginary)")))
+                    (d/dt "left")
+                    (d/dd " → " (d/em "n (unmarked)"))
+                    (d/dt "right")
+                    (d/dd " → " (d/em "m (marked)"))
+                    (d/dt "down")
+                    (d/dd " → " (d/em "u (undetermined)"))
+                    (d/dt "up")
+                    (d/dd " → " (d/em "i (imaginary)")))
                  ($ p/P "Following each direction, this process is repeated recursively down to the smallest diamonds (the ones that are actually drawn), which represent the interpretation results. Each result is color-coded according to the color convention used in uFORM iFORM:")
                  ($ p/Dl
                     (let [square 10
                           rhomb (math/round (math/sqrt (* square square 2)))]
-                      (for [[col v] [["#000000" :N]
-                                     ["#4757ff" :M]
-                                     ["#ff0044" :U]
-                                     ["#00ff5f" :I]]]
+                      (for [[col v] [["#000000" :n]
+                                     ["#4757ff" :m]
+                                     ["#ff0044" :u]
+                                     ["#00ff5f" :i]]]
                         (<>
                          {:key (name v)}
                          (d/dt
@@ -289,20 +318,21 @@
                               :y 0
                               :width square
                               :height square
-                              :fill col})))
-                          " : ")
-                         (d/dd ($ p/Formula (str v)))))))
+                              :fill col}))))
+                         (d/dd " → " (d/em (name v)))))))
                  ($ p/P "Below the diagram you can see the order in which variables are interpreted in the vmap. A different ordering can be selected using the drop-down menu in the bottom-left corner of the app.")
                  ($ p/P "A vmap of a FORM with more than one variable is called a " (d/em "vmap perspective") ", since it can only represent one unique ordering path coherently. It is often useful to examine multiple different perspectives side by side to spot sub-patterns or symmetries. By clicking on the button above the diagram, you can render all " (d/em "vmap perspectives") " at once. ")
                  ($ p/Note "For more information about the vmap and its applications, please read my " ($ p/A {:href "https://observablehq.com/@formsandlines/recursive-mapping-of-4-valued-forms-with-vmaps"} "introductory notebook") "."))
-               (d/dt "formDNA")
+               (d/dt
+                {:id "help-fdna"}
+                "formDNA")
                (d/dd
                  ($ p/P "A code format that stores all possible interpretation results of a FORM in a single " ($ p/A {:href "https://en.wikipedia.org/wiki/Quaternary_numeral_system"} "quaternary number") ". It is essentially a compact representation an equivalence class of FORMs that all share the same value structure.")
                  ($ p/P "Each formDNA is equivalent to a corresponding " ($ p/A {:href "https://en.wikipedia.org/wiki/Wolfram_code"} "Wolfram code") " with type ‘1D’ and rulespace ‘k=4, r=1’, which can be useful to study arbitrary value structures in cellular automata such as " (d/em "SelFis") ".")
                  ($ p/Note "For more information about formDNA and its applications, please read my " ($ p/A {:href "https://observablehq.com/@formsandlines/the-dna-of-4-valued-forms"} "introductory notebook") ".")))
             ($ p/H2
                {:id "help-emul"}
-               "Functions: emulation")
+               "Emulation Functions")
             ($ HelpDl
                (d/dt "SelFi") 
                (d/dd
@@ -326,9 +356,8 @@
                              :y 0
                              :width square
                              :height square
-                             :fill col}))
-                          " : ")
-                         (d/dd (d/em v))))))
+                             :fill col})))
+                         (d/dd " → " (d/em v))))))
                  )
                (d/dt "mindFORM")
                (d/dd

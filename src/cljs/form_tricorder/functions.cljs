@@ -438,35 +438,39 @@
 (defnc F-FDNA
   [{:keys [dna]}]
   (d/div {:class (css :font-mono :font-size-xs)}
-    (d/code
-      {:class (css {:word-wrap "break-word"
-                    :letter-spacing "0.05em"
-                    :display "flex"}
-                   ["& > *"
-                    {:padding "0.1rem 0"}])}
-      (d/span "::")
-      (d/span
-        {:class (css "dna"
-                     {:display "inline-flex"
-                      :flex-wrap "wrap"}
-                     ["& > span"
-                      {:padding "0 0.1rem"}]
-                     ["& > span:nth-child(odd)"
-                      {:color "var(--col-n29)"
-                       :background-color "var(--col-n3)"}]
-                     ["& > span:nth-child(even)"
-                      {:color "var(--col-m29)"
-                       :background-color "var(--col-m3)"}])}
-        (for [[group i] (map vector (partition-all 4 dna) (range))
-              :let [s (string/join "" group)]]
+         (d/code
+          {:class (css {:word-wrap "break-word"
+                        ;; :letter-spacing "0.05em"
+                        :letter-spacing "0.01em" ;; !TEMP
+                        :display "flex"}
+                       ["& > *"
+                        {:padding "0.1rem 0"}])}
+          (d/span "::")
           (d/span
-            {:key (str i)}
-            s))))))
+           {:class (css "dna"
+                        {:display "inline-flex"
+                         :flex-wrap "wrap"}
+                        ["& > span"
+                         {:padding "0 0.1rem"}]
+                        ["& > span:nth-child(odd)"
+                         {:color "var(--col-n29)"
+                          :background-color "var(--col-n3)"}]
+                        ["& > span:nth-child(even)"
+                         {:color "var(--col-m29)"
+                          :background-color "var(--col-m3)"}])}
+           (for [[group i] (map vector (partition-all 4 dna)
+                                (range))
+                 :let [s (-> (string/join "" group)
+                             string/lower-case ;; !TEMP
+                             )]]
+             (d/span
+              {:key (str i)}
+              s))))))
 
 (defn code->str
   [c]
   (case c
-    "const" "Constants (NUIM)"
+    "const" "Constants (nuim)"
     (str (string/upper-case c)
          " → 0123")))
 

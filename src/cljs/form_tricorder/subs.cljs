@@ -84,7 +84,9 @@
  :input/->expr-json ;; legacy format → remove later
  :<- [:input/expr]
  (fn [expr _]
-   (clj->js (io/uniform-expr {:legacy? true} expr))))
+   (clj->js (try (io/uniform-expr {:legacy? true} expr)
+                 (catch js/Error e
+                   (report-error e))))))
 
 (rf/reg-sub
  :input/->sorted-varorder
@@ -98,7 +100,9 @@
  :<- [:input/->sorted-varorder]
  (fn [sorted-varorder _]
    ;; (println "computing permutations")
-   (let [permutations (expr/permute-vars sorted-varorder)]
+   (let [permutations (try (expr/permute-vars sorted-varorder)
+                           (catch js/Error e
+                             (report-error e)))]
      permutations)))
 
 
@@ -111,7 +115,9 @@
      (report-error (ex-info "Expression data missing!" {})))
    (when (nil? varorder)
      (report-error (ex-info "Unknown variable ordering!" {})))
-   (let [value (expr/eval-all {:varorder varorder} expr {})]
+   (let [value (try (expr/eval-all {:varorder varorder} expr {})
+                    (catch js/Error e
+                      (report-error e)))]
      ;; (println "computing value")
      (:results value))))
 
@@ -123,11 +129,15 @@
      (report-error (ex-info "Expression data missing!" {})))
    (when (nil? varorder)
      (report-error (ex-info "Unknown variable ordering!" {})))
-   (let [formDNA (if (expr/formDNA? expr)
-                   expr
-                   (expr/eval->expr-all {:varorder varorder} expr {}))]
+   (let [formDNA (try (if (expr/formDNA? expr)
+                        expr
+                        (expr/eval->expr-all {:varorder varorder} expr {}))
+                      (catch js/Error e
+                        (report-error e)))]
      ;; (println "computing value")
-     (expr/op-get formDNA :dna))))
+     (try (expr/op-get formDNA :dna)
+          (catch js/Error e
+            (report-error e))))))
 
 (rf/reg-sub
  :input/->dna-view
@@ -135,10 +145,14 @@
  (fn [dna [_ type]]
    (when-not dna ;; TODO: improve error handling
      (report-error (ex-info "formDNA data missing!" {})))
-   (let [dna-view (case type
-                    :nmui (calc/dna->digits calc/nmui-code dna)
-                    :nuim (calc/dna->digits calc/nuim-code dna)
-                    (mapv name dna))]
+   (let [dna-view (try (case type
+                         :nmui (calc/dna->digits calc/nmui-code dna)
+                         :nuim (calc/dna->digits calc/nuim-code dna)
+                         (->> dna
+                              reverse ;; !TEMP
+                              (mapv name)))
+                       (catch js/Error e
+                         (report-error e)))]
      dna-view)))
 
 
@@ -148,7 +162,9 @@
  (fn [dna _]
    (when-not dna
      (report-error (ex-info "formDNA data missing!" {})))
-   (calc/dna->vmap dna)))
+   (try (calc/dna->vmap dna)
+        (catch js/Error e
+          (report-error e)))))
 
 (rf/reg-sub
  :input/->vmap-psps
@@ -157,7 +173,9 @@
    ;; (println "computing vmap")
    (when-not dna
      (report-error (ex-info "formDNA data missing!" {})))
-   (calc/vmap-perspectives (calc/dna-perspectives dna))))
+   (try (calc/vmap-perspectives (calc/dna-perspectives dna))
+        (catch js/Error e
+          (report-error e)))))
 
 
 (rf/reg-sub
@@ -167,7 +185,9 @@
    ;; (println "computing ca rules function")
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (partial calc/dna-get dna))))
+     :else (try (partial calc/dna-get dna)
+                (catch js/Error e
+                  (report-error e))))))
 
 (rf/reg-sub
  :input/->selfi-umwelt
