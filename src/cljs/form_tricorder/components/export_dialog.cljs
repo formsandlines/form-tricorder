@@ -34,8 +34,7 @@
 (defnc ExportTitle
   [{:keys [title]}]
   ($d Title
-    {:class
-     (css :text-lg :mb-4)}
+    {:class (css :text-lg :mb-4)}
     (or title "Export figure…")))
 
 (defnc ExportPreview

@@ -11,6 +11,7 @@
                                  ViewHorizontalIcon
                                  SourceIcon]]
    [form-tricorder.components.help-popover :refer [HelpPopover]]
+   [form-tricorder.components.about-dialog :refer [AboutDialog]]
    [form-tricorder.components.common.tooltip :as tooltip]
    ["@radix-ui/react-toolbar" :as Toolbar]
    ;; ["lucide-react" :as lucide]
@@ -201,15 +202,13 @@
             {:class "icon"})))
       ($d Separator
         {:class $separator-styles})
-      ($d TextButton
-        {:class $text-button-styles
-         :on-click (fn [_] (js/console.log "Clicked about"))}
-        "about")
+      ($ AboutDialog
+         ($d TextButton
+           {:class $text-button-styles}
+           "about"))
       ($ HelpPopover
          ($d TextButton
-           {:class $text-button-styles
-            ;; :on-click (fn [_] (js/console.log "Clicked help"))
-            }
+           {:class $text-button-styles}
            "help"))
       ($d Separator
         {:class $separator-styles})

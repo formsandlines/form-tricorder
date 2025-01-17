@@ -75,8 +75,9 @@
   (let+ [{:keys [children class]
           :rest r} props]
     (d/a
-      {:class (unite class $link-styles)
-       & r}
+     {:class (unite class $link-styles)
+      :target "_blank"
+      & r}
       children)))
 
 (defnc Note
