@@ -8,9 +8,10 @@
    [shadow.css :refer (css)]
    [clojure.math]
    [clojure.string :as string]
+   ["@radix-ui/react-icons" :as radix-icons]
    [form-tricorder.re-frame-adapter :as rf]
-   [formform-vis.core]
-   [formform-vis.utils :refer [save-svg save-img scale-svg ->attr]]
+   [formform-vis.core :refer [->attr]]
+   [formform-vis.utils-dom :refer [save-svg save-img]]
    [form-tricorder.icons :refer [PerspectivesExpandIcon
                                  PerspectivesCollapseIcon]]
    [form-tricorder.components.export-dialog
@@ -18,6 +19,7 @@
             ExportGroup ExportItem]]
    [form-tricorder.components.common.input :refer [Input]]
    [form-tricorder.components.common.button :refer [Button]]
+   [form-tricorder.components.copy-trigger :refer [CopyTrigger]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
    [form-tricorder.components.common.label :refer [Label]]
    [form-tricorder.components.common.radio-group
@@ -29,6 +31,23 @@
    [form-tricorder.utils :as utils :refer [let+]]))
 
 (def r) ;; hotfix for linting error in let+
+
+(defnc FuncUI
+  [{:keys [children]}]
+  (d/div
+   {:class (css "inner"
+                :gap-8
+                {:display "flex"
+                 :flex-direction "column"})}
+   children))
+
+(defnc FuncUIRow
+  [{:keys [children]}]
+  (d/div
+   {:class (css :gap-2
+                {:display "flex"})}
+   children))
+
 
 (defmulti gen-component (fn [func-id _] func-id))
 
@@ -43,15 +62,24 @@
 ;; EDN
 
 (defnc F-EDN
-  [{:keys [expr]}]
+  [{:keys [edn-str]}]
   (d/pre {:class (css :font-mono)}
-    (d/code (prn-str expr))))
+    (d/code edn-str)))
 
 (defnc F-EDN--init
   [args]
-  (let [expr (rf/subscribe [:input/expr])]
-    ($ F-EDN {:expr expr
-              & args})))
+  (let [expr (rf/subscribe [:input/expr])
+        edn-str (prn-str expr)]
+    ($ FuncUI
+       ($ FuncUIRow
+          ($ CopyTrigger
+             {:text-to-copy edn-str}
+             ($ Button
+                {:variant :outline
+                 :size :icon}
+                ($ radix-icons/CopyIcon))))
+       ($ F-EDN {:edn-str edn-str
+                 & args}))))
 
 (defmethod gen-component :edn
   [_ args]
@@ -62,16 +90,25 @@
 ;; JSON
 
 (defnc F-JSON
-  [{:keys [expr-json]}]
+  [{:keys [expr-json-str]}]
   (d/pre {:class (css :font-mono :text-xs)}
-    (d/code (.stringify js/JSON expr-json
-                        js/undefined 2))))
+    (d/code expr-json-str)))
 
 (defnc F-JSON--init
   [args]
-  (let [expr-json (rf/subscribe [:input/->expr-json])]
-    ($ F-JSON {:expr-json expr-json
-               & args})))
+  (let [expr-json (rf/subscribe [:input/->expr-json])
+        expr-json-str (.stringify js/JSON expr-json
+                                  js/undefined 2)]
+    ($ FuncUI
+       ($ FuncUIRow
+          ($ CopyTrigger
+             {:text-to-copy expr-json-str}
+             ($ Button
+                {:variant :outline
+                 :size :icon}
+                ($ radix-icons/CopyIcon))))
+       ($ F-JSON {:expr-json-str expr-json-str
+                  & args}))))
 
 (defmethod gen-component :json
   [_ args]
@@ -101,13 +138,13 @@
         varorder (rf/subscribe [:input/varorder])
         results (rf/subscribe [:input/->value])]
     (hooks/use-effect
-      [results]
-      (let [webc-el @ref]
-        (aset webc-el "results" results)))
-    (d/div {:class "Vtable inner"}
-      ($ :ff-vtable {:ref ref
-                     :styles (->attr vtable-css)
-                     :varorder (->attr varorder)}))))
+     [results]
+     (let [webc-el @ref]
+       (aset webc-el "results" results)))
+    ($ FuncUI
+       ($ :ff-vtable {:ref ref
+                      :styles (->attr vtable-css)
+                      :varorder (->attr varorder)}))))
 
 (defmethod gen-component :vtable
   [_ args]
@@ -387,48 +424,23 @@
         varorder (rf/subscribe [:input/varorder])
         vmap (when-not psps? (rf/subscribe [:input/->vmap]))
         vmap-psps (when psps? (rf/subscribe [:input/->vmap-psps]))]
-    (d/div
-      {:class (css :gap-2
-                   {:display "flex"
-                    :flex-direction "column"})}
-      (d/div
-        {:class (css :mb-3 :gap-1
-                     {:display "flex"})}
-        ($ Toggle {:variant :outline
-                   :on-click (fn [_] (set-psps? (fn [b] (not b))))}
-           ($ (if psps? PerspectivesCollapseIcon PerspectivesExpandIcon))
-           (d/span {:class (css :ml-1)}
-             "Perspectives"))
-        ($ F-Vmap--export
-           {:data (if psps? vmap-psps vmap)
-            :varorder varorder
-            :psps? psps?}))
-      ($ (if psps? VmapPsps Vmap)
-         {:data (if psps? vmap-psps vmap)
-          :varorder varorder}))))
-
-#_#_
-(defnc Title
-  [{:keys [children]}]
-  (d/h2
-    {:class (css :fg-primary)}
-    children))
-
-(defnc SlotTest
-  [{:keys [title footer children]}]
-  (<>
-    (d/div {:class (css :bg-primary)}
-      (when title title))
-    children
-    (when footer footer)))
+    ($ FuncUI
+       ($ FuncUIRow
+          ($ Toggle {:variant :outline
+                     :on-click (fn [_] (set-psps? (fn [b] (not b))))}
+             ($ (if psps? PerspectivesCollapseIcon PerspectivesExpandIcon))
+             (d/span {:class (css :ml-1)}
+                     "Perspectives"))
+          ($ F-Vmap--export
+             {:data (if psps? vmap-psps vmap)
+              :varorder varorder
+              :psps? psps?}))
+       ($ (if psps? VmapPsps Vmap)
+          {:data (if psps? vmap-psps vmap)
+           :varorder varorder}))))
 
 (defmethod gen-component :vmap
   [_ args]
-  #_
-  ($ SlotTest
-     {:title ($ Title "title")
-      :footer (d/p "footer")}
-     (d/div "test"))
   ($ F-Vmap--init {& args}))
 
 
@@ -494,18 +506,27 @@
                :value c}
               label))))))
 
+
+
 (defnc F-FDNA--init
   [args]
   (let [[code set-code] (hooks/use-state "const")
         dna-view (rf/subscribe [:input/->dna-view (keyword code)])]
-    (d/div
-      {:style {:display "flex"
-               :flex-direction "column"
-               :gap "1rem"}}
-      ($ EncodingSel {:current-code code
-                      :set-code set-code})
-      ($ F-FDNA {:dna dna-view
-                 & args}))))
+    ($ FuncUI
+       ($ FuncUIRow
+          ($ EncodingSel {:current-code code
+                          :set-code set-code})
+          ($ CopyTrigger
+             {:text-to-copy (str "::"
+                                 (-> (string/join "" dna-view)
+                                     string/lower-case ;; !TEMP
+                                     ))}
+             ($ Button
+                {:variant :outline
+                 :size :icon}
+                ($ radix-icons/CopyIcon))))
+       ($ F-FDNA {:dna dna-view
+                  & args}))))
 
 (defmethod gen-component :fdna
   [_ args]
@@ -515,20 +536,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Graph Visualization
 
-(defnc F-Graph--init
-  [{:keys [type]}]
-  (let [ref (hooks/use-ref nil)
-        expr-json  (rf/subscribe [:input/->expr-json])
-        appearance (rf/subscribe [:theme/appearance])
-        graph-style (rf/subscribe [:modes/graph-style])
-        ;; [styleclass set-styleclass] (hooks/use-state "basic")
-        theme (if (= :dark appearance) "dark" "light")]
+(defnc F-Graph
+  [{:keys [expr-json graph-type graph-style theme]}]
+  (let [ref (hooks/use-ref nil)]
     (hooks/use-effect
-      [expr-json appearance graph-style]
-      (let [webc-el @ref]
-        (aset webc-el "json" expr-json)))
+     [expr-json theme graph-style]
+     (let [webc-el @ref]
+       (aset webc-el "json" expr-json)))
     (d/div
-     (when (= type "pack")
+     (when (= graph-type "pack")
        (d/div
         {:class (css {:display "flex"
                       :align-items "center"})}
@@ -565,42 +581,60 @@
                {:htmlFor "styleclass-gestalt"}
                "Gestalt")))))
      ($ :ff-fgraph {:ref ref
-                    :type (->attr type)
+                    :type (->attr graph-type)
                     :styleclass (->attr (name graph-style))
                     :theme (->attr theme)}))))
 
+(defnc F-Graph--init
+  [{:keys [graph-type]}]
+  (let [
+        expr-json  (rf/subscribe [:input/->expr-json])
+        appearance (rf/subscribe [:theme/appearance])
+        graph-style (rf/subscribe [:modes/graph-style])
+        theme (if (= :dark appearance) "dark" "light")]
+    ($ FuncUI
+       ($ F-Graph {:expr-json expr-json
+                   :graph-type graph-type
+                   :graph-style graph-style
+                   :theme theme}))))
+
 (defmethod gen-component :depthtree
   [_ args]
-  ($ F-Graph--init {:type "tree" & args}))
+  ($ F-Graph--init {:graph-type "tree" & args}))
 
 (defmethod gen-component :graphs
   [_ args]
-  ($ F-Graph--init {:type "pack" & args}))
+  ($ F-Graph--init {:graph-type "pack" & args}))
 
 (defmethod gen-component :hooks
   [_ args]
-  ($ F-Graph--init {:type "gsbhooks" & args}))
+  ($ F-Graph--init {:graph-type "gsbhooks" & args}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SelFi CA
 
+(defnc F-Selfi
+  [{:keys [rules-fn umwelt]}]
+  (let [ref (hooks/use-ref nil)]
+    (hooks/use-effect
+     [rules-fn umwelt]
+     (let [webc-el @ref]
+       (aset webc-el "rules"  rules-fn)
+       (aset webc-el "umwelt" umwelt)))
+    ($ :ff-selfi {:ref ref
+                  :res (->attr 100)
+                  "ini-ptn" (->attr :random)
+                  "vis-limit" (->attr 200)
+                  :cellsize (->attr 4)})))
+
 (defnc F-Selfi--init
   [_]
-  (let [ref (hooks/use-ref nil)
-        rules-fn (rf/subscribe [:input/->selfi-rules-fn])
+  (let [rules-fn (rf/subscribe [:input/->selfi-rules-fn])
         umwelt   (rf/subscribe [:input/->selfi-umwelt])]
-    (hooks/use-effect
-      [rules-fn umwelt]
-      (let [webc-el @ref]
-        (aset webc-el "rules"  rules-fn)
-        (aset webc-el "umwelt" umwelt)))
-    (d/div {:class "Selfi"}
-      ($ :ff-selfi {:ref ref
-                    :res (->attr 100)
-                    "ini-ptn" (->attr :random)
-                    "vis-limit" (->attr 200)
-                    :cellsize (->attr 4)}))))
+    ($ FuncUI
+       ($ F-Selfi {:rules-fn rules-fn
+                   :umwelt umwelt}))))
 
 (defmethod gen-component :selfi
   [_ args]

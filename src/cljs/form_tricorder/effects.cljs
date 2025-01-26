@@ -1,6 +1,7 @@
 (ns form-tricorder.effects
   (:require
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [form-tricorder.utils :refer [copy-to-clipboard]]))
 
 (rf/reg-fx
  :set-search-params
@@ -13,13 +14,6 @@
        ;; (js/console.log path)
        ;; (js/console.log search-params)
        (.. js/window -history (replaceState (js-obj) "" path))))))
-
-
-(defn copy-to-clipboard
-  [text report-copy-status]
-  (.then (.. js/navigator -clipboard (writeText text))
-         (fn [] (report-copy-status [true text]))
-         (fn [err] (report-copy-status [false err]))))
 
 (rf/reg-fx
  :copy-url

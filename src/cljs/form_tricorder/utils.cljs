@@ -124,6 +124,13 @@
   [& strings]
   (string/join " " (remove nil? strings)))
 
+(defn copy-to-clipboard
+  [text report-copy-status]
+  (.then (.. js/navigator -clipboard (writeText text))
+         (fn [] (report-copy-status [true text]))
+         (fn [err] (report-copy-status [false err]))))
+
+
 (comment
   (pad 2 (.getUTCDate (js/Date.)))
   (get-timestamp)
