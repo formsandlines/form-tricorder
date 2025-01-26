@@ -132,19 +132,49 @@
     ["td"
      {:border-top "1px solid var(--col-bg-muted)"}]]))
 
-(defnc F-Vtable--init
-  [_]
-  (let [ref (hooks/use-ref nil)
-        varorder (rf/subscribe [:input/varorder])
-        results (rf/subscribe [:input/->value])]
+(defnc F-VTable
+  [{:keys [results varorder]}]
+  (let [ref (hooks/use-ref nil)]
     (hooks/use-effect
      [results]
      (let [webc-el @ref]
        (aset webc-el "results" results)))
+    ($ :ff-vtable {:ref ref
+                   :styles (->attr vtable-css)
+                   :varorder (->attr varorder)})))
+
+(defn results->tsv
+  [results varorder]
+  (->> results
+       (map (fn [[intpr res]]
+              (str (string/join ";" (map utils/pp-val intpr))
+                   ";"
+                   (utils/pp-val res))))
+       (cons (str (string/join ";" (map utils/pp-var varorder))
+                  ";Result"))
+       (string/join "\n")))
+
+(defnc F-Vtable--init
+  [_]
+  (let [varorder (rf/subscribe [:input/varorder])
+        results (rf/subscribe [:input/->value])]
     ($ FuncUI
-       ($ :ff-vtable {:ref ref
-                      :styles (->attr vtable-css)
-                      :varorder (->attr varorder)}))))
+       ($ FuncUIRow
+          ($ CopyTrigger
+             {:copy-handler (hooks/use-memo
+                              [results varorder]
+                              (fn [_ report-copy-status]
+                                (let [csv (results->tsv results varorder)]
+                                  (utils/copy-to-clipboard
+                                   csv report-copy-status))))}
+             ($ Button
+                {:variant :outline
+                 :size :md
+                 }
+                ($ radix-icons/CopyIcon)
+                (d/span {:class (css :ml-2)} "CSV"))))
+       ($ F-VTable {:results results
+                    :varorder varorder}))))
 
 (defmethod gen-component :vtable
   [_ args]
@@ -537,65 +567,74 @@
 ;; Graph Visualization
 
 (defnc F-Graph
-  [{:keys [expr-json graph-type graph-style theme]}]
+  [{:keys [expr-json graph-type graph-style theme compact-reentry?]}]
   (let [ref (hooks/use-ref nil)]
     (hooks/use-effect
      [expr-json theme graph-style]
      (let [webc-el @ref]
        (aset webc-el "json" expr-json)))
-    (d/div
-     (when (= graph-type "pack")
-       (d/div
-        {:class (css {:display "flex"
-                      :align-items "center"})}
-        ($ Label
-           {:htmlFor "styleclass-radio"}
-           "Style:")
-        ($ RadioGroup
-           {:id "styleclass-radio"
-            :class (css "StyleClass"
-                        :gap-4 :ml-2 :p-2 :rounded-md
-                        :border :border-col
-                        {:display "inline-flex"
-                         :align-items "center"}
-                        ["& > *"
-                         :gap-2
-                         {:display "flex"
-                          :align-items "center"}])
-            :value (name graph-style)
-            :onValueChange #(rf/dispatch [:modes/set-graph-style
-                                          {:next-graph-style
-                                           (keyword %)}])}
-           (d/div
-            ($ RadioGroupItem
-               {:id "styleclass-basic"
-                :value "basic"})
-            ($ Label
-               {:htmlFor "styleclass-basic"}
-               "Basic"))
-           (d/div
-            ($ RadioGroupItem
-               {:id "styleclass-gestalt"
-                :value "gestalt"})
-            ($ Label
-               {:htmlFor "styleclass-gestalt"}
-               "Gestalt")))))
-     ($ :ff-fgraph {:ref ref
-                    :type (->attr graph-type)
-                    :styleclass (->attr (name graph-style))
-                    :theme (->attr theme)}))))
+    ($ :ff-fgraph {:ref ref
+                   :type (->attr graph-type)
+                   "compact-reentry" compact-reentry?
+                   :styleclass (->attr (name graph-style))
+                   :theme (->attr theme)})))
 
 (defnc F-Graph--init
   [{:keys [graph-type]}]
-  (let [
-        expr-json  (rf/subscribe [:input/->expr-json])
+  (let [expr-json  (rf/subscribe [:input/->expr-json])
         appearance (rf/subscribe [:theme/appearance])
         graph-style (rf/subscribe [:modes/graph-style])
+        [compact-reentry? set-compact-reentry?] (hooks/use-state false)
         theme (if (= :dark appearance) "dark" "light")]
     ($ FuncUI
+       ($ FuncUIRow
+          (when (= graph-type "pack")
+            (d/div
+             {:class (css {:display "flex"
+                           :align-items "center"})}
+             ($ Label
+                {:htmlFor "styleclass-radio"}
+                "Style:")
+             ($ RadioGroup
+                {:id "styleclass-radio"
+                 :class (css "StyleClass"
+                             :gap-4 :ml-2 :p-2 :rounded-md
+                             :border :border-col
+                             {:display "inline-flex"
+                              :align-items "center"}
+                             ["& > *"
+                              :gap-2
+                              {:display "flex"
+                               :align-items "center"}])
+                 :value (name graph-style)
+                 :onValueChange #(rf/dispatch [:modes/set-graph-style
+                                               {:next-graph-style
+                                                (keyword %)}])}
+                (d/div
+                 ($ RadioGroupItem
+                    {:id "styleclass-basic"
+                     :value "basic"})
+                 ($ Label
+                    {:htmlFor "styleclass-basic"}
+                    "Basic"))
+                (d/div
+                 ($ RadioGroupItem
+                    {:id "styleclass-gestalt"
+                     :value "gestalt"})
+                 ($ Label
+                    {:htmlFor "styleclass-gestalt"}
+                    "Gestalt")))))
+          (when (= graph-type "gsbhooks")
+            ($ Toggle {:variant :outline
+                       :on-click (fn [_] (set-compact-reentry? #(not %)))}
+               ;; ($ (if compact-reentry?
+               ;;      PerspectivesCollapseIcon PerspectivesExpandIcon))
+               ;; (d/span {:class (css :ml-1)})
+               "Compact Re-Entries")))
        ($ F-Graph {:expr-json expr-json
                    :graph-type graph-type
                    :graph-style graph-style
+                   :compact-reentry? compact-reentry?
                    :theme theme}))))
 
 (defmethod gen-component :depthtree
