@@ -69,8 +69,10 @@
   (let [mode-id (model/func->mode func-id)
         mode    (model/modes-map mode-id)]
     ($d Root {:class (css "ModeFunctionTabs"
-                          :gap-6 :p-4
-                          {:display "flex"})
+                          :gap-6
+                          {:display "flex"
+                           :height "100%"
+                           :width "auto"})
               :value (name func-id)
               :onValueChange #(handle-change-view (keyword %))
               :activationMode "manual"
@@ -93,7 +95,9 @@
               :let [id-str (name id)]]
           ($d Content
             {:class (css :pb-10
-                         {:flex "1 1 auto"})
+                         {:height "100%"
+                          :width "100%"
+                          :overflow-x "auto"})
              :key   id-str
              :value id-str}
             (func/gen-component func-id {}))))))

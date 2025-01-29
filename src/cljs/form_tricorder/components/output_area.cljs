@@ -19,18 +19,9 @@
       {:class (css "OutputArea"
                    :p-0 :rounded-sm :bg
                    {:height "100%"
-                    ;; :overflow-y "auto"
-                    :box-sizing "border-box"
-                    ;; :border "1px solid lightgray"
-                    ;; :height "auto"
-                    ;; :height "600px" ;; ! must be fixed because gutter-style
-                    }
-                   ;; ["& > div"
-                   ;;  {:align-items "stretch"}]
-                   )}
-      (let [$item-styles (css {:height "100%"
-                               :width "100%"
-                               :overflow-y "auto"})]
+                    :box-sizing "border-box"})}
+      (let [$item-styles (css {:width "100%"
+                               :height "100%"})]
         (case windows
           ;; single view
           1 (d/div {:class $item-styles}

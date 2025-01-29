@@ -142,7 +142,8 @@
            (d/div
              {:class (str $item-styles " "
                           (css "inner"
-                               {:overflow-y "auto"}))}
+                               {:height "100%"
+                                :overflow "hidden"}))}
              ;; ($ Colortest)
              ;; ($ Foobar)
              ($ OutputArea)))))))

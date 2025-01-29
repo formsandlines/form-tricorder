@@ -23,5 +23,5 @@
   ;; files in the same session, run `cider-connect-sibling-clj`.
   {:extra-paths ["dev"]
    :extra-deps {binaryage/devtools {:mvn/version "1.0.7"}
-                thheller/shadow-cljs {:mvn/version "2.28.18"}
+                thheller/shadow-cljs {:mvn/version "2.28.20"}
                 com.thheller/shadow-css {:mvn/version "0.5.0"}}}}}

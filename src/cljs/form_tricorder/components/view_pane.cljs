@@ -19,15 +19,19 @@
         handle-remove-view #(rf/dispatch
                              [:views/remove {:view-index id}])]
     (d/div
-      {:class (css "ViewPane"
-                   {:position "relative"
-                    :overflow-y "auto"
-                    :display "flex"})}
+      {:class (css "ViewPane" :px-4 :pt-4 :pb-8
+                   {:display "flex"
+                    :height "100%"
+                    :width "100%"})}
       (d/div
-        {:class "ViewPaneControls"}
+        {:class (css "ViewPaneControls"
+                     {:height "100%"
+                      :width "100%"
+                      :overflow "hidden"
+                      :position "relative"})}
         (when-not only-child?
           ($ Button
-             {:class (css :top-4 :right-4
+             {:class (css :top-0 :right-0
                           {:position "absolute"
                            :z-index "1"
                            :outline "0.5rem solid var(--col-bg)"})

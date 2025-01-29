@@ -32,21 +32,26 @@
 
 (def r) ;; hotfix for linting error in let+
 
-(defnc FuncUI
-  [{:keys [children]}]
-  (d/div
-   {:class (css "inner"
-                :gap-8
-                {:display "flex"
-                 :flex-direction "column"})}
-   children))
 
-(defnc FuncUIRow
+(defnc Function
   [{:keys [children]}]
   (d/div
-   {:class (css :gap-2
-                {:display "flex"})}
-   children))
+    {:class (css "inner"
+                 :gap-8
+                 {:display "flex"
+                  :flex-direction "column"
+                  :height "100%"
+                  :width "100%"}
+                 ["& > *:last-child"
+                  {:overflow "auto"}])}
+    children))
+
+(defnc FuncOpts
+  [{:keys [children]}]
+  (d/div
+    {:class (css :gap-2
+                 {:display "flex"})}
+    children))
 
 
 (defmulti gen-component (fn [func-id _] func-id))
@@ -70,16 +75,17 @@
   [args]
   (let [expr (rf/subscribe [:input/expr])
         edn-str (prn-str expr)]
-    ($ FuncUI
-       ($ FuncUIRow
+    ($ Function
+       ($ FuncOpts
           ($ CopyTrigger
              {:text-to-copy edn-str}
              ($ Button
                 {:variant :outline
                  :size :icon}
                 ($ radix-icons/CopyIcon))))
-       ($ F-EDN {:edn-str edn-str
-                 & args}))))
+       (d/div
+         ($ F-EDN {:edn-str edn-str
+                   & args})))))
 
 (defmethod gen-component :edn
   [_ args]
@@ -99,16 +105,17 @@
   (let [expr-json (rf/subscribe [:input/->expr-json])
         expr-json-str (.stringify js/JSON expr-json
                                   js/undefined 2)]
-    ($ FuncUI
-       ($ FuncUIRow
+    ($ Function
+       ($ FuncOpts
           ($ CopyTrigger
              {:text-to-copy expr-json-str}
              ($ Button
                 {:variant :outline
                  :size :icon}
                 ($ radix-icons/CopyIcon))))
-       ($ F-JSON {:expr-json-str expr-json-str
-                  & args}))))
+       (d/div
+         ($ F-JSON {:expr-json-str expr-json-str
+                    & args})))))
 
 (defmethod gen-component :json
   [_ args]
@@ -123,8 +130,13 @@
    [[":host"
      {:font-family "var(--font-mono)"
       :font-size "var(--fs-1)"}]
+    ["table"
+     {:padding-bottom "var(--sp-6)"}]
     ["th"
-     {:font-weight "var(--weight-medium)"
+     {:position "sticky"
+      :background-color "var(--col-bg)"
+      :top "0"
+      :font-weight "var(--weight-medium)"
       :border-top "1px solid var(--col-fg)"
       :border-bottom "1px solid var(--col-fg)"}]
     ["tr:hover td"
@@ -158,8 +170,8 @@
   [_]
   (let [varorder (rf/subscribe [:input/varorder])
         results (rf/subscribe [:input/->value])]
-    ($ FuncUI
-       ($ FuncUIRow
+    ($ Function
+       ($ FuncOpts
           ($ CopyTrigger
              {:copy-handler (hooks/use-memo
                               [results varorder]
@@ -173,8 +185,9 @@
                  }
                 ($ radix-icons/CopyIcon)
                 (d/span {:class (css :ml-2)} "CSV"))))
-       ($ F-VTable {:results results
-                    :varorder varorder}))))
+       (d/div
+         ($ F-VTable {:results results
+                      :varorder varorder})))))
 
 (defmethod gen-component :vtable
   [_ args]
@@ -454,8 +467,8 @@
         varorder (rf/subscribe [:input/varorder])
         vmap (when-not psps? (rf/subscribe [:input/->vmap]))
         vmap-psps (when psps? (rf/subscribe [:input/->vmap-psps]))]
-    ($ FuncUI
-       ($ FuncUIRow
+    ($ Function
+       ($ FuncOpts
           ($ Toggle {:variant :outline
                      :on-click (fn [_] (set-psps? (fn [b] (not b))))}
              ($ (if psps? PerspectivesCollapseIcon PerspectivesExpandIcon))
@@ -465,9 +478,10 @@
              {:data (if psps? vmap-psps vmap)
               :varorder varorder
               :psps? psps?}))
-       ($ (if psps? VmapPsps Vmap)
-          {:data (if psps? vmap-psps vmap)
-           :varorder varorder}))))
+       (d/div
+         ($ (if psps? VmapPsps Vmap)
+            {:data (if psps? vmap-psps vmap)
+             :varorder varorder})))))
 
 (defmethod gen-component :vmap
   [_ args]
@@ -542,8 +556,8 @@
   [args]
   (let [[code set-code] (hooks/use-state "const")
         dna-view (rf/subscribe [:input/->dna-view (keyword code)])]
-    ($ FuncUI
-       ($ FuncUIRow
+    ($ Function
+       ($ FuncOpts
           ($ EncodingSel {:current-code code
                           :set-code set-code})
           ($ CopyTrigger
@@ -555,8 +569,9 @@
                 {:variant :outline
                  :size :icon}
                 ($ radix-icons/CopyIcon))))
-       ($ F-FDNA {:dna dna-view
-                  & args}))))
+       (d/div
+         ($ F-FDNA {:dna dna-view
+                    & args})))))
 
 (defmethod gen-component :fdna
   [_ args]
@@ -586,8 +601,8 @@
         graph-style (rf/subscribe [:modes/graph-style])
         [compact-reentry? set-compact-reentry?] (hooks/use-state false)
         theme (if (= :dark appearance) "dark" "light")]
-    ($ FuncUI
-       ($ FuncUIRow
+    ($ Function
+       ($ FuncOpts
           (when (= graph-type "pack")
             (d/div
              {:class (css {:display "flex"
@@ -631,11 +646,12 @@
                ;;      PerspectivesCollapseIcon PerspectivesExpandIcon))
                ;; (d/span {:class (css :ml-1)})
                "Compact Re-Entries")))
-       ($ F-Graph {:expr-json expr-json
-                   :graph-type graph-type
-                   :graph-style graph-style
-                   :compact-reentry? compact-reentry?
-                   :theme theme}))))
+       (d/div
+         ($ F-Graph {:expr-json expr-json
+                     :graph-type graph-type
+                     :graph-style graph-style
+                     :compact-reentry? compact-reentry?
+                     :theme theme})))))
 
 (defmethod gen-component :depthtree
   [_ args]
@@ -671,9 +687,10 @@
   [_]
   (let [rules-fn (rf/subscribe [:input/->selfi-rules-fn])
         umwelt   (rf/subscribe [:input/->selfi-umwelt])]
-    ($ FuncUI
-       ($ F-Selfi {:rules-fn rules-fn
-                   :umwelt umwelt}))))
+    ($ Function
+       (d/div
+         ($ F-Selfi {:rules-fn rules-fn
+                     :umwelt umwelt})))))
 
 (defmethod gen-component :selfi
   [_ args]
