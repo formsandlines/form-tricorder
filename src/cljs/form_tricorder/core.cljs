@@ -127,11 +127,11 @@
                           {:display "flex"
                            :flex-direction "column"
                            :max-width "100%"}
-                          ["@media (min-width: 1024px)"
+                          [:media-min-lg
                            {:flex-direction "row"}])}
              (d/div
                {:class (css :min-h-10 :rounded-sm
-                            ["@media (min-width: 1024px)"
+                            [:media-min-lg
                              {:flex "3 1 auto"
                               :min-width "10rem"
                               :height "100%"}])}
@@ -141,7 +141,7 @@
                                                 :set-search-params? %2}])})
                ($ ErrorDisplay))
              (d/div
-               {:class (css ["@media (min-width: 1024px)"
+               {:class (css [:media-min-lg
                              {:flex "2 0 28rem"
                               :height "100%"}])}
                ($ FunctionMenu

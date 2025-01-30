@@ -19,7 +19,7 @@
 (def Item (.-Item Menubar))
 
 (def $trigger-styles-base
-  (css :px-4 :pt-6 :font-sans :weight-normal :font-size-2
+  (css :px-4 :pt-3 :font-sans :weight-normal :font-size-sm
        :fg :rounded-sm
        {:padding-bottom "calc(var(--sp-2) - 1px)"
         :flex "1"
@@ -31,7 +31,10 @@
         :border "none"
         ;; :text-align "left"
         ;; :text-align "right"
-        :cursor "pointer"}))
+        :cursor "pointer"}
+       [:media-min-xs
+        :font-size-base
+        :pt-6]))
 
 (def $$trigger-style-variants
   {:expr (css {:background-color "var(--col-fmenu-expr)"
@@ -93,8 +96,12 @@
     {:class (css "FunctionMenu" "outer"
                  :gap-2
                  {:display "flex"
-                  :column-gap "$2"
-                  :box-sizing "border-box"})
+                  :flex-direction "row"
+                  ;; :column-gap "$2"
+                  :box-sizing "border-box"}
+                 ;; [:media-min-xs
+                 ;;  {:flex-direction "column"}]
+                 )
      :value keybind-mode-value
      :loop true}
     (for [{mode-id :id label :label items :items keybind :keybind} modes
@@ -115,9 +122,10 @@
                          {:display "flex"
                           :z-index "3"
                           :flex-direction "column"
-                          :width "var(--radix-menubar-trigger-width)"
-                          :padding "0 0 var(--space-5) 0"
-                          :box-shadow "var(--shadow-fmenu)"})
+                          :padding "0 0 var(--sp-3) 0"
+                          :box-shadow "var(--shadow-fmenu)"}
+                         [:media-min-xs
+                          {:width "var(--radix-menubar-trigger-width)"}])
              :sideOffset 2
              :align "start"
              :alignOffset 0
@@ -137,7 +145,8 @@
                                      :height "24px"})}
                   (function-icon id))
                 (d/div
-                  {:class (unite (css {:display "flex"
+                  {:class (unite (css :gap-2
+                                      {:display "flex"
                                        :flex "1"
                                        :justify-content "space-between"})
                                  $keybind-styles)}

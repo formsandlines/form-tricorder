@@ -1,8 +1,14 @@
 body {
     font-family: var(--font-sans);
     font-weight: var(--weight-normal);
-    // font-size: var(--font-size-base);
+    /* font-size: 16px; */
     line-height: 1.3em; // var(--lh-normal)
+}
+
+@media (max-width: 500px) {
+    body {
+	/* font-size: 14px; */
+    }
 }
 
 body a:hover {

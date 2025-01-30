@@ -178,6 +178,13 @@
      [:8xl :none]
      [:9xl :none]])))
 
+(def breakpoint-aliases
+  {:media-min-xs "@media (min-width: 500px)"
+   :media-min-sm "@media (min-width: 640px)"
+   :media-min-md "@media (min-width: 768px)"
+   :media-min-lg "@media (min-width: 1024px)"
+   :media-min-xl "@media (min-width: 1280px)"
+   :media-min-xxl "@media (min-width: 1536px)"})
 
 ;; functions for complex CSS
 (defn make-ring
@@ -281,5 +288,6 @@ calc(var(--size) / 2) calc(-1 * (var(--size) / 2)),
   (merge style-aliases
          color-aliases
          text-aliases
+         breakpoint-aliases
          special-aliases))
 
