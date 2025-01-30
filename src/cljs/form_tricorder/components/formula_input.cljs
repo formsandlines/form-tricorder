@@ -147,27 +147,26 @@
                                          (of (= appearance :dark)))]})))]
           (.. view (dispatch tsx)))))
     (d/div
-     {:class (css "FormulaInput" "inner"
-                  :min-h-10
-                  {:display "flex"
-                   :align-items "stretch"
-                   :justify-content "space-between"})
+      {:class (css "FormulaInput"
+                   {:display "flex"
+                    :align-items "stretch"
+                    :justify-content "space-between"})
       :on-blur (fn [_] (when-not submit-mode
                         ;; ? just set search params
                         (apply-input code true)))}
       (d/div
        {:class (css
-                :font-mono :bg :rounded-l
-                {:width "100%"
+                :font-mono :bg :rounded-sm-l
+                {:overflow "auto"
+                 :flex "1"
                  ;; :backgroundColor "transparent"
                  ;; :appearance "none"
                  ;; :border-width "0"
                  ;; :padding "$3" ; "0.6rem"
-                 ;; :flex "1 1 auto"
                  })
         :ref editor})
       (d/div
-       {:class (css :bg :p-1 :rounded-r
+       {:class (css :bg :p-1 :rounded-sm-r
                     {:display "flex"
                      :align-items "center"})}
         ($ Toggle

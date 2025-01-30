@@ -11,7 +11,7 @@
    [form-tricorder.subs :as subs]
    [form-tricorder.effects :as effects]
    [form-tricorder.functions :as func]
-   ;; [form-tricorder.utils :refer [log]]
+   [form-tricorder.utils :refer [unite]]
    ;; [form-tricorder.test.comptest :refer [Foobar]]
    ;; [form-tricorder.test.colortest :refer [Colortest]]
    [form-tricorder.components.common.alert
@@ -123,22 +123,35 @@
              {:class $item-styles}
              ($ Header))
            (d/div
-             {:class $item-styles}
-             ($ FormulaInput
-                {:apply-input #(rf/dispatch [:input/changed-formula
-                                             {:next-formula %1
-                                              :set-search-params? %2}])})
-             ($ ErrorDisplay))
+             {:class (css "inner" :gap-2
+                          {:display "flex"
+                           :flex-direction "column"
+                           :max-width "100%"}
+                          ["@media (min-width: 1024px)"
+                           {:flex-direction "row"}])}
+             (d/div
+               {:class (css :min-h-10 :rounded-sm
+                            ["@media (min-width: 1024px)"
+                             {:flex "3 1 auto"
+                              :min-width "10rem"
+                              :height "100%"}])}
+               ($ FormulaInput
+                  {:apply-input #(rf/dispatch [:input/changed-formula
+                                               {:next-formula %1
+                                                :set-search-params? %2}])})
+               ($ ErrorDisplay))
+             (d/div
+               {:class (css ["@media (min-width: 1024px)"
+                             {:flex "2 0 28rem"
+                              :height "100%"}])}
+               ($ FunctionMenu
+                  {:handle-select-fn call-function
+                   :keybind-mode-value keybind-mode-value})))
            (d/div
              {:class (css :bottom-0 :left-0
                           {:position "absolute"
                            :z-index "10"})}
              ($ OptionsDrawer))
-           (d/div
-             {:class $item-styles}
-             ($ FunctionMenu
-                {:handle-select-fn call-function
-                 :keybind-mode-value keybind-mode-value}))
            (d/div
              {:class (str $item-styles " "
                           (css "inner"
