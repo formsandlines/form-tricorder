@@ -265,6 +265,7 @@ calc(var(--size) / 2) calc(-1 * (var(--size) / 2)),
     :transition-timing-function "cubic-bezier(0.4, 0, 0.2, 1)"
     :transition-duration "var(--duration)"}
 
+   :ring-inset (make-ring {:offset-w 0 :inset? true})
    :ring (make-ring {})
 
    :outline-none (make-outline {:col "transparent"})

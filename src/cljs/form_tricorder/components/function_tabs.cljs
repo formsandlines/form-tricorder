@@ -97,7 +97,9 @@
             {:class (css :pb-10
                          {:height "100%"
                           :width "100%"
-                          :overflow-x "auto"})
+                          :overflow-x "auto"}
+                         ["&:focus-visible"
+                          :outline-none :ring])
              :key   id-str
              :value id-str}
             (func/gen-component func-id {}))))))

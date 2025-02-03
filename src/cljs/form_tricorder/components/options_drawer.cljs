@@ -62,7 +62,7 @@
        :onOpenChange set-open}
       ($d Content
         {:class (css
-                  {:overflow "hidden"}
+                  ;; {:overflow "hidden"}
                   ["&[data-state=open]"
                    {:animation "collapsible-slide-out 100ms ease-in"}]
                   ["&[data-state=closed]"
@@ -75,7 +75,9 @@
           ($ VarorderSel)
           ($ Label {:htmlFor "varorder-select"} "Interpretation order")))
       ($d Trigger
-        {:asChild true}
+        {:class (css ["&:focus-visible"
+                      :outline-none :ring])
+         :asChild true}
         (d/button
           ($d (if open icons/ChevronLeftIcon icons/ChevronRightIcon)
             {:class (css :size-icon-sm)}))))))

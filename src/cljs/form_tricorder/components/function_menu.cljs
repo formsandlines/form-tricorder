@@ -32,25 +32,42 @@
         ;; :text-align "left"
         ;; :text-align "right"
         :cursor "pointer"}
+       ["&:focus-visible"
+        :outline-none :ring]
        [:media-min-xs
         :font-size-base
         :pt-6]))
 
 (def $$trigger-style-variants
   {:expr (css {:background-color "var(--col-fmenu-expr)"
-               :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow), var(--shadow-fmenu)"}
+               :box-shadow "var(--shadow-fmenu)"
+               ;; :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow), var(--shadow-fmenu)"
+               }
               ["&:hover"
-               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow-hover), var(--shadow-fmenu)"}])
+               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow), var(--shadow-fmenu)"}
+               ;; {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-expr-shadow-hover), var(--shadow-fmenu)"}
+               ;; {:box-shadow "var(--shadow-fmenu)"}
+               ])
 
    :eval (css {:background-color "var(--col-fmenu-eval)"
-               :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow), var(--shadow-fmenu)"}
+               :box-shadow "var(--shadow-fmenu)"
+               ;; :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow), var(--shadow-fmenu)"
+               }
               ["&:hover"
-               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow-hover), var(--shadow-fmenu)"}])
+               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow), var(--shadow-fmenu)"}
+               ;; {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-eval-shadow-hover), var(--shadow-fmenu)"}
+               ;; {:box-shadow "var(--shadow-fmenu)"}
+               ])
 
    :emul (css {:background-color "var(--col-fmenu-emul)"
-               :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow), var(--shadow-fmenu)"}
+               :box-shadow "var(--shadow-fmenu)"
+               ;; :box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow), var(--shadow-fmenu)"
+               }
               ["&:hover"
-               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow-hover), var(--shadow-fmenu)"}])})
+               {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow), var(--shadow-fmenu)"}
+               ;; {:box-shadow "inset 0 -20px 20px -8px var(--col-fmenu-emul-shadow-hover), var(--shadow-fmenu)"}
+               ;; {:box-shadow "var(--shadow-fmenu)"}
+               ])})
 
 (defn $$trigger-styles
   [mode]
@@ -63,6 +80,8 @@
        {:display "flex"
         ;; :justify-content "space-between"
         :cursor "pointer"}
+       ["&:focus-visible"
+        :outline-none :ring-inset]
        ["& > *:last-child"
         :mx-4]))
 

@@ -25,7 +25,6 @@
    ["react" :refer [StrictMode]]
    ["react-dom/client" :as rdom]))
 
-
 (def call-function
   (fn [func-id alt-view?]
     (let [view-index (if alt-view? 1 0)]
@@ -132,7 +131,7 @@
              (d/div
                {:class (css :min-h-10 :rounded-sm
                             [:media-min-lg
-                             {:flex "3 1 auto"
+                             {:flex "4 1 auto"
                               :min-width "10rem"
                               :height "100%"}])}
                ($ FormulaInput
@@ -142,7 +141,7 @@
                ($ ErrorDisplay))
              (d/div
                {:class (css [:media-min-lg
-                             {:flex "2 0 28rem"
+                             {:flex "1 0 28rem"
                               :height "100%"}])}
                ($ FunctionMenu
                   {:handle-select-fn call-function

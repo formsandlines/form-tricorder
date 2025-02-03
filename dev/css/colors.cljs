@@ -114,14 +114,16 @@
   ([from-scale prefix] (derive-scale from-scale prefix false))
   ([from-scale prefix reverse?]
    (map
-    (fn [[scale-k [css-prop _]]]
+    (fn [[scale-k [css-prop css-var]]]
       (let [n (let [n (parse-long (name scale-k))]
                 (if reverse?
                   (- (last cs-range) n)
                   n))
             k (keyword (str prefix n))]
         [k [(c/css-var (str "col-" prefix) (str n))
-            (c/css-eval-var css-prop)]]))
+            ;; css-var ;; <- if custom properties in light-dark() not supported
+            (c/css-eval-var css-prop)
+            ]]))
     from-scale)))
 
 (def light-mode-scales

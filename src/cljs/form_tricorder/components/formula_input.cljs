@@ -66,7 +66,7 @@
   (let [editor (hooks/use-ref nil)
         current-formula (rf/subscribe [:input/formula])
         appearance (rf/subscribe [:theme/appearance])
-        [code set-code] (hooks/use-state "")
+        [code set-code] (hooks/use-state (or current-formula ""))
         [view set-view] (hooks/use-state nil)
         [submit-mode set-submit-mode] (hooks/use-state false)
         submit-mode-active (define-statefield
@@ -153,6 +153,7 @@
                     :justify-content "space-between"})
       :on-blur (fn [_] (when-not submit-mode
                         ;; ? just set search params
+                        ;; (js/console.log (str "code: " code))
                         (apply-input code true)))}
       (d/div
        {:class (css

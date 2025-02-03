@@ -27,7 +27,7 @@
         {:class (css "ViewPaneControls"
                      {:height "100%"
                       :width "100%"
-                      :overflow "hidden"
+                      ;; :overflow "hidden"
                       :position "relative"})}
         (when-not only-child?
           ($ Button

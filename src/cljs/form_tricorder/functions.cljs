@@ -49,9 +49,28 @@
 (defnc FuncOpts
   [{:keys [children]}]
   (d/div
-    {:class (css :gap-2
-                 {:display "flex"})}
-    children))
+    {:class (css ;; "outer"
+              :border-col
+              :p-2 :rounded
+              :gap-2
+              {:border "1px dashed"
+               ;; :position "relative"
+               :display "flex"
+               :width "fit-content"})}
+    children
+    (d/label
+      {:class (css :fg-muted)}
+      ($ radix-icons/MixerHorizontalIcon))
+    ;; (d/label
+    ;;   {:class (css
+    ;;             :font-size-xs :fg-muted :ml-1
+    ;;             {:margin-top "-0.3rem"}
+    ;;             ;; {:position "absolute"
+    ;;             ;;  :top "0"
+    ;;             ;;  :right "0"}
+    ;;             )}
+    ;;   "Options")
+    ))
 
 
 (defmulti gen-component (fn [func-id _] func-id))
@@ -602,44 +621,45 @@
         [compact-reentry? set-compact-reentry?] (hooks/use-state false)
         theme (if (= :dark appearance) "dark" "light")]
     ($ Function
-       ($ FuncOpts
-          (when (= graph-type "pack")
+       (when (= graph-type "pack")
+         ($ FuncOpts
             (d/div
-             {:class (css {:display "flex"
-                           :align-items "center"})}
-             ($ Label
-                {:htmlFor "styleclass-radio"}
-                "Style:")
-             ($ RadioGroup
-                {:id "styleclass-radio"
-                 :class (css "StyleClass"
-                             :gap-4 :ml-2 :p-2 :rounded-md
-                             :border :border-col
-                             {:display "inline-flex"
-                              :align-items "center"}
-                             ["& > *"
-                              :gap-2
-                              {:display "flex"
-                               :align-items "center"}])
-                 :value (name graph-style)
-                 :onValueChange #(rf/dispatch [:modes/set-graph-style
-                                               {:next-graph-style
-                                                (keyword %)}])}
-                (d/div
-                 ($ RadioGroupItem
-                    {:id "styleclass-basic"
-                     :value "basic"})
-                 ($ Label
-                    {:htmlFor "styleclass-basic"}
-                    "Basic"))
-                (d/div
-                 ($ RadioGroupItem
-                    {:id "styleclass-gestalt"
-                     :value "gestalt"})
-                 ($ Label
-                    {:htmlFor "styleclass-gestalt"}
-                    "Gestalt")))))
-          (when (= graph-type "gsbhooks")
+              {:class (css {:display "flex"
+                            :align-items "center"})}
+              ($ Label
+                 {:htmlFor "styleclass-radio"}
+                 "Style:")
+              ($ RadioGroup
+                 {:id "styleclass-radio"
+                  :class (css "StyleClass"
+                              :gap-4 :ml-2 :p-2 :rounded
+                              :border :border-col
+                              {:display "inline-flex"
+                               :align-items "center"}
+                              ["& > *"
+                               :gap-2
+                               {:display "flex"
+                                :align-items "center"}])
+                  :value (name graph-style)
+                  :onValueChange #(rf/dispatch [:modes/set-graph-style
+                                                {:next-graph-style
+                                                 (keyword %)}])}
+                 (d/div
+                   ($ RadioGroupItem
+                      {:id "styleclass-basic"
+                       :value "basic"})
+                   ($ Label
+                      {:htmlFor "styleclass-basic"}
+                      "Basic"))
+                 (d/div
+                   ($ RadioGroupItem
+                      {:id "styleclass-gestalt"
+                       :value "gestalt"})
+                   ($ Label
+                      {:htmlFor "styleclass-gestalt"}
+                      "Gestalt"))))))
+       (when (= graph-type "gsbhooks")
+         ($ FuncOpts
             ($ Toggle {:variant :outline
                        :on-click (fn [_] (set-compact-reentry? #(not %)))}
                ;; ($ (if compact-reentry?
