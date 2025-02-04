@@ -20,10 +20,13 @@
    [form-tricorder.components.common.input :refer [Input]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.copy-trigger :refer [CopyTrigger]]
+   [form-tricorder.components.value-filter :refer [ValueFilter]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
    [form-tricorder.components.common.label :refer [Label]]
    [form-tricorder.components.common.radio-group
     :refer [RadioGroup RadioGroupItem]]
+   ;; [form-tricorder.components.common.toggle-group
+   ;;  :refer [ToggleGroup ToggleGroupItem]]
    [form-tricorder.components.common.checkbox :refer [Checkbox]]
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
@@ -203,7 +206,10 @@
                  :size :md
                  }
                 ($ radix-icons/CopyIcon)
-                (d/span {:class (css :ml-2)} "CSV"))))
+                (d/span {:class (css :ml-2)} "CSV")))
+          ($ ValueFilter
+             {:results results
+              :varorder varorder}))
        (d/div
          ($ F-VTable {:results results
                       :varorder varorder})))))

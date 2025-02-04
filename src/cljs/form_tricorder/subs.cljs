@@ -121,6 +121,60 @@
      ;; (println "computing value")
      (:results value))))
 
+(comment
+  (= (->> (expr/eval-all '[[a] b])
+        :results
+        (mapv second))
+     (reverse (last (expr/=>* '[[a] b]))))
+
+  (= (->> (reverse (last (expr/=>* '[[a] b])))
+          (map vector (calc/vspace 2)))
+     (:results (expr/eval-all '[[a] b])))
+
+  (->> (calc/filter-dna (last (expr/=>* '[[a] b]))
+                        [:_ :U])
+       reverse)
+
+  (require '[clojure.set :as s])
+
+  (let [dna (last (expr/=>* '[[[a] b] c]))
+        vspace (vec (calc/vspace (calc/dna-dimension dna)))]
+    (for [i (range (count dna))
+          :let [c  (dna i)
+                vp (vec (vspace i))]
+          :when
+          (not= #{} (s/intersection #{:U :I} (set vp))) ;; OR
+          ;; (= #{} (s/intersection #{:U :I} (set vp))) ;; NOT OR
+          ;; (s/subset? #{:U :I} (set vp))  ;; AND
+          ;; (not (s/subset? #{:U :I} (set vp)))  ;; NOT AND
+          ;; (= #{:U :I} (set vp))  ;; EQ
+          ;; (not= #{:U :I} (set vp))  ;; NOT EQ
+          
+          ;; (every? #{:U :I} vp)  ;; OR
+          ;; (= (count (set vp)) (count (s/union #{:I :U} (set vp)))) ;; AND
+          ;; (every? #{:I} vp)  ;; symmetric
+          ;; (= (vp 1) :U)  ;; value filter
+          ]
+      [vp c]))
+
+  [[[:N :N] :N]
+   [[:N :U] :N]
+   [[:N :I] :N]
+   [[:N :M] :N]
+   [[:U :N] :U]
+   [[:U :U] :N]
+   [[:U :I] :U]
+   [[:U :M] :N]
+   [[:I :N] :I]
+   [[:I :U] :I]
+   [[:I :I] :N]
+   [[:I :M] :N]
+   [[:M :N] :M]
+   [[:M :U] :I]
+   [[:M :I] :U]
+   [[:M :M] :N]]
+  ,)
+
 (rf/reg-sub
  :input/->dna
  :<- [:input/->expr-data]

@@ -22,14 +22,14 @@
   (css
     :rounded-sm :text-xs :weight-normal :transition-colors
     :size-12 :p-0 :fg
-    {:flex "flex-none"
+    {:flex-shrink "0"
      :touch-action "manipulation"
      :display "inline-flex"
      :justify-content "center"
      :align-items "center"
      :white-space "nowrap"}
     ["&:focus-visible"
-     :outline-none :ring]
+     :outline-none :ring-inset]
     ["&:disabled"
      {:pointer-events "none"
       :opacity "0.5"}]
@@ -81,7 +81,8 @@
           {:class (css :gap-2
                        {:display "flex"
                         :flex-direction "column"
-                        :flex "flex-none"})}
+                        :overflow-y "auto"
+                        :flex-shrink "0"})}
           (for [{:keys [id label]} (:items mode)
                 :let [id-str (name id)]]
             ($d Trigger
@@ -94,12 +95,12 @@
         (for [{:keys [id]} (:items mode)
               :let [id-str (name id)]]
           ($d Content
-            {:class (css :pb-10
+            {:class (css ;; :pb-10
                          {:height "100%"
                           :width "100%"
                           :overflow-x "auto"}
                          ["&:focus-visible"
-                          :outline-none :ring])
+                          :outline-none])
              :key   id-str
              :value id-str}
             (func/gen-component func-id {}))))))
