@@ -59,6 +59,10 @@
           :icon (css :size-10 :p-0 :rounded-sm)
           :icon-sm (css :size-9 :p-0 :rounded-sm)
 
+          :value-filter/vmap
+          (css {:width "50%"
+                :height "50%"})
+
           :formula-input/submit-mode
           (css :size-8 :p-0 :rounded-full)}})
 

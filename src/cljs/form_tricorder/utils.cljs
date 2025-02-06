@@ -130,6 +130,26 @@
          (fn [] (report-copy-status [true text]))
          (fn [err] (report-copy-status [false err]))))
 
+(def const->col-ui
+  {:N "var(--col-const-n)"
+   :U "var(--col-const-u)"
+   :I "var(--col-const-i)"
+   :M "var(--col-const-m)"})
+
+(def const->col-ui-hover
+  {:N "var(--col-const-n-hover)"
+   :U "var(--col-const-u-hover)"
+   :I "var(--col-const-i-hover)"
+   :M "var(--col-const-m-hover)"})
+
+(def const->col-contrast
+  {:N "#000000"
+   :U "#FF0000"
+   :I "#00FF00"
+   :M "#0000FF"})
+
+(def consts [:N :U :I :M])
+(def consts-set #{:N :U :I :M})
 
 (comment
   (pad 2 (.getUTCDate (js/Date.)))

@@ -1339,6 +1339,7 @@
     --col-e25: light-dark(var(--coral-25), var(--coral-6));
     --col-fv30: light-dark(var(--lavender-30), var(--lavender-1));
     --col-n20: light-dark(var(--sand-20), var(--night-11));
+    --col-const-n-hover: var(--col-n6);
     --col-fmenu-expr-shadow-hover: var(--col-fx9);
     --col-fmenu-eval: var(--col-fv5);
     --col-fg-card: var(--col-n28);
@@ -1353,9 +1354,14 @@
     --col-fg: var(--col-n28);
     --col-bg-accent: var(--col-n5);
     --col-icon-expr: var(--col-fx26);
+    --col-const-i-hover: var(--col-fx6);
+    --col-const-u: var(--col-fe4);
+    --col-const-m: var(--col-fv4);
     --col-icon-eval: var(--col-fv26);
+    --col-const-i: var(--col-fx4);
     --col-bg-secondary: var(--col-n5);
     --col-fmenu-emul-shadow-hover: var(--col-fe9);
+    --col-const-n: var(--col-n4);
     --col-fmenu-expr-shadow: var(--col-fx7);
     --col-fmenu-eval-shadow: var(--col-fv7);
     --col-bg-primary: var(--col-m21);
@@ -1365,6 +1371,7 @@
     --col-tab-expr: var(--col-fx4);
     --col-fmenu-emul-shadow: var(--col-fe7);
     --col-fmenu-emul: var(--col-fe5);
+    --col-const-m-hover: var(--col-fv6);
     --col-icon-emul: var(--col-fe26);
     --col-border-col: var(--col-n11);
     --col-bg-card: var(--col-n1);
@@ -1374,10 +1381,12 @@
     --col-fg-muted: var(--col-n14);
     --col-tab-emul: var(--col-fe4);
     --col-bg-popover: var(--col-n1);
+    --col-const-u-hover: var(--col-fe6);
     --col-border-col-input: var(--col-n11);
 }
 
 .outer {
+    --col-const-n-hover: var(--col-n8);
     --col-fmenu-expr-shadow-hover: var(--col-fx11);
     --col-fmenu-eval: var(--col-fv7);
     --col-fg-card: var(--col-n30);
@@ -1392,9 +1401,14 @@
     --col-fg: var(--col-n30);
     --col-bg-accent: var(--col-n7);
     --col-icon-expr: var(--col-fx28);
+    --col-const-i-hover: var(--col-fx8);
+    --col-const-u: var(--col-fe6);
+    --col-const-m: var(--col-fv6);
     --col-icon-eval: var(--col-fv28);
+    --col-const-i: var(--col-fx6);
     --col-bg-secondary: var(--col-n7);
     --col-fmenu-emul-shadow-hover: var(--col-fe11);
+    --col-const-n: var(--col-n6);
     --col-fmenu-expr-shadow: var(--col-fx9);
     --col-fmenu-eval-shadow: var(--col-fv9);
     --col-bg-primary: var(--col-m23);
@@ -1404,6 +1418,7 @@
     --col-tab-expr: var(--col-fx6);
     --col-fmenu-emul-shadow: var(--col-fe9);
     --col-fmenu-emul: var(--col-fe7);
+    --col-const-m-hover: var(--col-fv8);
     --col-icon-emul: var(--col-fe28);
     --col-border-col: var(--col-n13);
     --col-bg-card: var(--col-n3);
@@ -1413,10 +1428,12 @@
     --col-fg-muted: var(--col-n16);
     --col-tab-emul: var(--col-fe6);
     --col-bg-popover: var(--col-n3);
+    --col-const-u-hover: var(--col-fe8);
     --col-border-col-input: var(--col-n13);
 }
 
 .inner {
+    --col-const-n-hover: var(--col-n6);
     --col-fmenu-expr-shadow-hover: var(--col-fx9);
     --col-fmenu-eval: var(--col-fv5);
     --col-fg-card: var(--col-n28);
@@ -1431,9 +1448,14 @@
     --col-fg: var(--col-n28);
     --col-bg-accent: var(--col-n5);
     --col-icon-expr: var(--col-fx26);
+    --col-const-i-hover: var(--col-fx6);
+    --col-const-u: var(--col-fe4);
+    --col-const-m: var(--col-fv4);
     --col-icon-eval: var(--col-fv26);
+    --col-const-i: var(--col-fx4);
     --col-bg-secondary: var(--col-n5);
     --col-fmenu-emul-shadow-hover: var(--col-fe9);
+    --col-const-n: var(--col-n4);
     --col-fmenu-expr-shadow: var(--col-fx7);
     --col-fmenu-eval-shadow: var(--col-fv7);
     --col-bg-primary: var(--col-m21);
@@ -1443,6 +1465,7 @@
     --col-tab-expr: var(--col-fx4);
     --col-fmenu-emul-shadow: var(--col-fe7);
     --col-fmenu-emul: var(--col-fe5);
+    --col-const-m-hover: var(--col-fv6);
     --col-icon-emul: var(--col-fe26);
     --col-border-col: var(--col-n11);
     --col-bg-card: var(--col-n1);
@@ -1452,6 +1475,7 @@
     --col-fg-muted: var(--col-n14);
     --col-tab-emul: var(--col-fe4);
     --col-bg-popover: var(--col-n1);
+    --col-const-u-hover: var(--col-fe6);
     --col-border-col-input: var(--col-n11);
 }
 

@@ -191,27 +191,28 @@
 (defnc F-Vtable--init
   [_]
   (let [varorder (rf/subscribe [:input/varorder])
-        results (rf/subscribe [:input/->value])]
+        filtered-results (rf/subscribe [:input/->filtered-results])]
+    ;; (println filtered-results)
     ($ Function
        ($ FuncOpts
           ($ CopyTrigger
              {:copy-handler (hooks/use-memo
-                              [results varorder]
+                              [filtered-results varorder]
                               (fn [_ report-copy-status]
-                                (let [csv (results->tsv results varorder)]
+                                (let [csv (results->tsv filtered-results
+                                                        varorder)]
                                   (utils/copy-to-clipboard
                                    csv report-copy-status))))}
              ($ Button
                 {:variant :outline
-                 :size :md
-                 }
+                 :size :md}
                 ($ radix-icons/CopyIcon)
                 (d/span {:class (css :ml-2)} "CSV")))
-          ($ ValueFilter
-             {:results results
-              :varorder varorder}))
+          (when varorder
+            ($ ValueFilter
+               {:varorder varorder})))
        (d/div
-         ($ F-VTable {:results results
+         ($ F-VTable {:results filtered-results
                       :varorder varorder})))))
 
 (defmethod gen-component :vtable
@@ -490,19 +491,22 @@
   []
   (let [[psps? set-psps?] (hooks/use-state false)
         varorder (rf/subscribe [:input/varorder])
-        vmap (when-not psps? (rf/subscribe [:input/->vmap]))
-        vmap-psps (when psps? (rf/subscribe [:input/->vmap-psps]))]
+        vmap (when-not psps? (rf/subscribe [:input/->filtered-vmap]))
+        vmap-psps (when psps? (rf/subscribe [:input/->filtered-vmap-psps]))]
     ($ Function
        ($ FuncOpts
           ($ Toggle {:variant :outline
                      :on-click (fn [_] (set-psps? (fn [b] (not b))))}
              ($ (if psps? PerspectivesCollapseIcon PerspectivesExpandIcon))
              (d/span {:class (css :ml-1)}
-                     "Perspectives"))
+               "Perspectives"))
           ($ F-Vmap--export
              {:data (if psps? vmap-psps vmap)
               :varorder varorder
-              :psps? psps?}))
+              :psps? psps?})
+          (when varorder
+            ($ ValueFilter
+               {:varorder varorder})))
        (d/div
          ($ (if psps? VmapPsps Vmap)
             {:data (if psps? vmap-psps vmap)

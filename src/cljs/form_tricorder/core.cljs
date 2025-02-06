@@ -44,7 +44,7 @@
          ($ AlertDescription
             (d/pre
              {:class (css :max-h-32
-                          {:overflow "scroll"})}
+                          {:overflow "auto"})}
              (d/code
               {:class (css :font-mono :font-size-xs :line-h-none
                            {:text-wrap "auto"})}

@@ -219,7 +219,16 @@
               [:fmenu-emul-shadow [:fe 7]]
               [:fmenu-expr-shadow-hover [:fx 9]]
               [:fmenu-eval-shadow-hover [:fv 9]]
-              [:fmenu-emul-shadow-hover [:fe 9]]])))))
+              [:fmenu-emul-shadow-hover [:fe 9]]
+              [:const-n [:n  4]]
+              [:const-u [:fe 4]]
+              [:const-i [:fx 4]]
+              [:const-m [:fv 4]]
+              [:const-n-hover [:n  6]]
+              [:const-u-hover [:fe 6]]
+              [:const-i-hover [:fx 6]]
+              [:const-m-hover [:fv 6]]
+              ])))))
 
 
 ;; Output

@@ -19,23 +19,102 @@
   (react/createContext {:size :default
                         :variant :default}))
 
+(def $group-base
+  (css ["&[data-orientation=horizontal]"
+        {:flex-direction "row"}]
+       ["&[data-orientation=vertical]"
+        {:flex-direction "column"}]))
+
+(def $$group-variants
+  {:variant {:spaced
+             (css :gap-1
+                  {:display "flex"
+                   :align-items "center"
+                   :justify-content "center"})
+
+             :joined
+             (css :gap-0
+                  {:display "flex"
+                   :width "fit-content"
+                   :align-items "stretch"
+                   :justify-content "center"}
+                  ["& > *:focus-visible"
+                   :ring-inset]
+                  ["&[data-orientation=horizontal] > *"
+                   :rounded-none :border-r-0]
+                  ["&[data-orientation=horizontal] > *:first-child"
+                   :rounded-l-sm]
+                  ["&[data-orientation=horizontal] > *:last-child"
+                   :rounded-r-sm :border-r]
+                  ["&[data-orientation=vertical] > *"
+                   :rounded-none :border-b-0]
+                  ["&[data-orientation=vertical] > *:first-child"
+                   :rounded-t-sm]
+                  ["&[data-orientation=vertical] > *:last-child"
+                   :rounded-b-sm :border-b])
+
+             :value-filter/vmap
+             (css :size-14
+                  {:position "relative"
+                   :margin "0.5rem"
+                   :transform "rotate(45deg)"}
+                  ["&::before, &::after"
+                   {:content "\"\""
+                    :position "absolute"
+                    :top "50%"
+                    :left "50%"
+                    :width "100%"
+                    :height "1px"
+                    :background-color "var(--col-border-col-input)"
+                    :z-index "10"}]
+                  ["&::after"
+                   {:transform "translate(-50%, -50%)"}]
+                  ["&::before"
+                   {:transform "translate(-50%, -50%) rotate(90deg)"}]
+                  ["& > *"
+                   {:position "absolute"}]
+                  ["& > *:nth-child(3)" ;; north / i
+                   :border-r-0 :border-b-0
+                   {:top "0"
+                    :left "0"}]
+                  ["& > *:nth-child(4)" ;; east / m
+                   :border-l-0 :border-b-0
+                   {:top "0"
+                    :right "0"}]
+                  ["& > *:nth-child(2)" ;; south / u
+                   :border-l-0 :border-t-0
+                   {:bottom "0"
+                    :right "0"}]
+                  ["& > *:nth-child(1)" ;; west / n
+                   :border-r-0 :border-t-0
+                   {:bottom "0"
+                    :left "0"}]
+                  ["& > * > *"
+                   {:transform "rotate(-45deg)"}])}})
+
+(defn $$group-styles
+  [group-variant]
+  (unite $group-base
+         (get-in $$group-variants [:variant (or group-variant :spaced)])))
+
 (defnc ToggleGroup
   [props ref]
   {:wrap [(react/forwardRef)]}
-  (let+ [{:keys [class className variant size children]
+  (let+ [{:keys [class className group-variant variant size children]
           :rest r} props]
     ($d Root
-      {:class (unite (css :gap-1
-                          {:display "flex"
-                           :align-items "center"
-                           :justify-content "center"})
+      {:class (unite ($$group-styles group-variant)
                      className class)
+       :orientation "horizontal"
        :ref ref
        & r}
       (provider
        {:context ToggleGroupContext
-        :value {:variant variant
-                :size size}}
+        :value (if (= group-variant :value-filter/vmap)
+                 {:variant :outline
+                  :size :value-filter/vmap}
+                 {:variant variant
+                  :size size})}
        children))))
 
 (defnc ToggleGroupItem

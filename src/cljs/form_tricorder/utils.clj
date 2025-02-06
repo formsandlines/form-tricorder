@@ -1,6 +1,15 @@
 (ns form-tricorder.utils)
 
-(defmacro let+ [bindings & body]
+(defmacro merge-some
+  "Merges all maps in order as in `merge` but falls back to non-nil values."
+  [& ms]
+  (let [symbs (vec (repeatedly (count ms) gensym))]
+    `(merge-with (fn ~symbs (or ~@(rseq symbs))) ;; bind ltr, merge rtl
+                 ~@ms)))
+
+(defmacro let+
+  "Like `let`, but with the ability to bind a rest symbol to `:rest` when destructuring maps (e.g. `{:keys […] :rest r}`), which refers to the remaining values instead of the whole map. This symbol can then be used in the body like a spread operator (e.g. `{… & r})`."
+  [bindings & body]
   (let [binds (partition-all 2 bindings)
         _     (assert (every? #(= 2 (count %)) binds)
                       "binding form must be even yo!")]

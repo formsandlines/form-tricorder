@@ -56,6 +56,48 @@
                        :error (insta/get-failure result)}))
       result)))
 
+(defn parse-vals-filter [s]
+  (let [vals-filter (set (map (comp keyword string/upper-case str)
+                              s))]
+    (when (set/subset? vals-filter utils/consts-set)
+      vals-filter)))
+
+(defn parse-terms-filter [s term-count]
+  (let [terms-filter (mapv parse-vals-filter (string/split s ","))]
+    (when (and (= (count terms-filter) term-count)
+               (every? set? terms-filter))
+      terms-filter)))
+
+(defn parse-interpr-filter-params
+  "Parses query-params for interpretation filter.
+  - example param: `interpr-filter=not;intersects;nu;n,uin,mnui`"
+  [query-param-s term-count]
+  (let [[neg-op? op terms-filter vals-filter]
+        (string/split query-param-s ";")
+        neg-op? (case neg-op?
+                  "not" true
+                  ""    false
+                  (throw (ex-info "Invalid interpretation filter option."
+                                  {:neg-op? neg-op?})))
+        op (let [op (keyword op)]
+             (if (#{:intersects :subseteq :equal} op)
+               op
+               (throw (ex-info "Invalid interpretation filter option."
+                               {:op op}))))
+        vals-filter (if-let [vals-filter (parse-vals-filter vals-filter)]
+                      vals-filter
+                      (throw (ex-info "Invalid interpretation filter option."
+                                      {:vals-filter vals-filter})))
+        terms-filter (if-let [terms-filter
+                              (parse-terms-filter terms-filter term-count)]
+                       terms-filter
+                       (throw (ex-info "Invalid interpretation filter option."
+                                       {:terms-filter terms-filter})))]
+    {:vals-filter vals-filter
+     :terms-filter terms-filter
+     :neg-op? neg-op?
+     :op op}))
+
 (defn conform-varorder
   [varorder expr]
   (let [vars (-> expr (expr/find-vars {}) utils/sort-varorder)]
@@ -76,6 +118,10 @@
                (assoc-in context [:coeffects :search-params]
                          search-params)))))
 
+(defn reset-terms-filter
+  [varorder]
+  (vec (repeat (count varorder) utils/consts-set)))
+
 (def default-db
   {:input {:formula ""
            :expr nil
@@ -84,7 +130,11 @@
            :windows 1}
    :views [{:func-id :graphs}]
    :modes {:expr {:graph-style :basic}
-           :eval nil
+           :eval {:interpr-filter {:vals-filter utils/consts-set
+                                   :terms-filter [] ;; e.g. [#{:N :U} #{:I} #{}]
+                                   :neg-op? false
+                                   :op :intersects} ;; | :subseteq | equal
+                  :results-filter utils/consts-set}
            :emul nil}
    :theme {:appearance :system}
    :cache {:selfi-evolution {:deps #{:expr :varorder}
@@ -117,12 +167,37 @@
                            (throw (ex-info "Invalid view-function id."
                                            {:view view})))))
                       (get default-db :views))
-              modes (if-let [graph-style (keyword
-                                          (.get search-params "graph-style"))]
-                      (if (#{:basic :gestalt} graph-style)
-                        {:expr {:graph-style graph-style}}
-                        (throw (ex-info "Invalid graph-style."
-                                        {:graph-style graph-style}))))
+              graph-style (when-let [graph-style
+                                     (keyword (.get search-params
+                                                    "graph-style"))]
+                            (if (#{:basic :gestalt} graph-style)
+                              graph-style
+                              (throw (ex-info "Invalid graph-style."
+                                              {:graph-style graph-style}))))
+              modes-expr (utils/merge-some
+                          (get-in default-db [:modes :expr])
+                          {:graph-style graph-style})
+              interpr-filter
+              (utils/merge-some
+               (get-in default-db [:modes :eval :interpr-filter])
+               (if-let [interpr-filter
+                        (keyword (.get search-params "interpr-filter"))]
+                 (let [interpr-filter (parse-interpr-filter-params
+                                       interpr-filter (count varorder))]
+                   {:terms-filter interpr-filter})
+                 {:terms-filter (reset-terms-filter varorder)}))
+              results-filter
+              (when-let [results-filter
+                         (keyword (.get search-params "results-filter"))]
+                (if (and (set? results-filter)
+                         (set/subset? results-filter utils/consts-set))
+                  results-filter
+                  (throw (ex-info "Invalid results filter."
+                                  {:results-filter results-filter}))))
+              modes-eval (utils/merge-some
+                          (get-in default-db [:modes :eval])
+                          {:results-filter results-filter
+                           :interpr-filter interpr-filter})
               appearance (if-let [app (keyword (.get search-params "theme"))]
                            (if (#{:light :dark :system} app)
                              app
@@ -136,10 +211,12 @@
                   :frame {:orientation orientation
                           :windows (count views)}
                   :views views
-                  :modes (merge (get default-db :modes) modes)
+                  :modes {:expr modes-expr
+                          :eval modes-eval}
                   :theme {:appearance appearance}
                   :cache (get default-db :cache)
                   :error (get default-db :error)}]
+          ;; (println (get-in db [:modes :eval]))
           {:db db})
         (catch js/Error e
           ;; in case of error, revert to blank config to prevent crash
@@ -192,7 +269,7 @@
          (-> db
              (update :input
                      ;; ? wrap in interceptor:
-                     (fn [{:keys [formula expr] :as m}]
+                     (fn [{:keys [formula] :as m}]
                        (if-not (= formula next-formula)
                          (let [next-expr (parse-formula next-formula)
                                next-varorder
@@ -208,11 +285,18 @@
                            (assoc m
                                   :formula  next-formula
                                   :expr     next-expr
-                                  :varorder next-varorder))
+                                  :varorder (vec next-varorder)))
                          m))))
+         db-next (let [varorder (get-in db-next [:input :varorder])]
+                   (if varorder
+                     (assoc-in db-next
+                               [:modes :eval :interpr-filter :terms-filter]
+                               (reset-terms-filter varorder))
+                     db-next))
          ;; formula-next (get-in db-next [:input :formula])
          ;; varorder-next (get-in db-next [:input :varorder])
          ]
+     ;; (println db-next)
      {:db db-next
       :fx (into [[:dispatch [:cache/invalidate
                              {:has-deps #{:formula :expr :varorder}}]]]
@@ -234,6 +318,7 @@
                        {:has-deps #{:varorder}}]]
            ;; [:set-search-params [["vars" (varorder->str next-varorder)]]]
            ]})))
+
 
 (rf/reg-event-fx
  :frame/set-orientation
@@ -301,6 +386,16 @@
  :modes/set-graph-style
  (fn [{db :db} [_ {:keys [next-graph-style]}]]
    {:db (assoc-in db [:modes :expr :graph-style] next-graph-style)}))
+
+(rf/reg-event-fx
+ :modes/set-interpr-filter
+ (fn [{db :db} [_ {:keys [next-interpr-filter]}]]
+   {:db (assoc-in db [:modes :eval :interpr-filter] next-interpr-filter)}))
+
+(rf/reg-event-fx
+ :modes/set-results-filter
+ (fn [{db :db} [_ {:keys [next-results-filter]}]]
+   {:db (assoc-in db [:modes :eval :results-filter] next-results-filter)}))
 
 
 ;; NOTE: a proposed feature of re-frame called “flows” might make the need

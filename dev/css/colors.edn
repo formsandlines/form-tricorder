@@ -605,6 +605,22 @@
     :border-col-input ["--col-border-col-input"
                        {:inner "var(--col-n11)", :outer "var(--col-n13)"}
                        :border-color],
+    :const-i ["--col-const-i" {:inner "var(--col-fx4)", :outer "var(--col-fx6)"}
+              nil],
+    :const-i-hover ["--col-const-i-hover"
+                    {:inner "var(--col-fx6)", :outer "var(--col-fx8)"} nil],
+    :const-m ["--col-const-m" {:inner "var(--col-fv4)", :outer "var(--col-fv6)"}
+              nil],
+    :const-m-hover ["--col-const-m-hover"
+                    {:inner "var(--col-fv6)", :outer "var(--col-fv8)"} nil],
+    :const-n ["--col-const-n" {:inner "var(--col-n4)", :outer "var(--col-n6)"}
+              nil],
+    :const-n-hover ["--col-const-n-hover"
+                    {:inner "var(--col-n6)", :outer "var(--col-n8)"} nil],
+    :const-u ["--col-const-u" {:inner "var(--col-fe4)", :outer "var(--col-fe6)"}
+              nil],
+    :const-u-hover ["--col-const-u-hover"
+                    {:inner "var(--col-fe6)", :outer "var(--col-fe8)"} nil],
     :fg ["--col-fg" {:inner "var(--col-n28)", :outer "var(--col-n30)"} :color],
     :fg-accent ["--col-fg-accent"
                 {:inner "var(--col-n28)", :outer "var(--col-n30)"} :color],
