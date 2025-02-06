@@ -584,7 +584,11 @@
 (defnc F-FDNA--init
   [args]
   (let [[code set-code] (hooks/use-state "const")
-        dna-view (rf/subscribe [:input/->dna-view (keyword code)])]
+        dna-view (rf/subscribe [:input/->filtered-dna-view (keyword code)])
+        dna-view (if (not= "const" code)
+                   (mapv #(if (< % 0) "_" %) dna-view)
+                   dna-view)
+        varorder (rf/subscribe [:input/varorder])]
     ($ Function
        ($ FuncOpts
           ($ EncodingSel {:current-code code
@@ -597,7 +601,10 @@
              ($ Button
                 {:variant :outline
                  :size :icon}
-                ($ radix-icons/CopyIcon))))
+                ($ radix-icons/CopyIcon)))
+          (when varorder
+            ($ ValueFilter
+               {:varorder varorder})))
        (d/div
          ($ F-FDNA {:dna dna-view
                     & args})))))

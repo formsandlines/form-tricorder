@@ -231,21 +231,34 @@
  :<- [:input/->filtered-results]
  dna-sub)
 
+
+(def dna-view-sub
+  (fn [dna [_ type]]
+    (when-not dna ;; TODO: improve error handling
+      (report-error (ex-info "formDNA data missing!" {})))
+    (let [dna-view (try (case type
+                          :nmui (calc/dna->digits calc/nmui-code dna)
+                          :nuim (calc/dna->digits calc/nuim-code dna)
+                          (->> dna
+                               reverse ;; !TEMP
+                               (mapv name)))
+                        (catch js/Error e
+                          (report-error e)))]
+      dna-view)))
+
+(comment
+  (calc/dna->digits calc/nuim-code [:N :U :_ :M])
+  ,)
+
 (rf/reg-sub
  :input/->dna-view
  :<- [:input/->dna]
- (fn [dna [_ type]]
-   (when-not dna ;; TODO: improve error handling
-     (report-error (ex-info "formDNA data missing!" {})))
-   (let [dna-view (try (case type
-                         :nmui (calc/dna->digits calc/nmui-code dna)
-                         :nuim (calc/dna->digits calc/nuim-code dna)
-                         (->> dna
-                              reverse ;; !TEMP
-                              (mapv name)))
-                       (catch js/Error e
-                         (report-error e)))]
-     dna-view)))
+ dna-view-sub)
+
+(rf/reg-sub
+ :input/->filtered-dna-view
+ :<- [:input/->filtered-dna]
+ dna-view-sub)
 
 
 (def vmap-sub

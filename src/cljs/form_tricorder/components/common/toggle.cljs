@@ -34,7 +34,7 @@
               {:background-color "transparent"}
               ["&:hover"
                :bg-accent :fg-accent]
-              ["&[data-state=on]"
+              ["&[data-state=on], &[data-state=checked]"
                :bg-accent :fg])
              :outline
              (css
@@ -42,7 +42,7 @@
               {:background-color "transparent"}
               ["&:hover"
                :bg-accent :fg-accent]
-              ["&[data-state=on]"
+              ["&[data-state=on], &[data-state=checked]"
                :bg-accent :fg-accent])
 
              :formula-input/submit-mode
@@ -50,7 +50,7 @@
               {:background-color "transparent"}
               ["&:hover"
                {:background-color "var(--col-m5)"}]
-              ["&[data-state=on]"
+              ["&[data-state=on], &[data-state=checked]"
                {:background-color "var(--col-m5)"}])}
 
    :size {:sm (css :h-9 :px-2-5 :rounded-sm)

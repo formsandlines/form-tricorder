@@ -52,6 +52,7 @@
           :size :sm
           ;; :style {:height "var(--sz-2)"}
           :pressed neg-op?
+          :title "negate set operation"
           :onPressedChange (fn [b] (filter-interpr-handler
                                    (assoc interpr-filter :neg-op? b)))}
          "¬"))
@@ -64,6 +65,7 @@
          {:variant :outline
           :size :sm
           :style {:height "var(--sz-2)"}
+          :title "invert toggle selection"
           :onClick (fn [_] (filter-interpr-handler
                            (assoc
                             interpr-filter
@@ -91,9 +93,8 @@
               (d/i (utils/pp-val c))))))
      (d/div
       {:class "InterpretationFilterOp"}
-      ($ ToggleGroup
-         {:type "single"
-          :value (name op)
+      ($ RadioGroup
+         {:value (name op)
           :onValueChange (fn [s] (filter-interpr-handler
                                  (assoc interpr-filter :op (keyword s))))
           :orientation "vertical"
@@ -103,9 +104,9 @@
          (for [[k s label] [[:intersects "∩" "intersects"]
                             [:subseteq "⊇" "is subset of"]
                             [:equal "=" "is equal to"]]]
-           ($ ToggleGroupItem
+           ($ RadioGroupItem
               {:key (str "filter-interpr-op" (name k))
-               :title label
+               :title (str "set operation: " label)
                :value (name k)}
               s))))
      (d/div
@@ -146,6 +147,7 @@
      ($ Button
         {:variant :destructive
          :size :sm
+         :title "reset to default settings"
          :onClick reset-filter-interpr-handler}
         "reset"))))
 
@@ -161,6 +163,7 @@
       {:variant :outline
        :size :sm
        :style {:height "var(--sz-2)"}
+       :title "invert toggle selection"
        :onClick (fn [_] (filter-results-handler
                         (set/difference utils/consts-set results-filter)))}
       "–")
@@ -183,6 +186,7 @@
    ($ Button
       {:variant :destructive
        :size :sm
+       :title "reset to default settings"
        :onClick reset-filter-results-handler}
       "reset")))
 
