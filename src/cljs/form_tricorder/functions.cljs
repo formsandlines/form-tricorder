@@ -31,7 +31,7 @@
    [form-tricorder.components.common.select
     :refer [Select SelectTrigger SelectValue SelectItem SelectContent
             SelectGroup SelectLabel]]
-   [form-tricorder.utils :as utils :refer [let+]]))
+   [form-tricorder.utils :as utils :refer [let+ unite]]))
 
 (def r) ;; hotfix for linting error in let+
 
@@ -63,18 +63,19 @@
     children
     (d/label
       {:class (css :fg-muted)}
-      ($ radix-icons/MixerHorizontalIcon))
-    ;; (d/label
-    ;;   {:class (css
-    ;;             :font-size-xs :fg-muted :ml-1
-    ;;             {:margin-top "-0.3rem"}
-    ;;             ;; {:position "absolute"
-    ;;             ;;  :top "0"
-    ;;             ;;  :right "0"}
-    ;;             )}
-    ;;   "Options")
-    ))
+      ($ radix-icons/MixerHorizontalIcon))))
 
+(defnc FuncOptsGroup
+  [{:keys [dir children]}]
+  (d/div
+    {:class (unite
+             (css :gap-2 {:display "flex"
+                          :align-items "start"})
+             (case dir
+               :row (css {:flex-direction "row"})
+               :column (css {:flex-direction "column"})
+               (throw (ex-info "invalid flex direction" {}))))}
+    children))
 
 (defmulti gen-component (fn [func-id _] func-id))
 
@@ -195,22 +196,24 @@
     ;; (println filtered-results)
     ($ Function
        ($ FuncOpts
-          ($ CopyTrigger
-             {:copy-handler (hooks/use-memo
-                              [filtered-results varorder]
-                              (fn [_ report-copy-status]
-                                (let [csv (results->tsv filtered-results
-                                                        varorder)]
-                                  (utils/copy-to-clipboard
-                                   csv report-copy-status))))}
-             ($ Button
-                {:variant :outline
-                 :size :md}
-                ($ radix-icons/CopyIcon)
-                (d/span {:class (css :ml-2)} "CSV")))
-          (when varorder
-            ($ ValueFilter
-               {:varorder varorder})))
+          ($ FuncOptsGroup
+             {:dir :column}
+             ($ CopyTrigger
+                {:copy-handler (hooks/use-memo
+                                 [filtered-results varorder]
+                                 (fn [_ report-copy-status]
+                                   (let [csv (results->tsv filtered-results
+                                                           varorder)]
+                                     (utils/copy-to-clipboard
+                                      csv report-copy-status))))}
+                ($ Button
+                   {:variant :outline
+                    :size :md}
+                   ($ radix-icons/CopyIcon)
+                   (d/span {:class (css :ml-2)} "CSV")))
+             (when varorder
+               ($ ValueFilter
+                  {:varorder varorder}))))
        (d/div
          ($ F-VTable {:results filtered-results
                       :varorder varorder})))))
@@ -495,18 +498,24 @@
         vmap-psps (when psps? (rf/subscribe [:input/->filtered-vmap-psps]))]
     ($ Function
        ($ FuncOpts
-          ($ Toggle {:variant :outline
-                     :on-click (fn [_] (set-psps? (fn [b] (not b))))}
-             ($ (if psps? PerspectivesCollapseIcon PerspectivesExpandIcon))
-             (d/span {:class (css :ml-1)}
-               "Perspectives"))
-          ($ F-Vmap--export
-             {:data (if psps? vmap-psps vmap)
-              :varorder varorder
-              :psps? psps?})
-          (when varorder
-            ($ ValueFilter
-               {:varorder varorder})))
+          ($ FuncOptsGroup
+             {:dir :column}
+             ($ FuncOptsGroup
+                {:dir :row}
+                ($ Toggle {:variant :outline
+                           :disabled (< (count varorder) 2)
+                           :on-click (fn [_] (set-psps? (fn [b] (not b))))}
+                   ($ (if psps?
+                        PerspectivesCollapseIcon PerspectivesExpandIcon))
+                   (d/span {:class (css :ml-1)}
+                     "Perspectives"))
+                ($ F-Vmap--export
+                   {:data (if psps? vmap-psps vmap)
+                    :varorder varorder
+                    :psps? psps?}))
+             (when varorder
+               ($ ValueFilter
+                  {:varorder varorder}))))
        (d/div
          ($ (if psps? VmapPsps Vmap)
             {:data (if psps? vmap-psps vmap)
@@ -591,20 +600,24 @@
         varorder (rf/subscribe [:input/varorder])]
     ($ Function
        ($ FuncOpts
-          ($ EncodingSel {:current-code code
-                          :set-code set-code})
-          ($ CopyTrigger
-             {:text-to-copy (str "::"
-                                 (-> (string/join "" dna-view)
-                                     string/lower-case ;; !TEMP
-                                     ))}
-             ($ Button
-                {:variant :outline
-                 :size :icon}
-                ($ radix-icons/CopyIcon)))
-          (when varorder
-            ($ ValueFilter
-               {:varorder varorder})))
+          ($ FuncOptsGroup
+             {:dir :column}
+             ($ FuncOptsGroup
+                {:dir :row}
+                ($ EncodingSel {:current-code code
+                                :set-code set-code})
+                ($ CopyTrigger
+                   {:text-to-copy (str "::"
+                                       (-> (string/join "" dna-view)
+                                           string/lower-case ;; !TEMP
+                                           ))}
+                   ($ Button
+                      {:variant :outline
+                       :size :icon}
+                      ($ radix-icons/CopyIcon))))
+             (when varorder
+               ($ ValueFilter
+                  {:varorder varorder}))))
        (d/div
          ($ F-FDNA {:dna dna-view
                     & args})))))

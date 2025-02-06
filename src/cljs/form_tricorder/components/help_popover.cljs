@@ -281,8 +281,25 @@
                  ($ HelpDl
                     (d/dt "Value table")
                     (d/dd
-                     ($ p/P "Also known as a " ($ p/A {:href "https://en.wikipedia.org/wiki/Truth_table"} "truth table") " in propositional logic. Each row shows an interpretation of all variables in the input expression with a unique set of values and the evaluated result in the rightmost column. If there are no variables, there is only one result."))
-                    (d/dt "vmap")
+                      ($ p/P "Also known as a " ($ p/A {:href "https://en.wikipedia.org/wiki/Truth_table"} "truth table") " in propositional logic. Each row shows an interpretation of all variables in the input expression with a unique set of values and the evaluated result in the rightmost column. If there are no variables, there is only one result.")
+                      ($ p/H3 "Filtering Options")
+                      ($ p/P "Value tables can get exponentially larger with each additional variable, which is why there are comprehensive filtering options above the table that can help to understand the results.")
+                      ($ p/Note "The filtering effects can be most easily and efficiently observed in the " ($ HelpNavLink {:target "#help-vmap"} "vmap") " function.")
+                      ($ p/P "Results can be filtered by any of the 4 values.")
+                      ($ p/P "The ‘" (d/code "–") "’ button inverts a selection and the " (d/code "reset") " button reverts all options to their default values.")
+                      ($ p/P "Interpretation filtering is a set operation between a set " (d/i "V") " of user-selected values (left-hand side) and each set " (d/i "I") " from the power set of all possible interpretations (right-hand side), which can itself be filtered by the user for each variable.")
+                      ($ p/P "The set operation can be one of:")
+                      ($ p/Dl
+                         (d/dt (d/code "∩"))
+                         (d/dd "→ " (d/i "I") " intersects " (d/i "V") " (at least one value in " (d/i "I") " must be in " (d/i "V") ")")
+                         (d/dt (d/code "⊇"))
+                         (d/dd "→ " (d/i "I") " is a subset of " (d/i "V") " (all values in " (d/i "I") " must be in " (d/i "V") ")")
+                         (d/dt (d/code "="))
+                         (d/dd "→ " (d/i "I") " equals " (d/i "V") " (all values in " (d/i "I") " and no other must be in " (d/i "V") ")"))
+                      ($ p/P "Additionally, the set operation can be negated by pressing the ‘" (d/code "¬") "’ switch, which enables many more configurations."))
+                    (d/dt
+                      {:id "help-vmap"}
+                      "vmap")
                     (d/dd
                      ($ p/P "Short for “variable/value-map”. Can be seen as an alternative representation to value tables that is especially useful for pattern recognition.")
                      ($ p/P "Each variable of an expression is represented as a diamond-shaped group that consists of four smaller groups representing its interpretation states in four directions:")
