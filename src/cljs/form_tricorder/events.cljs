@@ -412,6 +412,20 @@
  (fn [{db :db} [_ {:keys [next-results-filter]}]]
    {:db (assoc-in db [:modes :eval :results-filter] next-results-filter)}))
 
+(rf/reg-event-fx
+ :modes/reset-interpr-filter
+ (fn [{db :db} [_ _]]
+   (let [terms-filter (reset-terms-filter (get-in db [:input :varorder]))]
+     {:db (assoc-in db [:modes :eval :interpr-filter]
+                    (assoc (get-in default-db [:modes :eval :interpr-filter])
+                           :terms-filter terms-filter))})))
+
+(rf/reg-event-fx
+ :modes/reset-results-filter
+ (fn [{db :db} [_ _]]
+   {:db (assoc-in db [:modes :eval :results-filter]
+                  (get-in default-db [:modes :eval :results-filter]))}))
+
 
 ;; NOTE: a proposed feature of re-frame called “flows” might make the need
 ;; for manual caching obsolete, see https://day8.github.io/re-frame/Flows/

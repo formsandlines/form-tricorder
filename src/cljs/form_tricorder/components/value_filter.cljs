@@ -37,7 +37,8 @@
 
 
 (defnc InterpretationFilterUI
-  [{:keys [interpr-filter filter-interpr-handler varorder]}]
+  [{:keys [interpr-filter varorder
+           filter-interpr-handler reset-filter-interpr-handler]}]
   (let [{:keys [neg-op? op terms-filter vals-filter]} interpr-filter]
     (d/div
      {:class (css "InterpretationFilter"
@@ -141,11 +142,16 @@
                         :bottom "0"})
            :title (str v)}
           "v" (d/sub {:class (css {:margin-left "0.08rem"})}
-                     (str i)))))))))
+                     (str i))))))
+     ($ Button
+        {:variant :destructive
+         :size :sm
+         :onClick reset-filter-interpr-handler}
+        "reset"))))
 
 
 (defnc ResultsFilterUI
-  [{:keys [results-filter filter-results-handler]}]
+  [{:keys [results-filter filter-results-handler reset-filter-results-handler]}]
   (d/div
    {:class (css "ResultsFilter"
                 :gap-2
@@ -173,7 +179,12 @@
            {:key (str "filter-results-" (name c))
             :class ($$toggle-const-styles c)
             :value (name c)}
-           (d/i (utils/pp-val c)))))))
+           (d/i (utils/pp-val c)))))
+   ($ Button
+      {:variant :destructive
+       :size :sm
+       :onClick reset-filter-results-handler}
+      "reset")))
 
 (defnc ValueFilter
   [{:keys [varorder]}]
@@ -181,8 +192,10 @@
         interpr-filter (rf/subscribe [:modes/interpr-filter])
         set-filtered-results #(rf/dispatch [:modes/set-results-filter
                                             {:next-results-filter %}])
+        reset-filter-results #(rf/dispatch [:modes/reset-results-filter])
         set-filtered-interpr #(rf/dispatch [:modes/set-interpr-filter
                                             {:next-interpr-filter %}])
+        reset-filter-interpr #(rf/dispatch [:modes/reset-interpr-filter])
         ;; _ (println results-filter)
         ]
     (d/div
@@ -194,8 +207,9 @@
      ($ InterpretationFilterUI
         {:interpr-filter interpr-filter
          :filter-interpr-handler set-filtered-interpr
+         :reset-filter-interpr-handler reset-filter-interpr
          :varorder (vec varorder)})
      ($ ResultsFilterUI
         {:results-filter results-filter
-         :filter-results-handler set-filtered-results})
-     )))
+         :filter-results-handler set-filtered-results
+         :reset-filter-results-handler reset-filter-results}))))
