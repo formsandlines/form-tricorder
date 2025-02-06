@@ -149,57 +149,70 @@
    ;; (println search-params)
    (try (let [formula (or (.get search-params "f")
                           (get-in default-db [:input :formula]))
+
               expr (parse-formula formula)
+
               varorder (let [s (.get search-params "vars")]
                          (conform-varorder
                           (when (seq s) (string/split s ",")) expr))
-              orientation (if-let [ori (keyword (.get search-params "layout"))]
-                            (if (#{:cols :rows} ori)
-                              ori
-                              (throw (ex-info "Invalid frame orientation."
-                                              {:orientation ori})))
+
+              orientation (if-let [ori-s (.get search-params "layout")]
+                            (let [ori (keyword ori-s)]
+                              (if (#{:cols :rows} ori)
+                                ori
+                                (throw (ex-info "Invalid frame orientation."
+                                                {:orientation ori}))))
                             (get-in default-db [:frame :orientation]))
-              views (if-let [views (.get search-params "views")]
+
+              views (if-let [views-s (.get search-params "views")]
                       (vec
-                       (for [s (string/split views ",")
+                       (for [s (string/split views-s ",")
                              :let [view (keyword s)]]
                          (if (func-ids view)
                            {:func-id view}
                            (throw (ex-info "Invalid view-function id."
                                            {:view view})))))
                       (get default-db :views))
+
               graph-style (when-let [graph-style (keyword (.get search-params
                                                                 "graph-style"))]
                             (if (#{:basic :gestalt} graph-style)
                               graph-style
                               (throw (ex-info "Invalid graph-style."
                                               {:graph-style graph-style}))))
+
               modes-expr (utils/merge-some
                           (get-in default-db [:modes :expr])
                           {:graph-style graph-style})
+
               interpr-filter
               (utils/merge-some
                (get-in default-db [:modes :eval :interpr-filter])
-               (if-let [interpr-filter (.get search-params "interpr-filter")]
-                 (parse-interpr-filter-params interpr-filter (count varorder))
+               (if-let [interpr-filter-s (.get search-params "interpr-filter")]
+                 (parse-interpr-filter-params interpr-filter-s (count varorder))
                  {:terms-filter (reset-terms-filter varorder)}))
+
               results-filter
-              (when-let [results-filter (parse-vals-filter
-                                         (.get search-params "results-filter"))]
-                (if (and (set? results-filter)
-                         (set/subset? results-filter utils/consts-set))
-                  results-filter
-                  (throw (ex-info "Invalid results filter."
-                                  {:results-filter results-filter}))))
+              (if-let [results-filter-s (.get search-params "results-filter")]
+                (let [results-filter (parse-vals-filter results-filter-s)]
+                  (if (and (set? results-filter)
+                           (set/subset? results-filter utils/consts-set))
+                    results-filter
+                    (throw (ex-info "Invalid results filter."
+                                    {:results-filter results-filter}))))
+                (get-in default-db [:modes :eval :results-filter]))
+
               modes-eval (utils/merge-some
                           (get-in default-db [:modes :eval])
                           {:results-filter results-filter
                            :interpr-filter interpr-filter})
-              appearance (if-let [app (keyword (.get search-params "theme"))]
-                           (if (#{:light :dark :system} app)
-                             app
-                             (throw (ex-info "Invalid theme appearance."
-                                             {:appearance app})))
+
+              appearance (if-let [app-s (.get search-params "theme")]
+                           (let [app (keyword app-s)]
+                             (if (#{:light :dark :system} app)
+                               app
+                               (throw (ex-info "Invalid theme appearance."
+                                               {:appearance app}))))
                            (get-in default-db [:theme :appearance]))
 
               db {:input {:formula formula
