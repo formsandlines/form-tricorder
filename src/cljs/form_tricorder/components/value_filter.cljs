@@ -87,9 +87,9 @@
         (for [[i filter] (map-indexed vector terms-filter)
               :let [v (varorder i)]]
           (<>
+           {:key (str "filter-interpr-term-" i)}
            (d/div
-            {:key (str "filter-interpr-term-" i)
-             :class (css :gap-1
+            {:class (css :gap-1
                          {:display "flex"
                           :align-items "center"})}
             ($ CurlyBrace
@@ -235,37 +235,45 @@
                 {:display "flex"
                  :border "1px dashed"
                  :align-items "center"})}
-   ($ CurlyBrace
-      {:class $set-brace
-       :closed? false})
-   ($ Button
-      {:class (css :font-mono)
-       :variant :outline
-       :size :sm
-       :style {:height "var(--sz-2)"}
-       :title "invert toggle selection"
-       :onClick (fn [_] (filter-results-handler
-                        (set/difference utils/consts-set results-filter)))}
-      "–")
-   ($ ToggleGroup
-      {:type "multiple"
-       :value (clj->js results-filter)
-       :onValueChange (fn [arr] (filter-results-handler
-                                (into #{} (map keyword) arr)))
-       :class (css :font-mono)
-       :orientation "horizontal"
-       :group-variant :joined
-       :variant :outline
-       :size :sm}
-      (for [c utils/consts]
-        ($ ToggleGroupItem
-           {:key (str "filter-results-" (name c))
-            :class ($$toggle-const-styles c)
-            :value (name c)}
-           (d/i (utils/pp-val c)))))
-   ($ CurlyBrace
-      {:class $set-brace
-       :closed? true})
+   (d/span
+    {:class (css :fg-muted
+                 {:margin-right "-0.2rem"})}
+    (d/i "r") " ∈")
+   (d/div
+    {:class (css :gap-2
+                 {:display "flex"
+                  :align-items "center"})}
+    ($ CurlyBrace
+       {:class $set-brace
+        :closed? false})
+    ($ Button
+       {:class (css :font-mono)
+        :variant :outline
+        :size :sm
+        :style {:height "var(--sz-2)"}
+        :title "invert toggle selection"
+        :onClick (fn [_] (filter-results-handler
+                         (set/difference utils/consts-set results-filter)))}
+       "–")
+    ($ ToggleGroup
+       {:type "multiple"
+        :value (clj->js results-filter)
+        :onValueChange (fn [arr] (filter-results-handler
+                                 (into #{} (map keyword) arr)))
+        :class (css :font-mono)
+        :orientation "horizontal"
+        :group-variant :joined
+        :variant :outline
+        :size :sm}
+       (for [c utils/consts]
+         ($ ToggleGroupItem
+            {:key (str "filter-results-" (name c))
+             :class ($$toggle-const-styles c)
+             :value (name c)}
+            (d/i (utils/pp-val c)))))
+    ($ CurlyBrace
+       {:class $set-brace
+        :closed? true}))
    ($ Button
       {:variant :destructive
        :size :sm

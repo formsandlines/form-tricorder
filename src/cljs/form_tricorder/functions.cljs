@@ -156,7 +156,8 @@
     ["table"
      {:padding-bottom "var(--sp-6)"}]
     ["th"
-     {:position "sticky"
+     {:font-family "var(--font-sans)"
+      :position "sticky"
       :background-color "var(--col-bg)"
       :top "0"
       :font-weight "var(--weight-medium)"
@@ -164,6 +165,16 @@
       :border-bottom "1px solid var(--col-fg)"}]
     ["tr:hover td"
      {:background-color "var(--col-n3)"}]
+    ["th, td"
+     {:padding "0.1rem 0.4rem"}]
+    ["th:first-child, td:first-child"
+     {:padding "0.1rem 0.6rem 0.1rem 0"
+      :color "var(--col-fg-muted)"}]
+    ["th:last-child, td:last-child"
+     {:padding "0.1rem 0 0.1rem 0.6rem"
+      :text-align "right"}]
+    [".result-arrow"
+     {:color "var(--col-fg-muted)"}]
     ["td"
      {:border-top "1px solid var(--col-bg-muted)"}]]))
 
