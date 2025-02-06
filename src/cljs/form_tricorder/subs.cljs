@@ -188,11 +188,11 @@
    (if (or interpr-filter results-filter)
      (let [interpr-filter (make-interpr-filter interpr-filter)
            filtered-results
-           (try (for [[interpr result] results
-                      :when
-                      (and (results-filter result)
-                           (interpr-filter interpr))]
-                  [interpr result])
+           (try (for [[interpr result] results]
+                  (if (and (results-filter result)
+                           (interpr-filter interpr))
+                    [interpr result]
+                    [interpr :_]))
                 (catch js/Error e
                   (report-error e)))]
        ;; (println filtered-results)
@@ -210,6 +210,7 @@
                    (catch js/Error e
                      (report-error e)))]
      vspc)))
+
 
 (def dna-sub
   (fn [results _]
@@ -229,43 +230,6 @@
  :input/->filtered-dna
  :<- [:input/->filtered-results]
  dna-sub)
-
-#_
-(rf/reg-sub
- :input/->filtered-value
- :<- [:input/->value]
- ;; :<- [:modes/interpr-filter]
- ;; :<- [:modes/results-filter]
- (fn [[results
-      ;; interpr-filter results-filter
-      ] _]
-   (when (nil? results)
-     (report-error (ex-info "Results data missing!" {})))
-   ;; (when (nil? interpr-filter)
-   ;;   (report-error (ex-info "Interpretation filter missing!" {})))
-   ;; (when (nil? results-filter)
-   ;;   (report-error (ex-info "Results filter missing!" {})))
-   (let [value nil]
-     (:results value))))
-
-#_
-(rf/reg-sub
- :input/->dna
- :<- [:input/->expr-data]
- (fn [[expr varorder] _]
-   (when (= :not-found expr)
-     (report-error (ex-info "Expression data missing!" {})))
-   (when (nil? varorder)
-     (report-error (ex-info "Unknown variable ordering!" {})))
-   (let [formDNA (try (if (expr/formDNA? expr)
-                        expr
-                        (expr/eval->expr-all {:varorder varorder} expr {}))
-                      (catch js/Error e
-                        (report-error e)))]
-     ;; (println "computing value")
-     (try (expr/op-get formDNA :dna)
-          (catch js/Error e
-            (report-error e))))))
 
 (rf/reg-sub
  :input/->dna-view

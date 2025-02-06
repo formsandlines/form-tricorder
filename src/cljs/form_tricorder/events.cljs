@@ -72,27 +72,28 @@
   "Parses query-params for interpretation filter.
   - example param: `interpr-filter=not;intersects;nu;n,uin,mnui`"
   [query-param-s term-count]
-  (let [[neg-op? op terms-filter vals-filter]
+  ;; (println query-param-s)
+  (let [[neg-op?-s op-s terms-filter-s vals-filter-s]
         (string/split query-param-s ";")
-        neg-op? (case neg-op?
+        neg-op? (case neg-op?-s
                   "not" true
                   ""    false
-                  (throw (ex-info "Invalid interpretation filter option."
-                                  {:neg-op? neg-op?})))
-        op (let [op (keyword op)]
+                  (throw (ex-info "Invalid interpretation filter value."
+                                  {:neg-op? neg-op?-s})))
+        op (let [op (keyword op-s)]
              (if (#{:intersects :subseteq :equal} op)
                op
-               (throw (ex-info "Invalid interpretation filter option."
+               (throw (ex-info "Invalid interpretation filter value."
                                {:op op}))))
-        vals-filter (if-let [vals-filter (parse-vals-filter vals-filter)]
+        vals-filter (if-let [vals-filter (parse-vals-filter vals-filter-s)]
                       vals-filter
-                      (throw (ex-info "Invalid interpretation filter option."
-                                      {:vals-filter vals-filter})))
+                      (throw (ex-info "Invalid interpretation filter value."
+                                      {:vals-filter vals-filter-s})))
         terms-filter (if-let [terms-filter
-                              (parse-terms-filter terms-filter term-count)]
+                              (parse-terms-filter terms-filter-s term-count)]
                        terms-filter
-                       (throw (ex-info "Invalid interpretation filter option."
-                                       {:terms-filter terms-filter})))]
+                       (throw (ex-info "Invalid interpretation filter value."
+                                       {:terms-filter terms-filter-s})))]
     {:vals-filter vals-filter
      :terms-filter terms-filter
      :neg-op? neg-op?
@@ -167,9 +168,8 @@
                            (throw (ex-info "Invalid view-function id."
                                            {:view view})))))
                       (get default-db :views))
-              graph-style (when-let [graph-style
-                                     (keyword (.get search-params
-                                                    "graph-style"))]
+              graph-style (when-let [graph-style (keyword (.get search-params
+                                                                "graph-style"))]
                             (if (#{:basic :gestalt} graph-style)
                               graph-style
                               (throw (ex-info "Invalid graph-style."
@@ -180,15 +180,12 @@
               interpr-filter
               (utils/merge-some
                (get-in default-db [:modes :eval :interpr-filter])
-               (if-let [interpr-filter
-                        (keyword (.get search-params "interpr-filter"))]
-                 (let [interpr-filter (parse-interpr-filter-params
-                                       interpr-filter (count varorder))]
-                   {:terms-filter interpr-filter})
+               (if-let [interpr-filter (.get search-params "interpr-filter")]
+                 (parse-interpr-filter-params interpr-filter (count varorder))
                  {:terms-filter (reset-terms-filter varorder)}))
               results-filter
-              (when-let [results-filter
-                         (keyword (.get search-params "results-filter"))]
+              (when-let [results-filter (parse-vals-filter
+                                         (.get search-params "results-filter"))]
                 (if (and (set? results-filter)
                          (set/subset? results-filter utils/consts-set))
                   results-filter
@@ -221,7 +218,7 @@
         (catch js/Error e
           ;; in case of error, revert to blank config to prevent crash
           {:db (assoc default-db
-                      :error (ex-message e))}))))
+                      :error e)}))))
 
 (defn views->str
   [views]
@@ -231,6 +228,18 @@
   [varorder]
   (string/join "," varorder))
 
+(defn vals-filter->str
+  [vals-filter]
+  (string/join "" (map utils/pp-val vals-filter)))
+
+(defn interpr-filter->str
+  [{:keys [neg-op? op terms-filter vals-filter]}]
+  (let [neg-op?-s (if neg-op? "not" "")
+        op-s (name op)
+        terms-filter-s (string/join "," (map vals-filter->str terms-filter))
+        vals-filter-s (vals-filter->str vals-filter)]
+    (string/join ";" [neg-op?-s op-s terms-filter-s vals-filter-s] )))
+
 (rf/reg-event-fx
  :copy-stateful-link
  (fn [{:keys [db]} [_ {:keys [report-copy-status]}]]
@@ -239,13 +248,19 @@
          orientation (get-in db [:frame :orientation])
          graph-style (get-in db [:modes :expr :graph-style])
          formula (get-in db [:input :formula])
-         varorder (get-in db [:input :varorder])]
+         varorder (get-in db [:input :varorder])
+         interpr-filter (get-in db [:modes :eval :interpr-filter])
+         results-filter (get-in db [:modes :eval :results-filter])]
      {:fx [[:set-search-params [["views" (views->str views)]]]
            [:set-search-params [["layout" (name orientation)]]]
            [:set-search-params [["theme" (name appearance)]]]
            [:set-search-params [["graph-style" (name graph-style)]]]
            [:set-search-params [["f" formula]]]
            [:set-search-params [["vars" (varorder->str varorder)]]]
+           [:set-search-params [["interpr-filter" (interpr-filter->str
+                                                   interpr-filter)]]]
+           [:set-search-params [["results-filter" (vals-filter->str
+                                                   results-filter)]]]
            [:copy-url report-copy-status]]})))
 
 ;; (def update-expr

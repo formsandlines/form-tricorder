@@ -50,8 +50,9 @@
          {:variant :outline
           :size :sm
           ;; :style {:height "var(--sz-2)"}
-          :onClick (fn [_] (filter-interpr-handler
-                           (update interpr-filter :neg-op? #(not %))))}
+          :pressed neg-op?
+          :onPressedChange (fn [b] (filter-interpr-handler
+                                   (assoc interpr-filter :neg-op? b)))}
          "¬"))
      (d/div
       {:class (css "InterpretationValsFilter"

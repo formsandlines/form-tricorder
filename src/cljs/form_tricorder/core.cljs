@@ -35,7 +35,9 @@
 
 (defnc ErrorDisplay
   []
-  (let [error (rf/subscribe [:error/get])]
+  (let [error (rf/subscribe [:error/get])
+        error-msg (ex-message error)
+        error-data (ex-data error)]
     (when error
       ($ Alert
          {:variant :destructive
@@ -48,7 +50,7 @@
              (d/code
               {:class (css :font-mono :font-size-xs :line-h-none
                            {:text-wrap "auto"})}
-              (pr-str error))))))))
+               (str error-msg " \nData: " error-data))))))))
 
 (defnc App
   []
