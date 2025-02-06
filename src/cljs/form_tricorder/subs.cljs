@@ -149,7 +149,7 @@
 
 (defn make-interpr-filter
   [{:keys [vals-filter terms-filter neg-op? op] :as interpr-filter}]
-  (if interpr-filter
+  (if (and interpr-filter (seq terms-filter))
     (fn [interpr]
       (let [interpr (set (mapv #(%1 %2) terms-filter interpr))]
         (if (contains? interpr nil)

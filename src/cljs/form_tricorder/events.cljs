@@ -63,7 +63,9 @@
       vals-filter)))
 
 (defn parse-terms-filter [s term-count]
-  (let [terms-filter (mapv parse-vals-filter (string/split s ","))]
+  (let [terms-filter (if (string/blank? s)
+                       []
+                       (mapv parse-vals-filter (string/split s ",")))]
     (when (and (= (count terms-filter) term-count)
                (every? set? terms-filter))
       terms-filter)))

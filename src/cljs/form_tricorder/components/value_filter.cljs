@@ -39,7 +39,8 @@
 (defnc InterpretationFilterUI
   [{:keys [interpr-filter varorder
            filter-interpr-handler reset-filter-interpr-handler]}]
-  (let [{:keys [neg-op? op terms-filter vals-filter]} interpr-filter]
+  (let [{:keys [neg-op? op terms-filter vals-filter]} interpr-filter
+        disabled? (or (empty? varorder) (empty? terms-filter))]
     (d/div
      {:class (css "InterpretationFilter"
                   :gap-4
@@ -51,6 +52,7 @@
          {:variant :outline
           :size :sm
           ;; :style {:height "var(--sz-2)"}
+          :disabled disabled?
           :pressed neg-op?
           :title "negate set operation"
           :onPressedChange (fn [b] (filter-interpr-handler
@@ -65,6 +67,7 @@
          {:variant :outline
           :size :sm
           :style {:height "var(--sz-2)"}
+          :disabled disabled?
           :title "invert toggle selection"
           :onClick (fn [_] (filter-interpr-handler
                            (assoc
@@ -83,6 +86,7 @@
           :class (css :font-mono)
           :orientation "horizontal"
           :group-variant :joined
+          :disabled disabled?
           :variant :outline
           :size :sm}
          (for [c utils/consts]
@@ -97,6 +101,7 @@
          {:value (name op)
           :onValueChange (fn [s] (filter-interpr-handler
                                  (assoc interpr-filter :op (keyword s))))
+          :disabled disabled?
           :orientation "vertical"
           :group-variant :joined
           :variant :outline
@@ -128,6 +133,7 @@
                                        [:terms-filter i]
                                        (into #{} (map keyword) arr))))
              :class (css :font-mono)
+             :disabled disabled?
              :orientation "horizontal"
              :group-variant :value-filter/vmap}
             (for [c utils/consts]
@@ -147,6 +153,7 @@
      ($ Button
         {:variant :destructive
          :size :sm
+         :disabled disabled?
          :title "reset to default settings"
          :onClick reset-filter-interpr-handler}
         "reset"))))
