@@ -6,6 +6,7 @@
    [formform.calc :as calc]
    [formform.expr :as expr]
    [formform.io :as io]
+   [form-tricorder.events :refer [default-db reset-terms-filter]]
    [re-frame.core :as rf]))
 
 
@@ -198,6 +199,18 @@
        ;; (println filtered-results)
        (vec filtered-results))
      results)))
+
+(rf/reg-sub
+ :modes/->is-filtered?
+ :<- [:modes/interpr-filter]
+ :<- [:modes/results-filter]
+ (fn [[interpr-filter results-filter] [_ varorder]]
+   (let [db-eval (get-in default-db [:modes :eval])
+         def-interpr-filter (assoc (db-eval :interpr-filter)
+                                   :terms-filter (reset-terms-filter varorder))
+         def-results-filter (db-eval :results-filter)]
+     (or (not= results-filter def-results-filter)
+         (not= interpr-filter def-interpr-filter)))))
 
 ;; ? needed
 (rf/reg-sub

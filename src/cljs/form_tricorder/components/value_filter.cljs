@@ -14,7 +14,10 @@
    [form-tricorder.components.common.label :refer [Label]]
    [form-tricorder.components.common.radio-group
     :refer [RadioGroup RadioGroupItem]]
-   [form-tricorder.utils :as utils :refer [let+ unite]]))
+   [form-tricorder.utils :as utils :refer [let+ unite]]
+   ;; ["@radix-ui/react-icons" :as radix-icons]
+   ["lucide-react" :as lucide-icons]
+   ["@radix-ui/react-collapsible" :as Collapsible]))
 
 (def r) ;; hotfix for linting error in let+
 
@@ -287,36 +290,59 @@
    {:class (css :font-size-sm)}
    children))
 
+(def Root (.-Root Collapsible))
+(def Trigger (.-Trigger Collapsible))
+(def Content (.-Content Collapsible))
+
 (defnc ValueFilter
   [{:keys [varorder]}]
   (let [results-filter (rf/subscribe [:modes/results-filter])
         interpr-filter (rf/subscribe [:modes/interpr-filter])
+        is-filtered? (rf/subscribe [:modes/->is-filtered? varorder])
+        ;; _ (println is-filtered?)
+        [open set-open] (hooks/use-state is-filtered?)
         set-filtered-results #(rf/dispatch [:modes/set-results-filter
                                             {:next-results-filter %}])
         reset-filter-results #(rf/dispatch [:modes/reset-results-filter])
         set-filtered-interpr #(rf/dispatch [:modes/set-interpr-filter
                                             {:next-interpr-filter %}])
         reset-filter-interpr #(rf/dispatch [:modes/reset-interpr-filter])]
-    (d/div
-     {:class (css "ValueFilter"
-                  :gap-2
-                  {:display "flex"
-                   :flex-direction "column"})}
-     nil
-     (d/div
-      {:class (css
-               {:display "grid"
-                :column-gap "0.6rem"
-                :row-gap "0.4rem"
-                :grid-template-columns "auto 4fr"})}
-      ($ OptLabel "Interpr. filter:")
-      ($ InterpretationFilterUI
-         {:interpr-filter interpr-filter
-          :filter-interpr-handler set-filtered-interpr
-          :reset-filter-interpr-handler reset-filter-interpr
-          :varorder (vec varorder)})
-      ($ OptLabel "Results filter:")
-      ($ ResultsFilterUI
-         {:results-filter results-filter
-          :filter-results-handler set-filtered-results
-          :reset-filter-results-handler reset-filter-results})))))
+    ($d Root
+        {:class (css "ValueFilter"
+                     :gap-2
+                     {:display "flex"
+                      :align-items "start"
+                      :flex-direction "column"})
+         :open open
+         :onOpenChange set-open}
+        nil
+        ($d Trigger
+            {:class (css ["&:focus-visible"
+                          :outline-none :ring])
+             :asChild true}
+            ($ Toggle
+               {:variant :outline
+                :size :md}
+               ($ lucide-icons/Filter
+                  {:className (css {:height "0.8rem"
+                                    :width  "0.8rem"
+                                    :stroke "currentColor"
+                                    :color "currentColor"})})
+               (d/span {:class (css :ml-2)} "Filter")))
+        ($d Content
+            {:class (css
+                     {:display "grid"
+                      :column-gap "0.6rem"
+                      :row-gap "0.4rem"
+                      :grid-template-columns "auto 4fr"})}
+            ($ OptLabel "Interpr. filter:")
+            ($ InterpretationFilterUI
+               {:interpr-filter interpr-filter
+                :filter-interpr-handler set-filtered-interpr
+                :reset-filter-interpr-handler reset-filter-interpr
+                :varorder (vec varorder)})
+            ($ OptLabel "Results filter:")
+            ($ ResultsFilterUI
+               {:results-filter results-filter
+                :filter-results-handler set-filtered-results
+                :reset-filter-results-handler reset-filter-results})))))
