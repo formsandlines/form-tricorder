@@ -11,6 +11,7 @@
    ["@radix-ui/react-icons" :as radix-icons]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core :refer [->attr]]
+   [formform-vis.components.automaton :refer [make-state!]]
    [formform-vis.utils-dom :refer [save-svg save-img]]
    [form-tricorder.icons :refer [PerspectivesExpandIcon
                                  PerspectivesCollapseIcon]]
@@ -730,6 +731,91 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SelFi CA
 
+(defnc F-Automaton
+  [{:keys [ca cell-size buffer-size run?]}]
+  (let [ref (hooks/use-ref nil)]
+    (hooks/use-effect
+     []
+     (let [webc-el @ref
+           _ (make-state! webc-el)]
+       (aset webc-el "ca" ca)
+       (aset webc-el "run?" run?)))
+    ($ :ff-automaton {:ref ref
+                      "cell-size" (->attr cell-size)
+                      "buffer-size" (->attr buffer-size)})))
+
+
+(defnc F-Selfi--init
+  [_]
+  (let [ca (rf/subscribe [:input/->ca-selfi [:ball] 100])
+        [reset-key set-reset-key] (hooks/use-state (hash ca))]
+    (hooks/use-effect
+     [ca]
+     ;; when CA changes, the automaton component must be remounted,
+     ;; so we change its `key` (identity) to trick React into unmounting
+     ;; the “old” and mounting the “new” component
+     (when ca (set-reset-key (hash ca))))
+    ($ Function
+       (d/div
+        (when ca
+          ($ F-Automaton {:key reset-key
+                          :ca ca
+                          :run? true
+                          :cell-size 4
+                          :buffer-size 200}))))))
+
+(defmethod gen-component :selfi
+  [_ args]
+  ($ F-Selfi--init {& args}))
+
+
+(defnc F-Mindform--init
+  [_]
+  (let [ca (rf/subscribe [:input/->ca-mindform [:rand-center 20] 151 151])
+        [reset-key set-reset-key] (hooks/use-state (hash ca))]
+    (hooks/use-effect
+     [ca]
+     (when ca (set-reset-key (hash ca))))
+    ($ Function
+       (d/div
+        (when ca
+          ($ F-Automaton {:key reset-key
+                          :ca ca
+                          :run? true
+                          :cell-size 4
+                          :buffer-size 1}))))))
+
+(defmethod gen-component :mindform
+  [_ args]
+  ($ F-Mindform--init {& args}))
+
+
+(defnc F-Lifeform--init
+  [_]
+  (let [ca (rf/subscribe [:input/->ca-lifeform 151 151])
+        [reset-key set-reset-key] (hooks/use-state (hash ca))]
+    (hooks/use-effect
+     [ca]
+     (when ca (set-reset-key (hash ca))))
+    ($ Function
+       (d/div
+        (when ca
+          ($ F-Automaton {:key reset-key
+                          :ca ca
+                          :run? true
+                          :cell-size 4
+                          :buffer-size 1}))))))
+
+(defmethod gen-component :lifeform
+  [_ args]
+  ($ F-Lifeform--init {& args}))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; SelFi CA
+
+#_#_#_
 (defnc F-Selfi
   [{:keys [rules-fn umwelt]}]
   (let [ref (hooks/use-ref nil)]

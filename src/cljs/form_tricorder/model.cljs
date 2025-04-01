@@ -39,8 +39,9 @@
    {:id    :mindform
     :keybind "⌃m"
     :label "mindFORM"}
-   ;; {:id    :lifeform
-   ;;  :label "lifeFORM"}
+   {:id    :lifeform
+    :keybind "⌃l"
+    :label "lifeFORM"}
    ])
 
 (def modes

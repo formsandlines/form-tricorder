@@ -16,10 +16,10 @@
 
 (rf/reg-event-error-handler
  (fn [original-error re-frame-error]
-   (println "Original Error:")
-   (println original-error)
-   (println "Re-frame Error:")
-   (println (ex-data re-frame-error))
+   ;; (println "Original Error:")
+   ;; (println original-error)
+   ;; (println "Re-frame Error:")
+   ;; (println (ex-data re-frame-error))
    (rf/dispatch [:error/set {:error original-error}])))
 
 (def clear-errors

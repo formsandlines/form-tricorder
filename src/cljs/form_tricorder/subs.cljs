@@ -5,6 +5,7 @@
    [form-tricorder.utils :as utils]
    [formform.calc :as calc]
    [formform.expr :as expr]
+   [formform.emul :as emul]
    [formform.io :as io]
    [form-tricorder.events :refer [default-db reset-terms-filter]]
    [re-frame.core :as rf]))
@@ -311,39 +312,44 @@
  :<- [:input/->filtered-dna]
  vmap-psps-sub)
 
+(defn make-automaton
+  [type-k args & res]
+  (try (-> (apply emul/specify-ca
+                  (apply emul/make-species type-k args)
+                  res)
+           (emul/create-ca 0))
+       (catch js/Error e
+         (report-error e))))
+
 (rf/reg-sub
- :input/->selfi-rules-fn
+ :input/->ca-selfi
  :<- [:input/->dna]
- (fn [dna _]
-   ;; (println "computing ca rules function")
+ (fn [dna [_ ini-data res-w]]
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (try (partial calc/dna-get dna)
-                (catch js/Error e
-                  (report-error e))))))
+     :else (make-automaton :selfi [dna (apply emul/make-ini ini-data)]
+                           res-w))))
 
 (rf/reg-sub
- :input/->selfi-umwelt
- :<- [:input/varorder]
- (fn [varorder _]
-   ;; (println "computing ca umwelt")
+ :input/->ca-mindform
+ :<- [:input/->dna]
+ (fn [dna [_ ini-data res-w res-h]]
    (cond
-     (nil? varorder) (report-error (ex-info "Invalid variable ordering" {}))
-     :else (condp = (count varorder)
-             0 nil ;; constantly returns the FORM value
-             1 :e
-             2 :lr
-             3 :ler
-             4 :-lr+
-             5 :-ler+
-             (report-error (ex-info "Invalid variable count" {}))))))
+     (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
+     :else (make-automaton :mindform [dna (apply emul/make-ini ini-data)]
+                           res-w res-h))))
 
-
-(comment
-  (expr/eval-all [:fdna [] [:M]] {})
-  (expr/=>* [:fdna [] [:M]] {})
-
-  )
+(rf/reg-sub
+ :input/->ca-lifeform
+ :<- [:input/->dna]
+ (fn [dna [_ res-w res-h]]
+   (let [dim (calc/dna-dimension dna)]
+     (cond
+       (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
+       (not (== dim 3))
+       (report-error (ex-info "lifeFORMs require FORMs with exactly 3 variables (must result in formDNA of dimension 3)"
+                              {:dimension dim}))
+       :else (make-automaton :lifeform [dna] res-w res-h)))))
 
 
 (comment
