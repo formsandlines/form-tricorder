@@ -110,35 +110,48 @@
 
 (defnc ExportDialog
   [{:keys [title children on-export class]}]
-  ($d Root
-    {:class (or class "")
-     ;; :default-open true
-     }
-    ($ ExportTrigger)
-    ($d Portal
-      ($d Overlay
-        {:class (css "inner" :overlay-bg)})
-      ($d Content
-        {:class (css "outer"
-                     :bg :fg :p-8-5 :rounded-md
-                     :overlay-content
-                     {:width "90vw"})}
-        ($ ExportTitle {:title title})
-        ;; ($d Description
-        ;;   "Set some options.")
-        children
-        (d/div
-          {:class (css "ModalActions"
-                       :gap-4 :mt-4
-                       {:display "flex"
-                        :justify-content "end"})}
-          ($d Close
-            {:as-child true}
-            ($ Button
-               {:variant :outline}
-               "Cancel"))
-          ($d Close
-            {:as-child true
-             :on-click on-export}
-            ($ Button
-               "Download")))))))
+  ;; `on-export` returns a timeout that needs to be cleared when
+  ;; component unmounts, so we store it in a ref
+  (let [timeout-ref (hooks/use-ref nil)]
+    (hooks/use-effect
+     :once
+     #(when-let [timeout-id @timeout-ref]
+        (js/clearTimeout timeout-id)))
+    ($d Root
+        {:class (or class "")
+         ;; :default-open true
+         }
+        ($ ExportTrigger)
+        ($d Portal
+            ($d Overlay
+                {:class (css "inner" :overlay-bg)})
+            ($d Content
+                {:class (css "outer"
+                             :bg :fg :p-8-5 :rounded-md
+                             :overlay-content
+                             {:width "90vw"})}
+                ($ ExportTitle {:title title})
+                ;; ($d Description
+                ;;   "Set some options.")
+                children
+                (d/div
+                 {:class (css "ModalActions"
+                              :gap-4 :mt-4
+                              {:display "flex"
+                               :justify-content "end"})}
+                 ($d Close
+                     {:as-child true}
+                     ($ Button
+                        {:variant :outline}
+                        "Cancel"))
+                 ($d Close
+                     {:as-child true
+                      :on-click (fn [e]
+                                  ;; clear any existing timeout
+                                  (when-let [timeout-id @timeout-ref]
+                                    (js/clearTimeout timeout-id))
+                                  ;; store timeout to clear on unmount
+                                  (let [timeout-id (on-export e)]
+                                    (reset! timeout-ref timeout-id)))}
+                     ($ Button
+                        "Download"))))))))

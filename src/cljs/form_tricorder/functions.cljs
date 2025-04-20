@@ -9,6 +9,7 @@
    [clojure.math]
    [clojure.string :as string]
    ["@radix-ui/react-icons" :as radix-icons]
+   [formform.emul :as emul]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core :refer [->attr]]
    [formform-vis.components.automaton :refer [make-state!]]
@@ -324,6 +325,7 @@
                                 (getElementById (if psps?
                                                   "psps-figure"
                                                   "vmap-figure")))]
+            ;; timeout will get cleared in `ExportDialog` component
             (js/setTimeout
              (fn []
                (let [svg-el (get-svg-el el)]
@@ -731,30 +733,108 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SelFi CA
 
+;; first (error-prone) attempt, complects web component state with React:
+#_
 (defnc F-Automaton
-  [{:keys [ca cell-size buffer-size run?]}]
-  (let [ref (hooks/use-ref nil)]
+  [{:keys [ca-spec cell-size buffer-size run?]} :as props]
+  (let [webc-ref (hooks/use-ref nil)
+        ;; ca-ref (hooks/use-ref (emul/create-ca ca-spec 0))
+        ;; run-ref (hooks/use-ref run?)
+        ]
     (hooks/use-effect
-     []
-     (let [webc-el @ref
+     :once
+     (let [webc-el @webc-ref
+           ca (emul/create-ca ca-spec 0)
            _ (make-state! webc-el)]
+       ;; (aset webc-el "ca" @ca-ref)
+       ;; (aset webc-el "run?" @run-ref)
        (aset webc-el "ca" ca)
-       (aset webc-el "run?" run?)))
-    ($ :ff-automaton {:ref ref
+       (aset webc-el "run?" run?)
+       (fn []
+         ;; (reset! ref nil)
+         ;; nil
+         #_
+         (when webc-el
+           (aset webc-el "ca" nil)
+           ;; (.disconnect webc-el)
+           ;; (when (.-parentNode webc-el)
+           ;;   (.removeChild (.-parentNode webc-el) webc-el))
+           ;; (reset! ref nil)
+           ))))
+    ($ :ff-automaton {:ref webc-ref
                       "cell-size" (->attr cell-size)
                       "buffer-size" (->attr buffer-size)})))
 
+;; second attempt, isolates web component state:
+#_
+(defnc F-Automaton
+  [{:keys [ca-spec cell-size buffer-size run?]}]
+  (let [container-ref (hooks/use-ref nil)]
+    (hooks/use-effect
+      :once
+      (let [container @container-ref
+            webc-el (js/document.createElement "ff-automaton")
+            ca (emul/create-ca ca-spec 0)
+            _ (make-state! webc-el)]
+        (.setAttribute webc-el "cell-size" (->attr cell-size))
+        (.setAttribute webc-el "buffer-size" (->attr buffer-size))
+        (aset webc-el "ca" ca)
+        (aset webc-el "run?" run?)
+        (.appendChild container webc-el)
 
+        (fn []
+          (println "Cleanup React")
+          (when-let [parent (.-parentNode webc-el)]
+            (.removeChild parent webc-el)))))
+    (d/div {:ref container-ref})))
+
+;; third (unrefined) attempt, allows web component to react on prop change:
+(defnc F-Automaton
+  [props]
+  (let [container-ref (hooks/use-ref nil)
+        webc-ref (hooks/use-ref nil)]
+    (hooks/use-effect
+      [props]
+      (when (and (not @webc-ref) @container-ref)
+        ;; imperatively create web component and set initial props
+        (let [{:keys [ca-spec cell-size buffer-size run?]} props
+              webc-el (js/document.createElement "ff-automaton")
+              ca (emul/create-ca ca-spec 0)
+              _ (make-state! webc-el)]
+          (.setAttribute webc-el "cell-size" (->attr cell-size))
+          (.setAttribute webc-el "buffer-size" (->attr buffer-size))
+          (aset webc-el "ca" ca)
+          (aset webc-el "run?" run?)
+          ;; store reference to web component and append it to container
+          (reset! webc-ref webc-el)
+          (.appendChild @container-ref webc-el)))
+
+      ;; update properties when props change
+      (when @webc-ref
+        ;; TODO
+        nil)
+
+      ;; cleanup (is this necessary? seems to prevent detached components)
+      ;; #_
+      (fn []
+        ;; (println "Cleanup React")
+        (let [webc-el @webc-ref]
+          (reset! webc-ref nil)
+          (when-let [parent (.-parentNode webc-el)]
+            (.removeChild parent webc-el)))))
+    (d/div {:ref container-ref})))
+
+#_
 (defnc F-Selfi--init
   [_]
   (let [ca (rf/subscribe [:input/->ca-selfi [:ball] 100])
-        [reset-key set-reset-key] (hooks/use-state (hash ca))]
+        [reset-key set-reset-key] (hooks/use-state 0)]
     (hooks/use-effect
      [ca]
      ;; when CA changes, the automaton component must be remounted,
      ;; so we change its `key` (identity) to trick React into unmounting
      ;; the “old” and mounting the “new” component
-     (when ca (set-reset-key (hash ca))))
+     (set-reset-key inc))
     ($ Function
        (d/div
         (when ca
@@ -764,6 +844,31 @@
                           :cell-size 4
                           :buffer-size 200}))))))
 
+(defnc F-Selfi--init
+  [_]
+  (let [ca-spec (rf/subscribe [:input/->ca-selfi [:ball] 100])
+        [reset-key set-reset-key] (hooks/use-state 0)
+        ;; prevents unmounting effect on initial render
+        initial-render? (hooks/use-ref true)]
+    ;; (println "SELFI")
+    (hooks/use-effect
+     [ca-spec]
+     ;; when CA changes, the automaton component must be remounted,
+     ;; so we change its `key` (identity) to trick React into unmounting
+     ;; the “old” and mounting the “new” component
+     (if @initial-render?
+       (reset! initial-render? false)
+       (do
+         ;; (println "RESET KEY")
+         (set-reset-key inc))))
+    ($ Function
+       (when ca-spec
+         ($ F-Automaton {:key reset-key
+                         :ca-spec ca-spec
+                         :run? true
+                         :cell-size 4
+                         :buffer-size 200})))))
+
 (defmethod gen-component :selfi
   [_ args]
   ($ F-Selfi--init {& args}))
@@ -771,19 +876,24 @@
 
 (defnc F-Mindform--init
   [_]
-  (let [ca (rf/subscribe [:input/->ca-mindform [:rand-center 20] 151 151])
-        [reset-key set-reset-key] (hooks/use-state (hash ca))]
+  (let [ca-spec (rf/subscribe [:input/->ca-mindform [:rand-center 20] 151 151])
+        [reset-key set-reset-key] (hooks/use-state 0)
+        initial-render? (hooks/use-ref true)]
+    ;; (println "MINDFORM")
     (hooks/use-effect
-     [ca]
-     (when ca (set-reset-key (hash ca))))
+     [ca-spec]
+     (if @initial-render?
+       (reset! initial-render? false)
+       (do
+         ;; (println "RESET KEY")
+         (set-reset-key inc))))
     ($ Function
-       (d/div
-        (when ca
-          ($ F-Automaton {:key reset-key
-                          :ca ca
-                          :run? true
-                          :cell-size 4
-                          :buffer-size 1}))))))
+       (when ca-spec
+         ($ F-Automaton {:key reset-key
+                         :ca-spec ca-spec
+                         :run? true
+                         :cell-size 4
+                         :buffer-size 1})))))
 
 (defmethod gen-component :mindform
   [_ args]
@@ -792,24 +902,28 @@
 
 (defnc F-Lifeform--init
   [_]
-  (let [ca (rf/subscribe [:input/->ca-lifeform 151 151])
-        [reset-key set-reset-key] (hooks/use-state (hash ca))]
+  (let [ca-spec (rf/subscribe [:input/->ca-lifeform 151 151])
+        [reset-key set-reset-key] (hooks/use-state 0)
+        initial-render? (hooks/use-ref true)]
+    ;; (println "MINDFORM")
     (hooks/use-effect
-     [ca]
-     (when ca (set-reset-key (hash ca))))
+     [ca-spec]
+     (if @initial-render?
+       (reset! initial-render? false)
+       (do
+         ;; (println "RESET KEY")
+         (set-reset-key inc))))
     ($ Function
-       (d/div
-        (when ca
-          ($ F-Automaton {:key reset-key
-                          :ca ca
-                          :run? true
-                          :cell-size 4
-                          :buffer-size 1}))))))
+       (when ca-spec
+         ($ F-Automaton {:key reset-key
+                         :ca-spec ca-spec
+                         :run? true
+                         :cell-size 4
+                         :buffer-size 1})))))
 
 (defmethod gen-component :lifeform
   [_ args]
   ($ F-Lifeform--init {& args}))
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

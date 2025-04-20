@@ -140,7 +140,7 @@
                   :results-filter utils/consts-set}
            :emul nil}
    :theme {:appearance :system}
-   :cache {:selfi-evolution {:deps #{:expr :varorder}
+   :cache {:selfi-evolution {:deps #{:expr :varorder} ;; ?
                              :val nil}}
    :error nil})
 
@@ -400,9 +400,7 @@
    (let [views-next (utils/dissocv views view-index)]
      {:db (-> db
               (update-in [:frame :windows] dec)
-              (assoc :views views-next))
-      ;; :fx [[:set-search-params [["views" (views->str views-next)]]]]
-      })))
+              (assoc :views views-next))})))
 
 
 (rf/reg-event-fx

@@ -314,10 +314,15 @@
 
 (defn make-automaton
   [type-k args & res]
-  (try (-> (apply emul/specify-ca
-                  (apply emul/make-species type-k args)
-                  res)
-           (emul/create-ca 0))
+  (try (let [ca-spec (apply emul/specify-ca
+                            (apply emul/make-species type-k args)
+                            {}
+                            res)]
+         ca-spec
+         ;; (emul/create-ca ca-spec 0)
+         #_
+         {:id (hash ca-spec)
+          :ca (emul/create-ca ca-spec 0)})
        (catch js/Error e
          (report-error e))))
 
@@ -327,8 +332,10 @@
  (fn [dna [_ ini-data res-w]]
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (make-automaton :selfi [dna (apply emul/make-ini ini-data)]
-                           res-w))))
+     :else (let [ca (make-automaton :selfi [dna (apply emul/make-ini ini-data)]
+                                    res-w)]
+             ;; (println "rf ca-spec hash: " (hash ca))
+             ca))))
 
 (rf/reg-sub
  :input/->ca-mindform

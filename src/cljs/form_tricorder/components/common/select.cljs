@@ -109,70 +109,70 @@
           :or {position "popper"}
           :rest r} props]
     ($d Portal
-      ($d Content
-        {:class (unite className class
-                       (css
-                         :border-col-input :bg-popover :fg-popover
-                         :max-h-96 :min-w-43 :border :rounded-sm
-                         {:position "relative"
-                          :z-index "50"
-                          :max-height "$96" ;; 96
-                          :overflow "hidden"
-                          :box-shadow "$md"}
+        ($d Content
+            {:class (unite className class
+                           (css
+                            :border-col-input :bg-popover :fg-popover
+                            :max-h-96 :min-w-43 :border :rounded-sm
+                            {:position "relative"
+                             :z-index "50"
+                             :max-height "$96" ;; 96
+                             :overflow "hidden"
+                             :box-shadow "$md"}
 
-                         ;; ["&[data-state=open]"
-                         ;;  { ;; animate-in
-                         ;;   ;; fade-in-0
-                         ;;   ;; zoom-in-95
-                         ;;   }]
-                         ;; ["&[data-state=closed]"
-                         ;;  { ;; animate-out
-                         ;;   ;; fade-out-0
-                         ;;   ;; zoom-out-95
-                         ;;   }]
+                            ;; ["&[data-state=open]"
+                            ;;  { ;; animate-in
+                            ;;   ;; fade-in-0
+                            ;;   ;; zoom-in-95
+                            ;;   }]
+                            ;; ["&[data-state=closed]"
+                            ;;  { ;; animate-out
+                            ;;   ;; fade-out-0
+                            ;;   ;; zoom-out-95
+                            ;;   }]
 
-                         ;; ["&[data-side=left]"
-                         ;;  { ;; slide-in-from-right-2
-                         ;;   }]
-                         ;; ["&[data-side=right]"
-                         ;;  { ;; slide-in-from-left-2
-                         ;;   }]
-                         ;; ["&[data-side=top]"
-                         ;;  { ;; slide-in-from-bottom-2
-                         ;;   }]
-                         ;; ["&[data-side=bottom]"
-                         ;;  { ;; slide-in-from-top-2
-                         ;;   }]
-                         )
-                       ;; (when (= position "popper")
-                       ;;   (css
-                       ;;     ["&[data-side=left]"
-                       ;;      { ;; -translate-x-1
-                       ;;       }]
-                       ;;     ["&[data-side=right]"
-                       ;;      { ;; translate-x-1
-                       ;;       }]
-                       ;;     ["&[data-side=top]"
-                       ;;      { ;; -translate-y-1
-                       ;;       }]
-                       ;;     ["&[data-side=bottom]"
-                       ;;      { ;; translate-y-1
-                       ;;       }]))
-                       )
-         :layer (or layer js/undefined)
-         :position position
-         :ref ref
-         & r}
-        ($d SelectScrollUpButton)
-        ($d Viewport
-          {:class (unite
-                   (css :padding-1)
-                   (when (= position "popper")
-                     (css {:height "var(--radix-select-trigger-height)"
-                           :width "100%"
-                           :min-width "var(--radix-select-trigger-width)"})))}
-          children)
-        ($d SelectScrollDownButton)))))
+                            ;; ["&[data-side=left]"
+                            ;;  { ;; slide-in-from-right-2
+                            ;;   }]
+                            ;; ["&[data-side=right]"
+                            ;;  { ;; slide-in-from-left-2
+                            ;;   }]
+                            ;; ["&[data-side=top]"
+                            ;;  { ;; slide-in-from-bottom-2
+                            ;;   }]
+                            ;; ["&[data-side=bottom]"
+                            ;;  { ;; slide-in-from-top-2
+                            ;;   }]
+                            )
+                           ;; (when (= position "popper")
+                           ;;   (css
+                           ;;     ["&[data-side=left]"
+                           ;;      { ;; -translate-x-1
+                           ;;       }]
+                           ;;     ["&[data-side=right]"
+                           ;;      { ;; translate-x-1
+                           ;;       }]
+                           ;;     ["&[data-side=top]"
+                           ;;      { ;; -translate-y-1
+                           ;;       }]
+                           ;;     ["&[data-side=bottom]"
+                           ;;      { ;; translate-y-1
+                           ;;       }]))
+                           )
+             :layer (or layer js/undefined)
+             :position position
+             :ref ref
+             & r}
+            ($d SelectScrollUpButton)
+            ($d Viewport
+                {:class (unite
+                         (css :padding-1)
+                         (when (= position "popper")
+                           (css {:height "var(--radix-select-trigger-height)"
+                                 :width "100%"
+                                 :min-width "var(--radix-select-trigger-width)"})))}
+                children)
+            ($d SelectScrollDownButton)))))
 
 
 (defnc SelectLabel

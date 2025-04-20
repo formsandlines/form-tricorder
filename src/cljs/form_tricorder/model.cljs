@@ -41,8 +41,7 @@
     :label "mindFORM"}
    {:id    :lifeform
     :keybind "⌃l"
-    :label "lifeFORM"}
-   ])
+    :label "lifeFORM"}])
 
 (def modes
   [{:id    :expr

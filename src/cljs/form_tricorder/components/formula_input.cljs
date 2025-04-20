@@ -127,7 +127,9 @@
                       #js {:state start-state
                            :parent (.-current editor)})]
         (set-view view)
-        (fn [] (.destroy view))))
+        (fn []
+          ;; cleanup
+          (.destroy view))))
     (hooks/use-effect
       [submit-mode]
       (when view
@@ -151,10 +153,10 @@
                    {:display "flex"
                     :align-items "stretch"
                     :justify-content "space-between"})
-      :on-blur (fn [_] (when-not submit-mode
-                        ;; ? just set search params
-                        ;; (js/console.log (str "code: " code))
-                        (apply-input code true)))}
+       :on-blur (fn [_] (when-not submit-mode
+                         ;; ? just set search params
+                         ;; (js/console.log (str "code: " code))
+                         (apply-input code true)))}
       (d/div
        {:class (css
                 :font-mono :bg :rounded-sm-l

@@ -152,14 +152,25 @@
             (for [{:keys [id label keybind]} items
                   :let [id-str (name id)]]
               ($d Item
-                {:class ($$item-styles mode-id)
-                 :key   id-str
-                 :onSelect 
-                 (fn [e] (let [window-e (.-event js/window)
-                              shift? (if window-e
-                                       (.-shiftKey window-e)
-                                       false)]
-                          (handle-select-fn id shift?)))}
+                  {:class ($$item-styles mode-id)
+                   :key   id-str
+                   ;; :onSelect (fn [e]
+                   ;;             (js/console.log e)
+                   ;;             (handle-select-fn id (.-shiftKey e)))
+                   ;; :onPointerUp
+                   ;; (fn [e] (js/console.log e)
+                   ;;   (handle-select-fn id (.-shiftKey e)))
+                   :onSelect
+                   (fn [_] (handle-select-fn id false))
+                   ;; (fn [e] (let [window-e (.-event js/window)
+                   ;;              shift? (if window-e
+                   ;;                       (.-shiftKey window-e)
+                   ;;                       false)]
+                   ;;          ;; (js/console.log shift?)
+                   ;;          ;; (js/console.log "CustomEvent:")
+                   ;;          ;; (js/console.log e)
+                   ;;          (handle-select-fn id shift?)))
+                   }
                 (d/div {:class (css {:width "24px"
                                      :height "24px"})}
                   (function-icon id))

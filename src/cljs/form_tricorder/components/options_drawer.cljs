@@ -54,30 +54,30 @@
   [{:keys []}]
   (let [[open set-open] (hooks/use-state true)]
     ($d Root
-      {:class (css
-               :gap-3 :h-14 :p-3 :bg :rounded
-               {:display "flex"
-                :align-items "center"})
-       :open open
-       :onOpenChange set-open}
-      ($d Content
         {:class (css
-                  ;; {:overflow "hidden"}
-                  ["&[data-state=open]"
-                   {:animation "collapsible-slide-out 100ms ease-in"}]
-                  ["&[data-state=closed]"
-                   {:animation "collapsible-slide-in 100ms ease-out"}]
-                  ["& > div"
-                   :gap-2
-                   {:display "flex"
-                    :align-items "center"}])}
-        (d/div
-          ($ VarorderSel)
-          ($ Label {:htmlFor "varorder-select"} "Interpretation order")))
-      ($d Trigger
-        {:class (css ["&:focus-visible"
-                      :outline-none :ring])
-         :asChild true}
-        (d/button
-          ($d (if open icons/ChevronLeftIcon icons/ChevronRightIcon)
-            {:class (css :size-icon-sm)}))))))
+                 :gap-3 :h-14 :p-3 :bg :rounded
+                 {:display "flex"
+                  :align-items "center"})
+         :open open
+         :onOpenChange set-open}
+        ($d Content
+            {:class (css
+                     ;; {:overflow "hidden"}
+                     ["&[data-state=open]"
+                      {:animation "collapsible-slide-out 100ms ease-in"}]
+                     ["&[data-state=closed]"
+                      {:animation "collapsible-slide-in 100ms ease-out"}]
+                     ["& > div"
+                      :gap-2
+                      {:display "flex"
+                       :align-items "center"}])}
+            (d/div
+             ($ VarorderSel)
+             ($ Label {:htmlFor "varorder-select"} "Interpretation order")))
+        ($d Trigger
+            {:class (css ["&:focus-visible"
+                          :outline-none :ring])
+             :asChild true}
+            (d/button
+             ($d (if open icons/ChevronLeftIcon icons/ChevronRightIcon)
+                 {:class (css :size-icon-sm)}))))))

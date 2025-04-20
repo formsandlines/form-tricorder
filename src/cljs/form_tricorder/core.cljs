@@ -166,7 +166,9 @@
 (defonce root
   (rdom/createRoot (js/document.getElementById "root")))
 
-(defn ^:export init! []
+(defn ^:export init []
   (rf/dispatch-sync [:initialize-db])
-  (.render root ($ StrictMode ($ App))))
+  ;; (.render root ($ App))
+  (.render root ($ StrictMode ($ App)))
+  )
 
