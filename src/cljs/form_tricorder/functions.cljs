@@ -796,6 +796,7 @@
     (hooks/use-effect
       [props]
       (when (and (not @webc-ref) @container-ref)
+        ;; (println "F-Automaton effect! " (:ca-spec props))
         ;; imperatively create web component and set initial props
         (let [{:keys [ca-spec cell-size buffer-size run?]} props
               webc-el (js/document.createElement "ff-automaton")
@@ -815,7 +816,7 @@
         nil)
 
       ;; cleanup (is this necessary? seems to prevent detached components)
-      ;; #_
+      #_
       (fn []
         ;; (println "Cleanup React")
         (let [webc-el @webc-ref]
@@ -824,25 +825,6 @@
             (.removeChild parent webc-el)))))
     (d/div {:ref container-ref})))
 
-#_
-(defnc F-Selfi--init
-  [_]
-  (let [ca (rf/subscribe [:input/->ca-selfi [:ball] 100])
-        [reset-key set-reset-key] (hooks/use-state 0)]
-    (hooks/use-effect
-     [ca]
-     ;; when CA changes, the automaton component must be remounted,
-     ;; so we change its `key` (identity) to trick React into unmounting
-     ;; the “old” and mounting the “new” component
-     (set-reset-key inc))
-    ($ Function
-       (d/div
-        (when ca
-          ($ F-Automaton {:key reset-key
-                          :ca ca
-                          :run? true
-                          :cell-size 4
-                          :buffer-size 200}))))))
 
 (defnc F-Selfi--init
   [_]
@@ -850,7 +832,7 @@
         [reset-key set-reset-key] (hooks/use-state 0)
         ;; prevents unmounting effect on initial render
         initial-render? (hooks/use-ref true)]
-    ;; (println "SELFI")
+    (println "SELFI " reset-key)
     (hooks/use-effect
      [ca-spec]
      ;; when CA changes, the automaton component must be remounted,
@@ -859,7 +841,7 @@
      (if @initial-render?
        (reset! initial-render? false)
        (do
-         ;; (println "RESET KEY")
+         ;; (println "RESET KEY Selfi")
          (set-reset-key inc))))
     ($ Function
        (when ca-spec
@@ -879,13 +861,13 @@
   (let [ca-spec (rf/subscribe [:input/->ca-mindform [:rand-center 20] 151 151])
         [reset-key set-reset-key] (hooks/use-state 0)
         initial-render? (hooks/use-ref true)]
-    ;; (println "MINDFORM")
+    (println "MINDFORM " reset-key)
     (hooks/use-effect
      [ca-spec]
      (if @initial-render?
        (reset! initial-render? false)
        (do
-         ;; (println "RESET KEY")
+         ;; (println "RESET KEY Mindform")
          (set-reset-key inc))))
     ($ Function
        (when ca-spec
@@ -905,7 +887,7 @@
   (let [ca-spec (rf/subscribe [:input/->ca-lifeform 151 151])
         [reset-key set-reset-key] (hooks/use-state 0)
         initial-render? (hooks/use-ref true)]
-    ;; (println "MINDFORM")
+    (println "LIFEFORM " reset-key)
     (hooks/use-effect
      [ca-spec]
      (if @initial-render?

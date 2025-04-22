@@ -11,8 +11,7 @@
                   :devtools   {:reload-strategy :full
                                :preloads [devtools.preload
                                           day8.re-frame-10x.preload.react-18]
-                               ;; :after-load form-tricorder.core/init
-                               }
+                               :after-load form-tricorder.core/init}
 
                   :dev
                   {:compiler-options {:closure-defines

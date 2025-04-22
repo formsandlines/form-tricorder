@@ -84,7 +84,8 @@
                     :align-items "center"})}
       (d/span
        {:class (css ;; :ml-1
-                :fg-muted)}
+                :fg-muted
+                {:white-space "nowrap"})}
        "∀ " (d/i "I") " ∈" (when disabled? " ∅"))
       (when-not disabled?
         (for [[i filter] (map-indexed vector terms-filter)
