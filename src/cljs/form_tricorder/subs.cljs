@@ -45,6 +45,11 @@
    (get-in db [:theme :appearance])))
 
 (rf/reg-sub
+ :theme/system-color-scheme
+ (fn [db _]
+   (get-in db [:theme :system-color-scheme])))
+
+(rf/reg-sub
  :modes/graph-style
  (fn [db _]
    (get-in db [:modes :expr :graph-style])))
@@ -129,7 +134,7 @@
      (report-error (ex-info "Expression data missing!" {})))
    (when (nil? varorder)
      (report-error (ex-info "Unknown variable ordering!" {})))
-   (let [value (try (expr/eval-all {:varorder varorder} expr {})
+   (let [value (try (expr/eval-all expr {} {:varorder varorder})
                     (catch js/Error e
                       (report-error e)))]
      ;; (println "computing value")
@@ -144,7 +149,7 @@
      (report-error (ex-info "Expression data missing!" {})))
    (when (nil? varorder)
      (report-error (ex-info "Unknown variable ordering!" {})))
-   (let [value (try (expr/eval-all {:varorder varorder} expr {})
+   (let [value (try (expr/eval-all expr {} {:varorder varorder})
                     (catch js/Error e
                       (report-error e)))]
      (:results value))))
@@ -220,7 +225,7 @@
  (fn [results _]
    (when (= :not-found results)
      (report-error (ex-info "Results data missing!" {})))
-   (let [vspc (try (vec (reverse (map first results)))
+   (let [vspc (try (vec (map first results))
                    (catch js/Error e
                      (report-error e)))]
      vspc)))
@@ -230,7 +235,7 @@
   (fn [results _]
     (when (= :not-found results)
       (report-error (ex-info "Results data missing!" {})))
-    (let [dna (try (vec (reverse (map second results)))
+    (let [dna (try (vec (map second results))
                    (catch js/Error e
                      (report-error e)))]
       dna)))
@@ -253,15 +258,13 @@
     (let [dna-view (try (case type
                           :nmui (calc/dna->digits calc/nmui-code dna)
                           :nuim (calc/dna->digits calc/nuim-code dna)
-                          (->> dna
-                               reverse ;; !TEMP
-                               (mapv name)))
+                          (mapv name dna))
                         (catch js/Error e
                           (report-error e)))]
       dna-view)))
 
 (comment
-  (calc/dna->digits calc/nuim-code [:N :U :_ :M])
+  (calc/dna->digits calc/nuim-code [:n :u :_ :m])
   ,)
 
 (rf/reg-sub
@@ -312,12 +315,25 @@
  :<- [:input/->filtered-dna]
  vmap-psps-sub)
 
+(comment
+  (emul/make-selfi [:n :u :i :m] (emul/make-ini :constant :u))
+  
+  ,)
+
 (defn make-automaton
-  [type-k args & res]
-  (try (let [ca-spec (apply emul/specify-ca
-                            (apply emul/make-species type-k args)
-                            {}
-                            res)]
+  [type-k args]
+  (try (let [ca-spec (apply
+                      (case type-k
+                        :selfi emul/make-selfi
+                        :mindform emul/make-mindform
+                        :decisionform emul/make-decisionform
+                        :lifeform emul/make-lifeform
+                        (throw (ex-info "Unknown CA type." {:type type-k})))
+                      args)]
+         ;; [ca-spec (apply emul/specify-ca
+         ;;                  (apply emul/make-species type-k args)
+         ;;                  {}
+         ;;                  res)]
          ca-spec
          ;; (emul/create-ca ca-spec 0)
          #_
@@ -329,63 +345,61 @@
 (rf/reg-sub
  :input/->ca-selfi
  :<- [:input/->dna]
- (fn [dna [_ ini-data res-w]]
+ (fn [dna [_ ini-data]]
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (let [ca (make-automaton :selfi [dna (apply emul/make-ini ini-data)]
-                                    res-w)]
+     :else (let [ca (make-automaton :selfi
+                                    [dna (apply emul/make-ini ini-data)])]
              ;; (println "rf ca-spec hash: " (hash ca))
              ca))))
 
 (rf/reg-sub
  :input/->ca-mindform
  :<- [:input/->dna]
- (fn [dna [_ ini-data res-w res-h]]
+ (fn [dna [_ ini-data]]
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (make-automaton :mindform [dna (apply emul/make-ini ini-data)]
-                           res-w res-h))))
+     :else (make-automaton :mindform
+                           [dna (apply emul/make-ini ini-data)]))))
 
 (rf/reg-sub
  :input/->ca-lifeform
  :<- [:input/->dna]
- (fn [dna [_ res-w res-h]]
+ (fn [dna [_]]
    (let [dim (calc/dna-dimension dna)]
      (cond
        (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
        (not (== dim 3))
        (report-error (ex-info "lifeFORMs require FORMs with exactly 3 variables (must result in formDNA of dimension 3)"
                               {:dimension dim}))
-       :else (make-automaton :lifeform [dna] res-w res-h)))))
+       :else (make-automaton :lifeform [dna])))))
 
 
 (comment
   (= (->> (expr/eval-all '[[[a] b] c])
           :results
           (mapv second))
-     (reverse (last (expr/=>* '[[[a] b] c]))))
+     (last (expr/=>* '[[[a] b] c])))
 
   (= (->> (expr/eval-all '[[[a] b] c])
           :results
-          (mapv second)
-          reverse)
+          (mapv second))
      (last (expr/=>* '[[[a] b] c])))
 
-  (= (->> (reverse (last (expr/=>* '[[a] b])))
+  (= (->> (last (expr/=>* '[[a] b]))
           (map vector (calc/vspace 2)))
      (:results (expr/eval-all '[[a] b])))
 
-  (->> (calc/filter-dna (last (expr/=>* '[[a] b]))
-                        [:_ :U])
-       reverse)
+  (calc/filter-dna (last (expr/=>* '[[a] b]))
+                   [:_ :u])
 
   
-  (expr/eval-all ':N)
+  (expr/eval-all ':n)
 
   (require '[clojure.set :as s])
 
-  (let [fdna (expr/make :fdna [:N :U :I :M])]
-    (= fdna (expr/eval->expr-all fdna {})))
+  (let [fdna (expr/make :fdna [:n :u :i :m])]
+    (= fdna (expr/=>* fdna {})))
   
   (let [dna (last (expr/=>* '[[[a] b] c]))
         vspace (vec (calc/vspace (calc/dna-dimension dna)))]
@@ -393,36 +407,19 @@
           :let [c  (dna i)
                 vp (vec (vspace i))]
           :when
-          (not= #{} (s/intersection #{:U :I} (set vp))) ;; OR
-          ;; (= #{} (s/intersection #{:U :I} (set vp))) ;; NOT OR
-          ;; (s/subset? #{:U :I} (set vp))  ;; AND
-          ;; (not (s/subset? #{:U :I} (set vp)))  ;; NOT AND
-          ;; (= #{:U :I} (set vp))  ;; EQ
-          ;; (not= #{:U :I} (set vp))  ;; NOT EQ
+          (not= #{} (s/intersection #{:u :i} (set vp))) ;; OR
+          ;; (= #{} (s/intersection #{:u :i} (set vp))) ;; not or
+          ;; (s/subset? #{:u :i} (set vp))  ;; and
+          ;; (not (s/subset? #{:u :i} (set vp)))  ;; not and
+          ;; (= #{:u :i} (set vp))  ;; eq
+          ;; (not= #{:u :i} (set vp))  ;; not eq
           
-          ;; (every? #{:U :I} vp)  ;; OR
-          ;; (= (count (set vp)) (count (s/union #{:I :U} (set vp)))) ;; AND
-          ;; (every? #{:I} vp)  ;; symmetric
-          ;; (= (vp 1) :U)  ;; value filter
+          ;; (every? #{:u :i} vp)  ;; or
+          ;; (= (count (set vp)) (count (s/union #{:i :u} (set vp)))) ;; and
+          ;; (every? #{:i} vp)  ;; symmetric
+          ;; (= (vp 1) :u)  ;; value filter
           ]
       [vp c]))
-
-  [[[:N :N] :N]
-   [[:N :U] :N]
-   [[:N :I] :N]
-   [[:N :M] :N]
-   [[:U :N] :U]
-   [[:U :U] :N]
-   [[:U :I] :U]
-   [[:U :M] :N]
-   [[:I :N] :I]
-   [[:I :U] :I]
-   [[:I :I] :N]
-   [[:I :M] :N]
-   [[:M :N] :M]
-   [[:M :U] :I]
-   [[:M :I] :U]
-   [[:M :M] :N]]
 
   (merge-with
    #(or %2 %1)

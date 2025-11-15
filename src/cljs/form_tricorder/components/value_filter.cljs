@@ -11,10 +11,9 @@
    [form-tricorder.components.common.toggle :refer [Toggle]]
    [form-tricorder.components.common.toggle-group
     :refer [ToggleGroup ToggleGroupItem]]
-   [form-tricorder.components.common.label :refer [Label]]
    [form-tricorder.components.common.radio-group
     :refer [RadioGroup RadioGroupItem]]
-   [form-tricorder.utils :as utils :refer [let+ unite]]
+   [form-tricorder.utils :as utils :refer [let+]]
    ;; ["@radix-ui/react-icons" :as radix-icons]
    ["lucide-react" :as lucide-icons]
    ["@radix-ui/react-collapsible" :as Collapsible]))
@@ -22,19 +21,19 @@
 (def r) ;; hotfix for linting error in let+
 
 (def $$toggle-const-styles
-  {:N (css ["&[data-state=on]"
+  {:n (css ["&[data-state=on]"
             {:background-color "var(--col-const-n)"}]
            ["&[data-state=on]:hover"
             {:background-color "var(--col-const-n-hover)"}])
-   :U (css ["&[data-state=on]"
+   :u (css ["&[data-state=on]"
             {:background-color "var(--col-const-u)"}]
            ["&[data-state=on]:hover"
             {:background-color "var(--col-const-u-hover)"}])
-   :I (css ["&[data-state=on]"
+   :i (css ["&[data-state=on]"
             {:background-color "var(--col-const-i)"}]
            ["&[data-state=on]:hover"
             {:background-color "var(--col-const-i-hover)"}])
-   :M (css ["&[data-state=on]"
+   :m (css ["&[data-state=on]"
             {:background-color "var(--col-const-m)"}]
            ["&[data-state=on]:hover"
             {:background-color "var(--col-const-m-hover)"}])})

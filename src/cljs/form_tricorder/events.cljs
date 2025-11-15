@@ -57,8 +57,7 @@
       result)))
 
 (defn parse-vals-filter [s]
-  (let [vals-filter (set (map (comp keyword string/upper-case str)
-                              s))]
+  (let [vals-filter (set (map (comp keyword str) s))]
     (when (set/subset? vals-filter utils/consts-set)
       vals-filter)))
 
@@ -121,6 +120,17 @@
                (assoc-in context [:coeffects :search-params]
                          search-params)))))
 
+(def get-system-color-scheme
+  (rf/->interceptor
+   :id     :get-system-color-scheme
+   :before (fn [context]
+             (let [cs (if (.. js/window
+                              (matchMedia "(prefers-color-scheme: dark)")
+                              -matches)
+                        "dark" "light")]
+               (assoc-in context [:coeffects :system-color-scheme]
+                         cs)))))
+
 (defn reset-terms-filter
   [varorder]
   (vec (repeat (count varorder) utils/consts-set)))
@@ -134,20 +144,26 @@
    :views [{:func-id :graphs}]
    :modes {:expr {:graph-style :basic}
            :eval {:interpr-filter {:vals-filter utils/consts-set
-                                   :terms-filter [] ;; e.g. [#{:N :U} #{:I} #{}]
+                                   :terms-filter [] ;; e.g. [#{:n :u} #{:i} #{}]
                                    :neg-op? false
                                    :op :intersects} ;; | :subseteq | equal
                   :results-filter utils/consts-set}
-           :emul nil}
-   :theme {:appearance :system}
+           :emul {:res [161 161]
+                  :ini-spec {:bg {:type :random
+                                  :density {:n 0.5 :u 0.2 :i 0.8 :m 0.0}}
+                             :figure {:type :ball
+                                      :pos :topleft
+                                      :align :center}}}}
+   :theme {:appearance :system
+           :system-color-scheme "light"} ;; ? default or throw
    :cache {:selfi-evolution {:deps #{:expr :varorder} ;; ?
                              :val nil}}
    :error nil})
 
 (rf/reg-event-fx
  :initialize-db
- [fetch-search-params]
- (fn [{:keys [search-params]} _]
+ [fetch-search-params get-system-color-scheme]
+ (fn [{:keys [search-params system-color-scheme]} _]
    ;; (println search-params)
    (try (let [formula (or (.get search-params "f")
                           (get-in default-db [:input :formula]))
@@ -225,7 +241,8 @@
                   :views views
                   :modes {:expr modes-expr
                           :eval modes-eval}
-                  :theme {:appearance appearance}
+                  :theme {:appearance appearance
+                          :system-color-scheme system-color-scheme}
                   :cache (get default-db :cache)
                   :error (get default-db :error)}]
           ;; (println (get-in db [:modes :eval]))
@@ -409,6 +426,11 @@
    {:db (assoc-in db [:theme :appearance] next-appearance)
     ;; :fx [[:set-search-params [["theme" (name next-appearance)]]]]
     }))
+
+(rf/reg-event-fx
+ :theme/set-system-color-scheme
+ (fn [{db :db} [_ {:keys [next-system-color-scheme]}]]
+   {:db (assoc-in db [:theme :system-color-scheme] next-system-color-scheme)}))
 
 (rf/reg-event-fx
  :modes/set-graph-style

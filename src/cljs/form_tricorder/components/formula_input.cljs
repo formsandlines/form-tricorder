@@ -28,24 +28,34 @@
                {"&.cm-editor"
                 {:fontSize "1rem"}
                 
+                ;; TODO: check if darkmode necessary
                 "&light"
-                {:color "#4A4847"}
+                {:color "light-dark(#4A4847, #C5C7D1)"}
+                ;; {:color "#4A4847"}
                 "&dark"
-                {:color "#C5C7D1"}
+                {:color "light-dark(#4A4847, #C5C7D1)"}
+                ;; {:color "#C5C7D1"}
 
                 "&light .cm-content"
-                {:caretColor "#9297B0"}
+                {:caretColor "light-dark(#9297B0, #878584)"}
+                ;; {:caretColor "#9297B0"}
                 "&dark .cm-content"
-                {:caretColor "#878584"}
+                {:caretColor "light-dark(#9297B0, #878584)"}
+                ;; {:caretColor "#878584"}
                 
                 "&light.cm-focused .cm-matchingBracket"
-                {:backgroundColor "#ece9e8"}
-                "&light.cm-focused .cm-nonmatchingBracket"
-                {:backgroundColor "#ffcbcb"}
+                {:backgroundColor "light-dark(#ece9e8, #46495C)"}
+                ;; {:backgroundColor "#ece9e8"}
                 "&dark.cm-focused .cm-matchingBracket"
-                {:backgroundColor "#46495C"}
+                {:backgroundColor "light-dark(#ece9e8, #46495C)"}
+                ;; {:backgroundColor "#46495C"}
+                "&light.cm-focused .cm-nonmatchingBracket"
+                {:backgroundColor "light-dark(#ffcbcb, #7a0000)"}
+                ;; {:backgroundColor "#ffcbcb"}
                 "&dark.cm-focused .cm-nonmatchingBracket"
-                {:backgroundColor "#7a0000"}})))
+                {:backgroundColor "light-dark(#ffcbcb, #7a0000)"}
+                ;; {:backgroundColor "#7a0000"}
+                })))
 
 
 (def update-darkmode-type (.define StateEffect))

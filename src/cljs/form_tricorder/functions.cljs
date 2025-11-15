@@ -13,27 +13,23 @@
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core :refer [->attr]]
    [formform-vis.components.automaton :refer [make-state!]]
-   [formform-vis.utils-dom :refer [save-svg save-img]]
    [form-tricorder.icons :refer [PerspectivesExpandIcon
                                  PerspectivesCollapseIcon]]
-   [form-tricorder.components.export-dialog
-    :refer [ExportDialog ExportPreview ExportOptions
-            ExportGroup ExportItem]]
-   [form-tricorder.components.common.input :refer [Input]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.copy-trigger :refer [CopyTrigger]]
    [form-tricorder.components.value-filter :refer [ValueFilter]]
+   [form-tricorder.components.export-dialog :refer [ExportPreview]]
+   [form-tricorder.components.image-export :refer [ImageExportVmap
+                                                   ImageExportGraph]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
    [form-tricorder.components.common.label :refer [Label]]
    [form-tricorder.components.common.radio-group
     :refer [RadioGroup RadioGroupItem]]
    ;; [form-tricorder.components.common.toggle-group
    ;;  :refer [ToggleGroup ToggleGroupItem]]
-   [form-tricorder.components.common.checkbox :refer [Checkbox]]
    [form-tricorder.components.common.select
-    :refer [Select SelectTrigger SelectValue SelectItem SelectContent
-            SelectGroup SelectLabel]]
-   [form-tricorder.utils :as utils :refer [let+ unite]]))
+    :refer [Select SelectTrigger SelectValue SelectItem SelectContent]]
+   [form-tricorder.utils :as utils :refer [unite]]))
 
 (def r) ;; hotfix for linting error in let+
 
@@ -274,235 +270,33 @@
 ;;       :fill "currentcolor"}]]))
 
 (defnc F-Vmap-preview
-  [{:keys [psps? vis-id data varorder negative? bg-color padding scale
+  [{:keys [vis-id vis-data negative? bg-color padding scale
            default-caption? custom-caption-input]} ref]
   {:wrap [(react/forwardRef)]}
-  (hooks/use-effect
-    [varorder data]
-    (let [webc-el @ref]
-      (aset webc-el "varorder" varorder)
-      (aset webc-el (if psps? "vmapPsps" "vmap") data)))
-  ($ ExportPreview
-     {:class (if negative?
-               (css {:color-scheme "dark"})
-               (css {:color-scheme "light"}))}
-     ($ vis-id
-        {:ref ref
-         ;; :cellsize (->attr (* scale 12))
-         "fig-scale" scale
-         "full-svg" (->attr true)
-         "no-caption" (->attr (not default-caption?))
-         :label (->attr custom-caption-input)
-         ;; :styles (->attr vmap-export-css)
-         "caption-attrs"
-         (->attr {:font-family "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
-                  :font-size "12px"
-                  :fill (if negative? "#ffffff" "#000000")})
-         "fig-padding" (->attr padding)
-         "fig-bg-color" (->attr bg-color)})))
-
-(defnc F-Vmap--export
-  [{:keys [psps? data varorder]}]
-  (let [vis-id (if psps? "ff-vmap-psps" "ff-vmap")
-        export-ref (hooks/use-ref nil)
-        [format set-format] (hooks/use-state "svg")
-        [scale set-scale] (hooks/use-state 1.0)
-        [negative? set-negative?] (hooks/use-state false)
-        [background? set-background?] (hooks/use-state false)
-        [padding set-padding] (hooks/use-state 0)
-        [bg-color set-bg-color] (hooks/use-state "#ffffff")
-        [default-caption? set-default-caption?] (hooks/use-state true)
-        [custom-caption? set-custom-caption?] (hooks/use-state false)
-        [custom-caption-input set-custom-caption-input] (hooks/use-state "")]
-    ($ ExportDialog
-       {:title "Export vmap…"
-        :on-export
-        (fn [e]
-          (let [el (.. export-ref -current)
-                make-filename (fn [ext] (str (utils/get-timestamp) "_"
-                                            vis-id ext))
-                get-svg-el #(.. % -shadowRoot
-                                (getElementById (if psps?
-                                                  "psps-figure"
-                                                  "vmap-figure")))]
-            ;; timeout will get cleared in `ExportDialog` component
-            (js/setTimeout
-             (fn []
-               (let [svg-el (get-svg-el el)]
-                 (case format
-                   "png" (save-img svg-el (make-filename ".png") {})
-                   "svg" (save-svg svg-el (make-filename ".svg") {}))))
-             1000)))}
-       ($ F-Vmap-preview
-          {:ref export-ref
-           :psps? psps?
-           :vis-id vis-id
-           :data data
-           :varorder varorder
-           :scale scale
-           :negative? negative?
-           :bg-color (when background? bg-color)
-           :padding padding
-           :default-caption? default-caption?
-           :custom-caption-input (when custom-caption? custom-caption-input)})
-       ($ ExportOptions
-          ($ ExportGroup
-             {:orientation :horizontal}
-             ($ ExportGroup
-                {:orientation :vertical}
-                ($ ExportItem
-                   {:title "File format:"}
-                   ($ RadioGroup
-                      {:class (css "FileFormat"
-                                   :gap-10
-                                   {:display "flex"}
-                                   ["& > *"
-                                    :gap-3
-                                    {:display "flex"
-                                     :align-items "center"}])
-                       ;; :defaultValue "svg"
-                       :value format
-                       :onValueChange set-format}
-                      (d/div
-                        ($ RadioGroupItem
-                           {:id "png"
-                            :value "png"})
-                        ($ Label
-                           {:htmlFor "png"}
-                           "PNG"))
-                      (d/div
-                        ($ RadioGroupItem
-                           {:id "svg"
-                            :value "svg"})
-                        ($ Label
-                           {:htmlFor "svg"}
-                           "SVG"))))
-                ($ ExportItem
-                   {:title "Scale:"}
-                   ;; {:class (css :mt-4)}
-                   (let [scales [0.5 1.0 2.0 3.0 4.0 5.0]
-                         scale->label (zipmap scales
-                                              ["Size ×0.5 (small)"
-                                               "Size ×1 (standard)"
-                                               "Size ×2 (medium)"
-                                               "Size ×3 (large)"
-                                               "Size ×4 (extralarge)"
-                                               "Size ×5 (print)"])]
-                     ($d Select
-                       {:id "varorder-select"
-                        :value scale
-                        :onValueChange (fn [v] (set-scale v))}
-                       ($ SelectTrigger
-                          ($d SelectValue
-                            {:placeholder "Select scale…"}
-                            (scale->label scale)))
-                       ($ SelectContent
-                          {:class "outer"}
-                          (for [x scales
-                                :let [label (scale->label x)]]
-                            ($ SelectItem
-                               {:key label
-                                :value x}
-                               label)))))))
-             ($ ExportItem
-                {:title "Appearance:"}
-                (d/div
-                  {:class (css :gap-3
-                               {:display "flex"
-                                :flex-direction "column"})}
-                  (d/div
-                    {:class (css :gap-3
-                                 {:display "flex"
-                                  :align-items "center"})}
-                    ($ Checkbox
-                       {:id "negative"
-                        :checked negative?
-                        :onCheckedChange #(set-negative? (not negative?))})
-                    ($ Label
-                       {:htmlFor "negative"}
-                       "negative"))
-                  (d/div
-                    {:class (css :gap-3
-                                 {:display "flex"
-                                  :flex-direction "row"})}
-                    (d/div
-                      {:class (css :gap-3
-                                   {:display "flex"
-                                    :align-items "center"})}
-                      ($ Checkbox
-                         {:id "background"
-                          :checked background?
-                          :onCheckedChange #(set-background?
-                                             (not background?))})
-                      ($ Label
-                         {:htmlFor "background"}
-                         "background:"))
-                    ;; ? browser support
-                    (d/input
-                      {:type "color"
-                       :value bg-color
-                       :onChange #(set-bg-color (.. % -target -value))
-                       :disabled (not background?)}))
-                  (d/div
-                    {:class (css :gap-3
-                                 {:display "flex"
-                                  :flex-direction "row"
-                                  :align-items "center"
-                                  :margin-left "var(--sizes-icon-sm)"
-                                  :padding-left "var(--sp-3)"})}
-                    ($ Label
-                       {:htmlFor "padding"}
-                       "padding:")
-                    ($ Input
-                       {:class (css :w-20)
-                        :id "padding"
-                        :type "number"
-                        :step "1"
-                        :min "0"
-                        :max "99"
-                        :value padding
-                        :onChange
-                        #(set-padding
-                          (try (parse-long (.. % -target -value))
-                               (catch js/Error e
-                                 (js/console.error e))))}))))
-             ($ ExportItem
-                {:title "Caption:"}
-                (d/div
-                  {:class (css :gap-3
-                               {:display "flex"
-                                :flex-direction "column"})}
-                  (d/div
-                    {:class (css :gap-3
-                                 {:display "flex"
-                                  :align-items "center"})}
-                    ($ Checkbox
-                       {:id "default-caption"
-                        :checked default-caption?
-                        :onCheckedChange #(set-default-caption?
-                                           (not default-caption?))})
-                    ($ Label
-                       {:htmlFor "default-caption"}
-                       "variable order"))
-                  (d/div
-                    {:class (css :gap-3
-                                 {:display "flex"
-                                  :align-items "center"})}
-                    ($ Checkbox
-                       {:id "custom-caption"
-                        :checked custom-caption?
-                        :onCheckedChange #(set-custom-caption?
-                                           (not custom-caption?))})
-                    ($ Label
-                       {:htmlFor "custom-caption"}
-                       "custom label:"))
-                  ($ Input
-                     {:type "text"
-                      :value custom-caption-input
-                      :disabled (not custom-caption?)
-                      :onChange #(set-custom-caption-input
-                                  (.. % -target -value))
-                      :placeholder "Custom text"}))))))))
+  (let [{:keys [psps? data varorder]} vis-data]
+    (hooks/use-effect
+     [varorder data]
+     (let [webc-el @ref]
+       (aset webc-el "varorder" varorder)
+       (aset webc-el (if psps? "vmapPsps" "vmap") data)))
+    ($ ExportPreview
+       {:class (if negative?
+                 (css {:color-scheme "dark"})
+                 (css {:color-scheme "light"}))}
+       ($ vis-id
+          {:ref ref
+           ;; :cellsize (->attr (* scale 12))
+           "fig-scale" scale
+           "full-svg" (->attr true)
+           "no-caption" (->attr (not default-caption?))
+           :label (->attr custom-caption-input)
+           ;; :styles (->attr vmap-export-css)
+           "caption-attrs"
+           (->attr {:font-family "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+                    :font-size "12px"
+                    :fill (if negative? "#ffffff" "#000000")})
+           "fig-padding" (->attr padding)
+           "fig-bg-color" (->attr bg-color)}))))
 
 (defnc F-Vmap--init
   []
@@ -522,18 +316,24 @@
                    ($ (if psps?
                         PerspectivesCollapseIcon PerspectivesExpandIcon))
                    (d/span {:class (css :ml-1)}
-                     "Perspectives"))
-                ($ F-Vmap--export
-                   {:data (if psps? vmap-psps vmap)
-                    :varorder varorder
-                    :psps? psps?}))
+                           "Perspectives"))
+                ($ ImageExportVmap
+                   {:vis-id (if psps? "ff-vmap-psps" "ff-vmap")
+                    :vis-data {:data (if psps? vmap-psps vmap)
+                               :varorder varorder
+                               :psps? psps?}
+                    :get-svg-el #(.. % -shadowRoot
+                                     (getElementById (if psps?
+                                                       "psps-figure"
+                                                       "vmap-figure")))
+                    :preview-cmp F-Vmap-preview}))
              (when varorder
                ($ ValueFilter
                   {:varorder varorder}))))
        (d/div
-         ($ (if psps? VmapPsps Vmap)
-            {:data (if psps? vmap-psps vmap)
-             :varorder varorder})))))
+        ($ (if psps? VmapPsps Vmap)
+           {:data (if psps? vmap-psps vmap)
+            :varorder varorder})))))
 
 (defmethod gen-component :vmap
   [_ args]
@@ -657,65 +457,118 @@
                    :styleclass (->attr (name graph-style))
                    :theme (->attr theme)})))
 
+(defnc F-Graph-preview
+  [{:keys [vis-id vis-data negative? bg-color padding scale
+           default-caption? custom-caption-input]} ref]
+  {:wrap [(react/forwardRef)]}
+  (let [{:keys [expr-json graph-type graph-style theme compact-reentry?]}
+        vis-data]
+    (hooks/use-effect
+     [expr-json]
+     (let [webc-el @ref]
+       (aset webc-el "json" expr-json)))
+    ($ ExportPreview
+       {:class (if negative?
+                 (css {:color-scheme "dark"})
+                 (css {:color-scheme "light"}))}
+       ($ vis-id
+          {:ref ref
+           :type (->attr graph-type)
+           "compact-reentry" compact-reentry?
+           :styleclass (->attr (name graph-style))
+           :theme (->attr (if negative? "dark" "light"))
+           "fig-scale" scale
+           "fig-padding" (->attr padding)
+           "fig-bg-color" (->attr bg-color)
+           ;; "full-svg" (->attr true)
+           ;; "no-caption" (->attr (not default-caption?))
+           ;; :label (->attr custom-caption-input)
+           ;; :styles (->attr vmap-export-css)
+           ;; "caption-attrs"
+           ;; (->attr {:font-family "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace"
+           ;;          :font-size "12px"
+           ;;          :fill (if negative? "#ffffff" "#000000")})
+           }))))
+
 (defnc F-Graph--init
   [{:keys [graph-type]}]
   (let [expr-json  (rf/subscribe [:input/->expr-json])
         appearance (rf/subscribe [:theme/appearance])
+        system-color-scheme (rf/subscribe [:theme/system-color-scheme])
         graph-style (rf/subscribe [:modes/graph-style])
         [compact-reentry? set-compact-reentry?] (hooks/use-state false)
-        theme (if (= :dark appearance) "dark" "light")]
+        theme (if (= :system appearance)
+                system-color-scheme
+                (name appearance))]
     ($ Function
-       (when (= graph-type "pack")
-         ($ FuncOpts
-            (d/div
-              {:class (css {:display "flex"
-                            :align-items "center"})}
-              ($ Label
-                 {:htmlFor "styleclass-radio"}
-                 "Style:")
-              ($ RadioGroup
-                 {:id "styleclass-radio"
-                  :class (css "StyleClass"
-                              :gap-4 :ml-2 :p-2 :rounded
-                              :border :border-col
-                              {:display "inline-flex"
-                               :align-items "center"}
-                              ["& > *"
-                               :gap-2
-                               {:display "flex"
-                                :align-items "center"}])
-                  :value (name graph-style)
-                  :onValueChange #(rf/dispatch [:modes/set-graph-style
-                                                {:next-graph-style
-                                                 (keyword %)}])}
-                 (d/div
-                   ($ RadioGroupItem
-                      {:id "styleclass-basic"
-                       :value "basic"})
+       ($ FuncOpts
+          ($ FuncOptsGroup
+             {:dir :row}
+             (case graph-type
+               "pack"
+               ($ FuncOptsGroup
+                  {:dir :column}
+                  (d/div
+                   {:class (css {:display "flex"
+                                 :align-items "center"})}
                    ($ Label
-                      {:htmlFor "styleclass-basic"}
-                      "Basic"))
-                 (d/div
-                   ($ RadioGroupItem
-                      {:id "styleclass-gestalt"
-                       :value "gestalt"})
-                   ($ Label
-                      {:htmlFor "styleclass-gestalt"}
-                      "Gestalt"))))))
-       (when (= graph-type "gsbhooks")
-         ($ FuncOpts
-            ($ Toggle {:variant :outline
-                       :on-click (fn [_] (set-compact-reentry? #(not %)))}
-               ;; ($ (if compact-reentry?
-               ;;      PerspectivesCollapseIcon PerspectivesExpandIcon))
-               ;; (d/span {:class (css :ml-1)})
-               "Compact Re-Entries")))
+                      {:htmlFor "styleclass-radio"}
+                      "Style:")
+                   ($ RadioGroup
+                      {:id "styleclass-radio"
+                       :class (css "StyleClass"
+                                   :gap-4 :ml-2 :p-2 :rounded
+                                   :border :border-col
+                                   {:display "inline-flex"
+                                    :align-items "center"}
+                                   ["& > *"
+                                    :gap-2
+                                    {:display "flex"
+                                     :align-items "center"}])
+                       :value (name graph-style)
+                       :onValueChange #(rf/dispatch [:modes/set-graph-style
+                                                     {:next-graph-style
+                                                      (keyword %)}])}
+                      (d/div
+                       ($ RadioGroupItem
+                          {:id "styleclass-basic"
+                           :value "basic"})
+                       ($ Label
+                          {:htmlFor "styleclass-basic"}
+                          "Basic"))
+                      (d/div
+                       ($ RadioGroupItem
+                          {:id "styleclass-gestalt"
+                           :value "gestalt"})
+                       ($ Label
+                          {:htmlFor "styleclass-gestalt"}
+                          "Gestalt")))))
+               "gsbhooks"
+               ($ FuncOptsGroup
+                  {:dir :column}
+                  ($ Toggle {:variant :outline
+                             :on-click (fn [_] (set-compact-reentry? #(not %)))}
+                     ;; ($ (if compact-reentry?
+                     ;;      PerspectivesCollapseIcon PerspectivesExpandIcon))
+                     ;; (d/span {:class (css :ml-1)})
+                     "Compact Re-Entries"))
+               nil)
+             ($ ImageExportGraph
+                {:vis-id "ff-fgraph"
+                 :vis-data {:expr-json expr-json
+                            :graph-type graph-type
+                            :graph-style graph-style
+                            :compact-reentry? compact-reentry?
+                            :theme theme}
+                 :get-svg-el #(.. % -shadowRoot
+                                  (getElementById "chart"))
+                 :preview-cmp F-Graph-preview})))
        (d/div
-         ($ F-Graph {:expr-json expr-json
-                     :graph-type graph-type
-                     :graph-style graph-style
-                     :compact-reentry? compact-reentry?
-                     :theme theme})))))
+        ($ F-Graph {:expr-json expr-json
+                    :graph-type graph-type
+                    :graph-style graph-style
+                    :compact-reentry? compact-reentry?
+                    :theme theme})))))
 
 (defmethod gen-component :depthtree
   [_ args]
@@ -798,9 +651,9 @@
       (when (and (not @webc-ref) @container-ref)
         ;; (println "F-Automaton effect! " (:ca-spec props))
         ;; imperatively create web component and set initial props
-        (let [{:keys [ca-spec cell-size buffer-size run?]} props
+        (let [{:keys [ca-spec res cell-size buffer-size run?]} props
               webc-el (js/document.createElement "ff-automaton")
-              ca (emul/create-ca ca-spec 0)
+              ca (emul/create-ca ca-spec res 0)
               _ (make-state! webc-el)]
           (.setAttribute webc-el "cell-size" (->attr cell-size))
           (.setAttribute webc-el "buffer-size" (->attr buffer-size))
@@ -825,10 +678,37 @@
             (.removeChild parent webc-el)))))
     (d/div {:ref container-ref})))
 
+(defn ini->str
+  [ini]
+  (str ini))
+
+(defnc IniSel
+  [{:keys [current-ini set-ini]}]
+  (let [inis-available [:random :ball]]
+    ($d Select
+      {:id "automaton-ini-select"
+       :value current-ini
+       :onValueChange (fn [v] (set-ini v))}
+      ($ SelectTrigger
+         {:style {:width "10rem"}}
+         ($d SelectValue
+           (ini->str current-ini)))
+      ($ SelectContent
+         {:class "inner"}
+         (for [ini inis-available
+               :let [label (ini->str ini)]]
+           ($ SelectItem
+              {:key (str ini)
+               :value ini}
+              label))))))
 
 (defnc F-Selfi--init
   [_]
-  (let [ca-spec (rf/subscribe [:input/->ca-selfi [:ball] 100])
+  (let [[ini set-ini] (hooks/use-state :ball)
+        ini-spec (case ini
+                   :ball [:figure :n (emul/ini-patterns :ball) :center]
+                   :random [:random])
+        ca-spec (rf/subscribe [:input/->ca-selfi ini-spec])
         [reset-key set-reset-key] (hooks/use-state 0)
         ;; prevents unmounting effect on initial render
         initial-render? (hooks/use-ref true)]
@@ -845,9 +725,14 @@
          (set-reset-key inc))))
     ($ Function
        (when ca-spec
+         ($ FuncOpts
+            ($ IniSel {:current-ini ini
+                       :set-ini set-ini})))
+       (when ca-spec
          ($ F-Automaton {:key reset-key
                          :ca-spec ca-spec
                          :run? true
+                         :res [100]
                          :cell-size 4
                          :buffer-size 200})))))
 
@@ -858,7 +743,11 @@
 
 (defnc F-Mindform--init
   [_]
-  (let [ca-spec (rf/subscribe [:input/->ca-mindform [:rand-center 20] 151 151])
+  (let [ca-spec (rf/subscribe [:input/->ca-mindform
+                               [:random]
+                               #_
+                               [:figure :n (emul/ini-patterns :ball) :center]
+                               ])
         [reset-key set-reset-key] (hooks/use-state 0)
         initial-render? (hooks/use-ref true)]
     (println "MINDFORM " reset-key)
@@ -874,6 +763,7 @@
          ($ F-Automaton {:key reset-key
                          :ca-spec ca-spec
                          :run? true
+                         :res [151 151]
                          :cell-size 4
                          :buffer-size 1})))))
 
@@ -884,7 +774,7 @@
 
 (defnc F-Lifeform--init
   [_]
-  (let [ca-spec (rf/subscribe [:input/->ca-lifeform 151 151])
+  (let [ca-spec (rf/subscribe [:input/->ca-lifeform])
         [reset-key set-reset-key] (hooks/use-state 0)
         initial-render? (hooks/use-ref true)]
     (println "LIFEFORM " reset-key)
@@ -900,6 +790,7 @@
          ($ F-Automaton {:key reset-key
                          :ca-spec ca-spec
                          :run? true
+                         :res [151 151]
                          :cell-size 4
                          :buffer-size 1})))))
 

@@ -9,8 +9,8 @@
                                      ;; :entries [form-tricorder.core]
                                      }}
                   :devtools   {:reload-strategy :full
-                               :preloads [devtools.preload
-                                          day8.re-frame-10x.preload.react-18]
+                               ;; :preloads [devtools.preload
+                               ;;            day8.re-frame-10x.preload.react-18]
                                :after-load form-tricorder.core/init}
 
                   :dev

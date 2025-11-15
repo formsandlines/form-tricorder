@@ -48,6 +48,15 @@
   []
   (let [appearance (rf/subscribe [:theme/appearance])]
     (hooks/use-effect
+     :once
+     (.. js/window
+         (matchMedia "(prefers-color-scheme: dark)")
+         (addEventListener
+          "change"
+          #(rf/dispatch [:theme/set-system-color-scheme
+                         {:next-system-color-scheme
+                          (if (.-matches %) "dark" "light")}]))))
+    (hooks/use-effect
      [appearance]
      (let [root-el (.. js/document -documentElement)]
        (aset (.-style root-el) "color-scheme" (if (= :system appearance)
@@ -110,7 +119,6 @@
 
 (defn ^:export init []
   (rf/dispatch-sync [:initialize-db])
-  (.render root ($ App))
-  ;; (.render root ($ StrictMode ($ App)))
-  )
+  ;; (.render root ($ App))
+  (.render root ($ StrictMode ($ App))))
 
