@@ -4,6 +4,7 @@
    [clojure.string :as string]
    [goog.string :as gstring]
    [shadow.css :refer (css)]
+   [formform.emul :refer [ini-patterns]]
    [formform.utils :refer [compare-names]]
    ;; [clojure.math :as math]
    )
@@ -99,15 +100,24 @@
            (- dmax dmin)))
      rmin))
 
-(defn pad
+(defn- pad-impl
   "Pads `0` or given `pad-char` before string."
-  ([len s] (pad \0 len s))
-  ([pad-char len s]
+  ([pad-char len s pad-right?]
    (let [s (if (string? s) s (str s))]
      (loop [s s]
        (if (< (count s) len)
-         (recur (str pad-char s))
+         (recur (if pad-right?
+                  (str s pad-char)
+                  (str pad-char s)))
          s)))))
+
+(defn pad
+  ([len s] (pad-impl \0 len s false))
+  ([pad-char len s] (pad-impl pad-char len s false)))
+
+(defn pad-right
+  ([len s] (pad-impl \0 len s true))
+  ([pad-char len s] (pad-impl pad-char len s true)))
 
 (defn get-timestamp
   []
@@ -151,6 +161,25 @@
 
 (def consts [:n :u :i :m])
 (def consts-set #{:n :u :i :m})
+(def consts-str ["n" "u" "i" "m"])
+(def consts-str-set #{"n" "u" "i" "m"})
+
+(def extended-ini-patterns-seq
+  (concat [[:n [:n]]
+           [:u [:u]]
+           [:i [:i]]
+           [:m [:m]]]
+          ini-patterns))
+
+(def extended-ini-patterns
+  (into {} extended-ini-patterns-seq))
+
+(defn gen-ca-seed
+  []
+  (rand-int
+   1000000000
+   ;; (.-MAX_SAFE_INTEGER js/Number)
+   ))
 
 (comment
   (pad 2 (.getUTCDate (js/Date.)))

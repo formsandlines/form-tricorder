@@ -148,12 +148,23 @@
                                    :neg-op? false
                                    :op :intersects} ;; | :subseteq | equal
                   :results-filter utils/consts-set}
-           :emul {:res [161 161]
-                  :ini-spec {:bg {:type :random
-                                  :density {:n 0.5 :u 0.2 :i 0.8 :m 0.0}}
-                             :figure {:type :ball
-                                      :pos :topleft
-                                      :align :center}}}}
+           :emul {:res [61 61] ; [161 161]
+                  :cell-size 4
+                  :seed (utils/gen-ca-seed)
+                  :ini {:bg {:bg-type :constant
+                             :const :n
+                             :rand-weights {:n 0.5 :u 0.2 :i 0.8 :m 0.0}
+                             :cycle-vals [:n :u]}
+                        :figure {:apply? true
+                                 :fig-type :random
+                                 :pattern :ball
+                                 :rand-res [21 21]
+                                 :rand-decay 0.0
+                                 :rand-weights {:n 1.0 :u 1.0 :i 1.0 :m 1.0}
+                                 :pos [0.5 0.5]
+                                 :align :center
+                                 :copies [1 1]
+                                 :spacing [2 2]}}}}
    :theme {:appearance :system
            :system-color-scheme "light"} ;; ? default or throw
    :cache {:selfi-evolution {:deps #{:expr :varorder} ;; ?
@@ -225,6 +236,10 @@
                           {:results-filter results-filter
                            :interpr-filter interpr-filter})
 
+              modes-emul (utils/merge-some
+                          (get-in default-db [:modes :emul])
+                          {})
+
               appearance (if-let [app-s (.get search-params "theme")]
                            (let [app (keyword app-s)]
                              (if (#{:light :dark :system} app)
@@ -240,7 +255,8 @@
                           :windows (count views)}
                   :views views
                   :modes {:expr modes-expr
-                          :eval modes-eval}
+                          :eval modes-eval
+                          :emul modes-emul}
                   :theme {:appearance appearance
                           :system-color-scheme system-color-scheme}
                   :cache (get default-db :cache)
@@ -437,6 +453,34 @@
  (fn [{db :db} [_ {:keys [next-graph-style]}]]
    {:db (assoc-in db [:modes :expr :graph-style] next-graph-style)}))
 
+
+(rf/reg-event-fx
+ :modes/set-ca-res
+ (fn [{db :db} [_ {:keys [next-res]}]]
+   {:db (assoc-in db [:modes :emul :res] next-res)}))
+
+(rf/reg-event-fx
+ :modes/set-ca-cell-size
+ (fn [{db :db} [_ {:keys [next-cell-size]}]]
+   {:db (assoc-in db [:modes :emul :cell-size] next-cell-size)}))
+
+(rf/reg-event-fx
+ :modes/set-ca-seed
+ (fn [{db :db} [_ {:keys [next-seed]}]]
+   {:db (assoc-in db [:modes :emul :seed] next-seed)}))
+
+(rf/reg-event-fx
+ :modes/set-ca-ini
+ (fn [{db :db} [_ {:keys [next-ca-ini]}]]
+   {:db (assoc-in db [:modes :emul :ini] next-ca-ini)}))
+
+(rf/reg-event-fx
+ :modes/reset-ca-ini
+ (fn [{db :db} [_ _]]
+   {:db (assoc-in db [:modes :emul :ini]
+                  (get-in default-db [:modes :emul :ini]))}))
+
+
 (rf/reg-event-fx
  :modes/set-interpr-filter
  (fn [{db :db} [_ {:keys [next-interpr-filter]}]]
@@ -460,6 +504,7 @@
  (fn [{db :db} [_ _]]
    {:db (assoc-in db [:modes :eval :results-filter]
                   (get-in default-db [:modes :eval :results-filter]))}))
+
 
 
 ;; NOTE: a proposed feature of re-frame called “flows” might make the need

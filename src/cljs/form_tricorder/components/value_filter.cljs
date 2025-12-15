@@ -7,6 +7,8 @@
    [helix.dom :as d :refer [$d]]
    [shadow.css :refer (css)]
    [form-tricorder.re-frame-adapter :as rf]
+   [form-tricorder.components.function-opts
+    :refer [FuncOpts FuncOptsGroup FuncOptHead $$toggle-const-styles]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.common.toggle :refer [Toggle]]
    [form-tricorder.components.common.toggle-group
@@ -19,25 +21,6 @@
    ["@radix-ui/react-collapsible" :as Collapsible]))
 
 (def r) ;; hotfix for linting error in let+
-
-(def $$toggle-const-styles
-  {:n (css ["&[data-state=on]"
-            {:background-color "var(--col-const-n)"}]
-           ["&[data-state=on]:hover"
-            {:background-color "var(--col-const-n-hover)"}])
-   :u (css ["&[data-state=on]"
-            {:background-color "var(--col-const-u)"}]
-           ["&[data-state=on]:hover"
-            {:background-color "var(--col-const-u-hover)"}])
-   :i (css ["&[data-state=on]"
-            {:background-color "var(--col-const-i)"}]
-           ["&[data-state=on]:hover"
-            {:background-color "var(--col-const-i-hover)"}])
-   :m (css ["&[data-state=on]"
-            {:background-color "var(--col-const-m)"}]
-           ["&[data-state=on]:hover"
-            {:background-color "var(--col-const-m-hover)"}])})
-
 
 (defnc CurlyBrace
   [props]
@@ -64,176 +47,181 @@
   (css :h-18 :fg-muted))
 
 (defnc InterpretationFilterUI
-  [{:keys [interpr-filter varorder
+  [{:keys [label-id interpr-filter varorder
            filter-interpr-handler reset-filter-interpr-handler]}]
   (let [{:keys [neg-op? op terms-filter vals-filter]} interpr-filter
         disabled? (or (empty? varorder) (empty? terms-filter))]
-    (d/div
-     {:class (css "InterpretationFilter"
-                  :gap-3 :border-col :py-3 :px-4 :rounded
-                  {:display "flex"
-                   :border "1px dashed"
-                   :flex-direction "column"
-                   :justify-content "stretch"
-                   :align-items "start"})}
-     (d/div
-      {:class (css "InterpretationTermsFilter"
-                   :gap-2
-                   {:display "flex"
-                    :align-items "center"})}
-      (d/span
-       {:class (css ;; :ml-1
-                :fg-muted
-                {:white-space "nowrap"})}
-       "∀ " (d/i "I") " ∈" (when disabled? " ∅"))
-      (when-not disabled?
-        (for [[i filter] (map-indexed vector terms-filter)
-              :let [v (varorder i)]]
-          (<>
-           {:key (str "filter-interpr-term-" i)}
-           (d/div
-            {:class (css :gap-1
-                         {:display "flex"
-                          :align-items "center"})}
-            ($ CurlyBrace
-               {:class $set-brace-lg
-                :closed? false})
-            (d/div
-             {:class (css :pr-2
-                          {:position "relative"})}
-             ($ ToggleGroup
-                {:type "multiple"
-                 :value (clj->js filter)
-                 :onValueChange (fn [arr] (filter-interpr-handler
-                                          (assoc-in
-                                           interpr-filter
-                                           [:terms-filter i]
-                                           (into #{} (map keyword) arr))))
-                 :class (css :font-mono)
-                 :disabled disabled?
-                 :orientation "horizontal"
-                 :group-variant :value-filter/vmap}
-                (for [c utils/consts]
-                  ($ ToggleGroupItem
-                     {:key (str "filter-results-" (name c))
-                      :class ($$toggle-const-styles c)
-                      :value (name c)}
-                     (d/i (utils/pp-val c)))))
-             (d/abbr
-              {:class (css :font-size-sm
-                           {:position "absolute"
-                            :right "0"
-                            :bottom "0"})
-               :title (str v)}
-              "v" (d/sub {:class (css {:margin-left "0.08rem"})}
-                         (str i))))
-            ($ CurlyBrace
-               {:class $set-brace-lg
-                :closed? true}))
-           (when (< i (dec (count terms-filter)))
-             (d/span
-              {:class (css :fg-muted)}
-              "×")))))
-      (d/span
-       {:class (css :fg-muted)}
-       ": "))
-     (d/div
-      {:class (css :gap-3
-                   {:display "flex"
-                    :align-items "center"})}
-      (d/div
-       {:class "InterpretationFilterNegOp"}
-       ($ Toggle
-          {:class (css :font-mono :pb-1)
-           :variant :outline
-           :size :sm
-           ;; :style {:max-height "var(--sz-6)"}
-           :disabled disabled?
-           :pressed neg-op?
-           :title "negate set operation"
-           :onPressedChange (fn [b] (filter-interpr-handler
-                                    (assoc interpr-filter :neg-op? b)))}
-          "¬"))
-      (d/span
-       {:class (css :fg-muted)}
-       (d/i "I"))
-      (d/div
-       {:class "InterpretationFilterOp"}
-       ($ RadioGroup
-          {:value (name op)
-           :onValueChange (fn [s] (filter-interpr-handler
-                                  (assoc interpr-filter :op (keyword s))))
-           :disabled disabled?
-           :orientation "horizontal"
-           :group-variant :joined
-           :variant :outline
-           :size :sm}
-          (for [[k s label] [[:intersects "∩" "intersects"]
-                             [:subseteq "⊆" "is subset of"]
-                             [:equal "=" "is equal to"]]]
-            ($ RadioGroupItem
-               {:key (str "filter-interpr-op" (name k))
-                :class (css :font-mono)
-                :title (str "set operation: " label)
-                :value (name k)}
-               s))))
-      (d/div
-       {:class (css "InterpretationValsFilter"
-                    :gap-2
+    ($ FuncOptsGroup
+       {:dir :column
+        :aria-labelledby label-id
+        :class (css "InterpretationFilter"
+                    :gap-3 :border-col :py-3 :px-4 :rounded
                     {:display "flex"
-                     :align-items "center"})}
-       ($ CurlyBrace
-          {:class $set-brace
-           :closed? false})
-       ($ Button
-          {:class (css :font-mono)
-           :variant :outline
-           :size :sm
-           :style {:height "var(--sz-2)"}
-           :disabled disabled?
-           :title "invert toggle selection"
-           :onClick (fn [_] (filter-interpr-handler
-                            (assoc
-                             interpr-filter
-                             :vals-filter
-                             (set/difference utils/consts-set vals-filter))))}
-          "–")
-       ($ ToggleGroup
-          {:type "multiple"
-           :value (clj->js vals-filter)
-           :onValueChange (fn [arr] (filter-interpr-handler
-                                    (assoc
-                                     interpr-filter
-                                     :vals-filter
-                                     (into #{} (map keyword) arr))))
-           :class (css :font-mono)
-           :orientation "horizontal"
-           :group-variant :joined
-           :disabled disabled?
-           :variant :outline
-           :size :sm}
-          (for [c utils/consts]
-            ($ ToggleGroupItem
-               {:key (str "filter-interpr-vals-" (name c))
-                :class ($$toggle-const-styles c)
-                :value (name c)}
-               (d/i (utils/pp-val c)))))
-       ($ CurlyBrace
-          {:class $set-brace
-           :closed? true}))
-      ($ Button
-         {:variant :destructive
-          :size :sm
-          :disabled disabled?
-          :title "reset to default settings"
-          :onClick reset-filter-interpr-handler}
-         "reset")))))
+                     :border "1px dashed"
+                     :flex-direction "column"
+                     :justify-content "stretch"
+                     :align-items "start"})}
+       (d/div
+        {:class (css "InterpretationTermsFilter"
+                     :gap-2
+                     {:display "flex"
+                      :align-items "center"})}
+        (d/span
+         {:class (css ;; :ml-1
+                  :fg-muted
+                  {:white-space "nowrap"})}
+         "∀ " (d/i "I") " ∈" (when disabled? " ∅"))
+        (when-not disabled? ;; ? better use display: none
+          (for [[i filter] (map-indexed vector terms-filter)
+                :let [v (varorder i)]]
+            (<>
+             {:key (str "filter-interpr-term-" i)}
+             (d/div
+              {:class (css :gap-1
+                           {:display "flex"
+                            :align-items "center"})}
+              ($ CurlyBrace
+                 {:class $set-brace-lg
+                  :closed? false})
+              (d/div
+               {:class (css :pr-2
+                            {:position "relative"})}
+               ($ ToggleGroup
+                  {:type "multiple"
+                   :value (clj->js filter)
+                   :onValueChange (fn [arr] (filter-interpr-handler
+                                            (assoc-in
+                                             interpr-filter
+                                             [:terms-filter i]
+                                             (into #{} (map keyword) arr))))
+                   :class (css :font-mono)
+                   :disabled disabled?
+                   :orientation "horizontal"
+                   :group-variant :value-filter/vmap}
+                  (for [c utils/consts]
+                    ($ ToggleGroupItem
+                       {:key (str "filter-results-" (name c))
+                        :class ($$toggle-const-styles c)
+                        :value (name c)}
+                       (d/i (utils/pp-val c)))))
+               (d/abbr
+                {:class (css :font-size-sm
+                             {:position "absolute"
+                              :right "0"
+                              :bottom "0"})
+                 :title (str v)}
+                "v" (d/sub {:class (css {:margin-left "0.08rem"})}
+                           (str i))))
+              ($ CurlyBrace
+                 {:class $set-brace-lg
+                  :closed? true}))
+             (when (< i (dec (count terms-filter)))
+               (d/span
+                {:class (css :fg-muted)}
+                "×")))))
+        (d/span
+         {:class (css :fg-muted)}
+         ": "))
+       (d/div
+        {:class (css :gap-3
+                     {:display "flex"
+                      :align-items "center"})}
+        (d/div
+         {:class "InterpretationFilterNegOp"}
+         ($ Toggle
+            {:class (css :font-mono :pb-1)
+             :variant :outline
+             :size :sm
+             ;; :style {:max-height "var(--sz-6)"}
+             :disabled disabled?
+             :pressed neg-op?
+             :title "negate set operation"
+             :onPressedChange (fn [b] (filter-interpr-handler
+                                      (assoc interpr-filter :neg-op? b)))}
+            "¬"))
+        (d/span
+         {:class (css :fg-muted)}
+         (d/i "I"))
+        (d/div
+         {:class "InterpretationFilterOp"}
+         ($ RadioGroup
+            {:value (name op)
+             :onValueChange (fn [s] (filter-interpr-handler
+                                    (assoc interpr-filter :op (keyword s))))
+             :disabled disabled?
+             :orientation "horizontal"
+             :group-variant :joined
+             :variant :outline
+             :size :sm}
+            (for [[k s label] [[:intersects "∩" "intersects"]
+                               [:subseteq "⊆" "is subset of"]
+                               [:equal "=" "is equal to"]]]
+              ($ RadioGroupItem
+                 {:key (str "filter-interpr-op" (name k))
+                  :class (css :font-mono)
+                  :title (str "set operation: " label)
+                  :value (name k)}
+                 s))))
+        (d/div
+         {:class (css "InterpretationValsFilter"
+                      :gap-2
+                      {:display "flex"
+                       :align-items "center"})}
+         ($ CurlyBrace
+            {:class $set-brace
+             :closed? false})
+         ($ Button
+            {:class (css :font-mono)
+             :variant :outline
+             :size :sm
+             :style {:height "var(--sz-2)"}
+             :disabled disabled?
+             :title "invert toggle selection"
+             :onClick (fn [_] (filter-interpr-handler
+                              (assoc
+                               interpr-filter
+                               :vals-filter
+                               (set/difference utils/consts-set vals-filter))))}
+            "–")
+         ($ ToggleGroup
+            {:type "multiple"
+             :value (clj->js vals-filter)
+             :onValueChange (fn [arr] (filter-interpr-handler
+                                      (assoc
+                                       interpr-filter
+                                       :vals-filter
+                                       (into #{} (map keyword) arr))))
+             :class (css :font-mono)
+             :orientation "horizontal"
+             :group-variant :joined
+             :disabled disabled?
+             :variant :outline
+             :size :sm}
+            (for [c utils/consts]
+              ($ ToggleGroupItem
+                 {:key (str "filter-interpr-vals-" (name c))
+                  :class ($$toggle-const-styles c)
+                  :value (name c)}
+                 (d/i (utils/pp-val c)))))
+         ($ CurlyBrace
+            {:class $set-brace
+             :closed? true}))
+        ($ Button
+           {:variant :destructive
+            :size :sm
+            :disabled disabled?
+            :title "reset to default settings"
+            :onClick reset-filter-interpr-handler}
+           "reset")))))
 
 
 (defnc ResultsFilterUI
-  [{:keys [results-filter filter-results-handler reset-filter-results-handler]}]
-  (d/div
-   {:class (css "ResultsFilter"
+  [{:keys [label-id results-filter filter-results-handler
+           reset-filter-results-handler]}]
+  ($ FuncOptsGroup
+     {:dir :row
+      :aria-labelledby label-id
+      :class (css "ResultsFilter"
                 :gap-3 :border-col :py-3 :px-4 :rounded
                 {:display "flex"
                  :border "1px dashed"
@@ -286,7 +274,7 @@
 
 (defnc OptLabel
   [{:keys [children]}]
-  (d/label
+  (d/div
    {:class (css :font-size-sm)}
    children))
 
@@ -335,14 +323,16 @@
                       :column-gap "0.6rem"
                       :row-gap "0.4rem"
                       :grid-template-columns "auto 4fr"})}
-            ($ OptLabel "Interpr. filter:")
+            ($ FuncOptHead {:id "interpr-filter"} "Interpr. filter:")
             ($ InterpretationFilterUI
-               {:interpr-filter interpr-filter
+               {:label-id "interpr-filter"
+                :interpr-filter interpr-filter
                 :filter-interpr-handler set-filtered-interpr
                 :reset-filter-interpr-handler reset-filter-interpr
                 :varorder (vec varorder)})
-            ($ OptLabel "Results filter:")
+            ($ FuncOptHead {:id "results-filter"} "Results filter:")
             ($ ResultsFilterUI
-               {:results-filter results-filter
+               {:label-id "results-filter"
+                :results-filter results-filter
                 :filter-results-handler set-filtered-results
                 :reset-filter-results-handler reset-filter-results})))))

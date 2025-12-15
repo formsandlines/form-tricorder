@@ -9,15 +9,18 @@
    [clojure.math]
    [clojure.string :as string]
    ["@radix-ui/react-icons" :as radix-icons]
+   ["lucide-react" :as lucide-icons]
    [formform.emul :as emul]
    [form-tricorder.re-frame-adapter :as rf]
    [formform-vis.core :refer [->attr]]
    [formform-vis.components.automaton :refer [make-state!]]
    [form-tricorder.icons :refer [PerspectivesExpandIcon
                                  PerspectivesCollapseIcon]]
+   [form-tricorder.components.function-opts :refer [FuncOpts FuncOptsGroup]]
    [form-tricorder.components.common.button :refer [Button]]
    [form-tricorder.components.copy-trigger :refer [CopyTrigger]]
    [form-tricorder.components.value-filter :refer [ValueFilter]]
+   [form-tricorder.components.ca-config :refer [CaConfig]]
    [form-tricorder.components.export-dialog :refer [ExportPreview]]
    [form-tricorder.components.image-export :refer [ImageExportVmap
                                                    ImageExportGraph]]
@@ -43,36 +46,11 @@
                   :flex-direction "column"
                   :height "100%"
                   :width "100%"}
-                 ["& > *:last-child"
-                  {:overflow "auto"}])}
-    children))
-
-(defnc FuncOpts
-  [{:keys [children]}]
-  (d/div
-    {:class (css ;; "outer"
-              :border-col
-              :p-2 :rounded
-              :gap-2
-              {:border "1px dashed"
-               ;; :position "relative"
-               :display "flex"
-               :width "fit-content"})}
-    children
-    (d/label
-      {:class (css :fg-muted)}
-      ($ radix-icons/MixerHorizontalIcon))))
-
-(defnc FuncOptsGroup
-  [{:keys [dir children]}]
-  (d/div
-    {:class (unite
-             (css :gap-2 {:display "flex"
-                          :align-items "start"})
-             (case dir
-               :row (css {:flex-direction "row"})
-               :column (css {:flex-direction "column"})
-               (throw (ex-info "invalid flex direction" {}))))}
+                 ;; this separates the scroll area of the config from the
+                 ;; scroll area of the function display:
+                 ;; ["& > *:last-child"
+                 ;;  {:overflow "auto"}]
+                 )}
     children))
 
 (defmulti gen-component (fn [func-id _] func-id))
@@ -586,154 +564,100 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; SelFi CA
 
-;; first (error-prone) attempt, complects web component state with React:
-#_
-(defnc F-Automaton
-  [{:keys [ca-spec cell-size buffer-size run?]} :as props]
-  (let [webc-ref (hooks/use-ref nil)
-        ;; ca-ref (hooks/use-ref (emul/create-ca ca-spec 0))
-        ;; run-ref (hooks/use-ref run?)
-        ]
-    (hooks/use-effect
-     :once
-     (let [webc-el @webc-ref
-           ca (emul/create-ca ca-spec 0)
-           _ (make-state! webc-el)]
-       ;; (aset webc-el "ca" @ca-ref)
-       ;; (aset webc-el "run?" @run-ref)
-       (aset webc-el "ca" ca)
-       (aset webc-el "run?" run?)
-       (fn []
-         ;; (reset! ref nil)
-         ;; nil
-         #_
-         (when webc-el
-           (aset webc-el "ca" nil)
-           ;; (.disconnect webc-el)
-           ;; (when (.-parentNode webc-el)
-           ;;   (.removeChild (.-parentNode webc-el) webc-el))
-           ;; (reset! ref nil)
-           ))))
-    ($ :ff-automaton {:ref webc-ref
-                      "cell-size" (->attr cell-size)
-                      "buffer-size" (->attr buffer-size)})))
+(defn setup-automaton!
+  [{:keys [ca-spec res cell-size seed buffer-size run?] :as props}]
+  (let [webc-el (js/document.createElement "ff-automaton")
+        ca (emul/create-ca ca-spec res {:seed seed
+                                        :history-cache-limit 0})
+        _ (make-state! webc-el)]
+    ;; (println "CA changed!!")
+    (.setAttribute webc-el "cell-size" (->attr cell-size))
+    (.setAttribute webc-el "buffer-size" (->attr buffer-size))
+    (aset webc-el "ca" ca)
+    (aset webc-el "run?" run?)
+    webc-el))
 
-;; second attempt, isolates web component state:
-#_
-(defnc F-Automaton
-  [{:keys [ca-spec cell-size buffer-size run?]}]
-  (let [container-ref (hooks/use-ref nil)]
-    (hooks/use-effect
-      :once
-      (let [container @container-ref
-            webc-el (js/document.createElement "ff-automaton")
-            ca (emul/create-ca ca-spec 0)
-            _ (make-state! webc-el)]
-        (.setAttribute webc-el "cell-size" (->attr cell-size))
-        (.setAttribute webc-el "buffer-size" (->attr buffer-size))
-        (aset webc-el "ca" ca)
-        (aset webc-el "run?" run?)
-        (.appendChild container webc-el)
+(defn update-automaton!
+  [webc-el {:keys [cell-size]}]
+  (.setAttribute webc-el "cell-size" (->attr cell-size)))
 
-        (fn []
-          (println "Cleanup React")
-          (when-let [parent (.-parentNode webc-el)]
-            (.removeChild parent webc-el)))))
-    (d/div {:ref container-ref})))
-
-;; third (unrefined) attempt, allows web component to react on prop change:
 (defnc F-Automaton
   [props]
   (let [container-ref (hooks/use-ref nil)
         webc-ref (hooks/use-ref nil)]
     (hooks/use-effect
-      [props]
-      (when (and (not @webc-ref) @container-ref)
-        ;; (println "F-Automaton effect! " (:ca-spec props))
-        ;; imperatively create web component and set initial props
-        (let [{:keys [ca-spec res cell-size buffer-size run?]} props
-              webc-el (js/document.createElement "ff-automaton")
-              ca (emul/create-ca ca-spec res 0)
-              _ (make-state! webc-el)]
-          (.setAttribute webc-el "cell-size" (->attr cell-size))
-          (.setAttribute webc-el "buffer-size" (->attr buffer-size))
-          (aset webc-el "ca" ca)
-          (aset webc-el "run?" run?)
-          ;; store reference to web component and append it to container
-          (reset! webc-ref webc-el)
-          (.appendChild @container-ref webc-el)))
+     [props]
+     (when (and (not @webc-ref) @container-ref)
+       ;; (println "F-Automaton effect! " (:ca-spec props))
+       ;; imperatively create web component and set initial props
+       (let [webc-el (setup-automaton! props)]
+         ;; store reference to web component and append it to container
+         (reset! webc-ref webc-el)
+         (.appendChild @container-ref webc-el)))
 
-      ;; update properties when props change
-      (when @webc-ref
-        ;; TODO
-        nil)
+     ;; update properties when props change
+     (when @webc-ref
+       ;; (println "props change!")
+       (let [^js/Object webc-el @webc-ref
+             ^js/Object ca (.-ca webc-el)
+             prev-res (emul/get-resolution ca)
+             next-res (:res props)]
+         (if (not= prev-res next-res)
+           nil
+           ;; (let [next-webc-el (setup-automaton! props)]
+           ;;   ;; remove previous web component from dom
+           ;;   (reset! webc-ref nil)
+           ;;   (when-let [parent (.-parentNode webc-el)]
+           ;;     (.removeChild parent webc-el))
+           ;;   ;; store reference to web component and append it to container
+           ;;   (reset! webc-ref next-webc-el)
+           ;;   (.appendChild @container-ref next-webc-el))
+           (update-automaton! webc-el props))))
 
-      ;; cleanup (is this necessary? seems to prevent detached components)
-      #_
-      (fn []
-        ;; (println "Cleanup React")
-        (let [webc-el @webc-ref]
-          (reset! webc-ref nil)
-          (when-let [parent (.-parentNode webc-el)]
-            (.removeChild parent webc-el)))))
+     ;; cleanup (is this necessary? seems to prevent detached components)
+     #_
+     (fn []
+       ;; (println "Cleanup React")
+       (let [webc-el @webc-ref]
+         (reset! webc-ref nil)
+         (when-let [parent (.-parentNode webc-el)]
+           (.removeChild parent webc-el)))))
     (d/div {:ref container-ref})))
-
-(defn ini->str
-  [ini]
-  (str ini))
-
-(defnc IniSel
-  [{:keys [current-ini set-ini]}]
-  (let [inis-available [:random :ball]]
-    ($d Select
-      {:id "automaton-ini-select"
-       :value current-ini
-       :onValueChange (fn [v] (set-ini v))}
-      ($ SelectTrigger
-         {:style {:width "10rem"}}
-         ($d SelectValue
-           (ini->str current-ini)))
-      ($ SelectContent
-         {:class "inner"}
-         (for [ini inis-available
-               :let [label (ini->str ini)]]
-           ($ SelectItem
-              {:key (str ini)
-               :value ini}
-              label))))))
 
 (defnc F-Selfi--init
   [_]
-  (let [[ini set-ini] (hooks/use-state :ball)
-        ini-spec (case ini
-                   :ball [:figure :n (emul/ini-patterns :ball) :center]
-                   :random [:random])
-        ca-spec (rf/subscribe [:input/->ca-selfi ini-spec])
+  (let [res (rf/subscribe [:modes/ca-res])
+        cell-size (rf/subscribe [:modes/ca-cell-size])
+        seed (rf/subscribe [:modes/ca-seed])
+        ca-spec (rf/subscribe [:input/->ca-selfi])
         [reset-key set-reset-key] (hooks/use-state 0)
         ;; prevents unmounting effect on initial render
         initial-render? (hooks/use-ref true)]
+    ;; (println ini-spec)
     (println "SELFI " reset-key)
     (hooks/use-effect
-     [ca-spec]
-     ;; when CA changes, the automaton component must be remounted,
-     ;; so we change its `key` (identity) to trick React into unmounting
-     ;; the “old” and mounting the “new” component
-     (if @initial-render?
-       (reset! initial-render? false)
-       (do
-         ;; (println "RESET KEY Selfi")
-         (set-reset-key inc))))
+      [ca-spec res cell-size seed]
+      ;; when CA changes, the automaton component must be remounted,
+      ;; so we change its `key` (identity) to trick React into unmounting
+      ;; the “old” and mounting the “new” component
+      (if @initial-render?
+        (reset! initial-render? false)
+        (do
+          ;; (println "RESET KEY Selfi")
+          (set-reset-key inc))))
     ($ Function
-       (when ca-spec
-         ($ FuncOpts
-            ($ IniSel {:current-ini ini
-                       :set-ini set-ini})))
+       ($ FuncOpts
+          ($ CaConfig {:ca-type :selfi
+                       :res res
+                       :cell-size cell-size
+                       :seed seed}))
        (when ca-spec
          ($ F-Automaton {:key reset-key
                          :ca-spec ca-spec
                          :run? true
-                         :res [100]
-                         :cell-size 4
+                         :res [(first res)]
+                         :cell-size cell-size
+                         :seed seed
                          :buffer-size 200})))))
 
 (defmethod gen-component :selfi
@@ -743,28 +667,38 @@
 
 (defnc F-Mindform--init
   [_]
-  (let [ca-spec (rf/subscribe [:input/->ca-mindform
-                               [:random]
-                               #_
-                               [:figure :n (emul/ini-patterns :ball) :center]
-                               ])
+  (let [res (rf/subscribe [:modes/ca-res])
+        cell-size (rf/subscribe [:modes/ca-cell-size])
+        seed (rf/subscribe [:modes/ca-seed])
+        ca-spec (rf/subscribe [:input/->ca-mindform])
+        ;; ca-spec (rf/subscribe [:input/->ca-mindform
+        ;;                        [:random]
+        ;;                        #_
+        ;;                        [:figure :n (emul/ini-patterns :ball) :center]
+        ;;                        ])
         [reset-key set-reset-key] (hooks/use-state 0)
         initial-render? (hooks/use-ref true)]
     (println "MINDFORM " reset-key)
     (hooks/use-effect
-     [ca-spec]
+     [ca-spec res cell-size seed]
      (if @initial-render?
        (reset! initial-render? false)
        (do
          ;; (println "RESET KEY Mindform")
          (set-reset-key inc))))
     ($ Function
+       ($ FuncOpts
+          ($ CaConfig {:ca-type :mindform
+                       :res res
+                       :cell-size cell-size
+                       :seed seed}))
        (when ca-spec
          ($ F-Automaton {:key reset-key
                          :ca-spec ca-spec
-                         :run? true
-                         :res [151 151]
-                         :cell-size 4
+                         :run? false
+                         :res res ; 151
+                         :cell-size cell-size
+                         :seed seed
                          :buffer-size 1})))))
 
 (defmethod gen-component :mindform

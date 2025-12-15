@@ -44,6 +44,12 @@
                :bg-accent :fg-accent]
               ["&[data-state=on], &[data-state=open], &[data-state=checked]"
                :bg-accent :fg-accent])
+             :ghost
+             (css {:background-color "transparent"}
+                  ["&:hover"
+                   :bg-accent :fg-accent]
+                  ["&[data-state=on], &[data-state=open], &[data-state=checked]"
+                   :bg-accent :fg-accent])
 
              :formula-input/submit-mode
              (css

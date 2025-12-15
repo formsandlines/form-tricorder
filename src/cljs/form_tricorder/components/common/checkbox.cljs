@@ -8,7 +8,7 @@
    [form-tricorder.utils :refer [let+ unite]]
    ["react" :as react]
    ["@radix-ui/react-checkbox" :as CheckboxPrimitive]
-   ["lucide-react" :as icons]
+   ["lucide-react" :as lucide-icons]
    ;; ["@radix-ui/react-icons" :refer [CheckIcon]]
    ))
 
@@ -45,5 +45,5 @@
                       :align-items "center"
                       :justify-content "center"
                       :color "currentColor"})}
-        ($d icons/Check
+        ($d lucide-icons/Check
           {:class (css :size-icon-sm)})))))

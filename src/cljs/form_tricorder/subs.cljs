@@ -55,6 +55,27 @@
    (get-in db [:modes :expr :graph-style])))
 
 (rf/reg-sub
+ :modes/ca-res
+ (fn [db _]
+   (get-in db [:modes :emul :res])))
+
+(rf/reg-sub
+ :modes/ca-cell-size
+ (fn [db _]
+   (get-in db [:modes :emul :cell-size])))
+
+(rf/reg-sub
+ :modes/ca-seed
+ (fn [db _]
+   (get-in db [:modes :emul :seed])))
+
+(rf/reg-sub
+ :modes/ca-ini
+ (fn [db _]
+   (get-in db [:modes :emul :ini])))
+
+
+(rf/reg-sub
  :modes/interpr-filter
  (fn [db _]
    (get-in db [:modes :eval :interpr-filter])))
@@ -342,36 +363,111 @@
        (catch js/Error e
          (report-error e))))
 
+#_
+(rf/reg-sub
+ :modes/->ca-ini-spec
+ :<- [:modes/ca-ini]
+ (fn [{:keys [bg figure]} _]
+   (let [{:keys [bg-type const rand-weights cycle-vals]} bg
+         bg-args (case bg-type
+                   :constant [const]
+                   :random [{:weights rand-weights}]
+                   :cycle [cycle-vals]
+                   (throw (ex-info "Invalid CA background type."
+                                   {:type bg-type})))
+         bg-ini (apply emul/make-ini bg-type bg-args)]
+     ;; (println "TEST: " bg-ini)
+     (if (:apply? figure)
+       (let [{:keys [rand-res align rand-decay pos fig-type
+                     gap copies rand-weights pattern]} figure
+             anchor {:pos pos :align align}]
+         (case fig-type
+           ;; TODO: add repeated ini
+           :pattern (emul/make-ini :figure
+                                   bg-ini (emul/ini-patterns pattern) anchor)
+           :random (emul/make-ini :rand-figure
+                                  {:decay rand-decay :weights rand-weights}
+                                  bg-ini rand-res anchor)
+           (throw (ex-info "Invalid CA figure type."
+                           {:type fig-type}))))
+       (do (println bg-ini)
+           bg-ini)))))
+
+(defn make-ini-spec
+  [{:keys [bg figure]}]
+  (let [{:keys [bg-type const rand-weights cycle-vals]} bg
+        bg-args (case bg-type
+                  :constant [const]
+                  :random [{:weights rand-weights}]
+                  :cycle [cycle-vals]
+                  (throw (ex-info "Invalid CA background type."
+                                  {:type bg-type})))
+        bg-ini (apply emul/make-ini bg-type bg-args)]
+    ;; (println "TEST: " bg-ini)
+    (if (:apply? figure)
+      (let [{:keys [rand-res align rand-decay pos fig-type
+                    spacing copies rand-weights pattern]} figure
+            opts {:decay rand-decay :weights rand-weights}
+            anchor {:pos pos :align align}
+            figure (case fig-type
+                     ;; TODO: add repeated ini
+                     :pattern
+                     (emul/make-ini :figure
+                                    opts
+                                    bg-ini (utils/extended-ini-patterns pattern)
+                                    anchor)
+                     :random
+                     (emul/make-ini :rand-figure
+                                    opts
+                                    bg-ini rand-res anchor)
+                     (throw (ex-info "Invalid CA figure type."
+                                     {:type fig-type})))]
+        (if (and (= (first copies) 1)
+                 (= (second copies) 1))
+          figure
+          (emul/make-ini :figure-repeat opts figure copies spacing)))
+      bg-ini)))
+
+(comment
+  (= (emul/make-ini :constant :n) (emul/make-ini :constant :u))
+  (= (emul/make-ini :cycle [:n]) (emul/make-ini :cycle [:u]))
+
+  ,)
+
 (rf/reg-sub
  :input/->ca-selfi
  :<- [:input/->dna]
- (fn [dna [_ ini-data]]
+ :<- [:modes/ca-ini]
+ (fn [[dna ini] _]
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (let [ca (make-automaton :selfi
-                                    [dna (apply emul/make-ini ini-data)])]
-             ;; (println "rf ca-spec hash: " (hash ca))
-             ca))))
+     :else (let [ca (make-automaton :selfi [dna (make-ini-spec ini)])]
+             ;; since re-frame compares objects with `=`, changes might
+             ;; not get picked up, so we assoc a unique id to force re-render
+             (assoc ca :uuid (random-uuid))))))
 
 (rf/reg-sub
  :input/->ca-mindform
  :<- [:input/->dna]
- (fn [dna [_ ini-data]]
+ :<- [:modes/ca-ini]
+ (fn [[dna ini] _]
    (cond
      (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
-     :else (make-automaton :mindform
-                           [dna (apply emul/make-ini ini-data)]))))
+     :else (let [ca (make-automaton :mindform [dna (make-ini-spec ini)])]
+             ;; since re-frame compares objects with `=`, changes might
+             ;; not get picked up, so we assoc a unique id to force re-render
+             (assoc ca :uuid (random-uuid))))))
 
 (rf/reg-sub
  :input/->ca-lifeform
  :<- [:input/->dna]
+ :<- [:modes/ca-ini]
  (fn [dna [_]]
    (let [dim (calc/dna-dimension dna)]
      (cond
        (nil? dna) (report-error (ex-info "Invalid formDNA" {}))
        (not (== dim 3))
-       (report-error (ex-info "lifeFORMs require FORMs with exactly 3 variables (must result in formDNA of dimension 3)"
-                              {:dimension dim}))
+       (report-error (ex-info "lifeFORMs require FORMs with exactly 3 variables (must result in formDNA of dimension 3)" {:dimension dim}))
        :else (make-automaton :lifeform [dna])))))
 
 

@@ -53,6 +53,36 @@
                   ["&[data-orientation=vertical] > *:last-child"
                    :rounded-b-sm :border-b])
 
+             :grid
+             (css :gap-0
+                  {:display "grid"
+                   :grid-template-columns "auto auto auto"
+                   :width "fit-content"
+                   :align-items "stretch"
+                   :justify-content "center"}
+                  ["& > *:focus-visible"
+                   :ring-inset]
+                  ["& > *"
+                   :rounded-none]
+                  ["& > *:first-child"
+                   :rounded-tl-sm]
+                  ["& > *:nth-child(2)"
+                   :border-l-0 :border-r-0]
+                  ["& > *:nth-child(3)"
+                   :rounded-tr-sm]
+                  ["& > *:nth-child(4)"
+                   :border-t-0 :border-b-0]
+                  ["& > *:nth-child(5)"
+                   :border-l-0 :border-r-0 :border-t-0 :border-b-0]
+                  ["& > *:nth-child(6)"
+                   :border-t-0 :border-b-0]
+                  ["& > *:nth-child(7)"
+                   :rounded-bl-sm]
+                  ["& > *:nth-child(8)"
+                   :border-l-0 :border-r-0]
+                  ["& > *:last-child"
+                   :rounded-br-sm])
+
              :value-filter/vmap
              (css :size-14
                   {:position "relative"
