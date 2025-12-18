@@ -153,14 +153,14 @@
                   :seed (utils/gen-ca-seed)
                   :ini {:bg {:bg-type :constant
                              :const :n
-                             :rand-weights {:n 0.5 :u 0.2 :i 0.8 :m 0.0}
+                             :rand-weights utils/equal-weights
                              :cycle-vals [:n :u]}
                         :figure {:apply? true
                                  :fig-type :random
                                  :pattern :ball
                                  :rand-res [21 21]
                                  :rand-decay 0.0
-                                 :rand-weights {:n 1.0 :u 1.0 :i 1.0 :m 1.0}
+                                 :rand-weights utils/equal-weights
                                  :pos [0.5 0.5]
                                  :align :center
                                  :copies [1 1]
@@ -270,7 +270,7 @@
 
 (defn views->str
   [views]
-  (string/join "," (map (comp name :func-id) views)))
+  (string/join "," (mapv (comp name :func-id) views)))
 
 (defn varorder->str
   [varorder]
@@ -278,15 +278,36 @@
 
 (defn vals-filter->str
   [vals-filter]
-  (string/join "" (map utils/pp-val vals-filter)))
+  (string/join "" (mapv utils/pp-val vals-filter)))
 
 (defn interpr-filter->str
   [{:keys [neg-op? op terms-filter vals-filter]}]
   (let [neg-op?-s (if neg-op? "not" "")
         op-s (name op)
-        terms-filter-s (string/join "," (map vals-filter->str terms-filter))
+        terms-filter-s (string/join "," (mapv vals-filter->str terms-filter))
         vals-filter-s (vals-filter->str vals-filter)]
     (string/join ";" [neg-op?-s op-s terms-filter-s vals-filter-s] )))
+
+(defn res->str
+  [[w h]]
+  (str w (when h (str "," h))))
+
+(defn weights->str
+  [{:keys [n u i m]}]
+  (str n "," u "," i "," m))
+
+(defn ini-bg->str
+  [{:keys [bg-type const rand-weights cycle-vals]}]
+  (let [bg-type-s (name bg-type)
+        const-s (name const)
+        rand-weights-s (weights->str rand-weights)
+        cycle-vals-s (string/join "" (mapv utils/pp-val cycle-vals))]
+    (string/join ";" [bg-type-s const-s rand-weights-s cycle-vals-s])))
+
+(defn ini-fig->str
+  [{:keys [apply? fig-type pattern pos align copies spacing
+           rand-res rand-decay rand-weights]}]
+  "TODO")
 
 (rf/reg-event-fx
  :copy-stateful-link
@@ -298,7 +319,11 @@
          formula (get-in db [:input :formula])
          varorder (get-in db [:input :varorder])
          interpr-filter (get-in db [:modes :eval :interpr-filter])
-         results-filter (get-in db [:modes :eval :results-filter])]
+         results-filter (get-in db [:modes :eval :results-filter])
+         ca-res (get-in db [:modes :emul :res])
+         ca-cell-size (get-in db [:modes :emul :cell-size])
+         ca-seed (get-in db [:modes :emul :seed])
+         ca-ini (get-in db [:modes :emul :ini])]
      {:fx [[:set-search-params [["views" (views->str views)]]]
            [:set-search-params [["layout" (name orientation)]]]
            [:set-search-params [["theme" (name appearance)]]]
@@ -309,6 +334,11 @@
                                                    interpr-filter)]]]
            [:set-search-params [["results-filter" (vals-filter->str
                                                    results-filter)]]]
+           [:set-search-params [["ca-res" (res->str ca-res)]]]
+           [:set-search-params [["cell" (str ca-cell-size)]]]
+           [:set-search-params [["seed" (str ca-seed)]]]
+           [:set-search-params [["ini-bg" (ini-bg->str (:bg ca-ini))]]]
+           [:set-search-params [["ini-fig" (ini-fig->str (:figure ca-ini))]]]
            [:copy-url report-copy-status]]})))
 
 ;; (def update-expr

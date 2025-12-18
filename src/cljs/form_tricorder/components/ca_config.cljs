@@ -29,6 +29,7 @@
    [form-tricorder.utils :as utils :refer [let+ unite]]
    ;; ["@radix-ui/react-icons" :as radix-icons]
    ["lucide-react" :as lucide-icons]
+   ["@radix-ui/react-popover" :as PopoverPrimitive]
    ["@radix-ui/react-icons" :as radix-icons]
    ["@radix-ui/react-collapsible" :as Collapsible]))
 
@@ -118,83 +119,92 @@
                     (set-res [(first res) next-res-y])))}))))))))
 
 
-;; density: 
-(defn calc-density
-  [weights]
-  (let [total (+ 0.0 (reduce + (vals weights)))
-        normal-weights (update-vals weights #(/ % total))
-        ;; n-weight (:n normal-weights)
-        v-weights (vals (dissoc normal-weights :n))]
-    (.toPrecision (reduce + v-weights) 2)))
-
-(defn apply-density-on-weights
-  [density weights]
-  (let [total (+ 0.0 (reduce + (vals weights)))
-        normal-weights (update-vals weights #(/ % total))
-        n-weight (:n normal-weights)
-        v-weights (vals (dissoc normal-weights :n))
-        ]
-    ))
-
-(comment
-  (calc-density {:n 0.95
-                 :u 0.05
-                 :i 0.1
-                 :m 0.05})
-
-  (.toPrecision 0.2348426 3)
-  
-  ,)
-
-(def equal-weights {:n 0.25
-                    :u 0.25
-                    :i 0.25
-                    :m 0.25})
+(defnc WeightsPopover
+  [{:keys [disabled? rand-weights set-rand-weights children]}]
+  (let [[open? set-open?] (hooks/use-state false)]
+    ($d (.-Root PopoverPrimitive)
+      {:open open?
+       :onOpenChange #(set-open? %)
+       :modal false}
+      ($d (.-Trigger PopoverPrimitive)
+        {:asChild true}
+        children)
+      ($d (.-Portal PopoverPrimitive)
+        ($d (.-Content PopoverPrimitive)
+          {:align "start"
+           :side "bottom"
+           :sideOffset 6
+           :collisionPadding 10
+           :onInteractOutside #(.preventDefault %)
+           :sticky "always"
+           :class (css "outer"
+                       :py-6 :pl-6 :pr-14 :text-sm :shadow-md
+                       ;; :bg-popover
+                       :fg-popover
+                       :border :border-col :rounded-md
+                       {
+                        ;; :width "70vw"
+                        ;; :min-width "260px"
+                        ;; :max-width "200px"
+                        ;; :max-height "600px"
+                        :overflow "auto"
+                        :z-index "11"
+                        :background-color "color-mix(in srgb, var(--col-bg-popover) 96%, transparent)"})}
+          ($d (.-Close PopoverPrimitive)
+            {:asChild true}
+            ($ Button
+               {:class (css :top-4 :right-4
+                            {:position "absolute"
+                             :outline "0.4rem solid var(--col-bg)"
+                             :z-index "12"})
+                :variant :secondary
+                :size :icon-sm}
+               ($d radix-icons/Cross2Icon)))
+          (d/div
+            {:class (css :w-64 :gap-x-3 :gap-y-1-5 :font-mono :text-sm
+                         {:display "grid"
+                          ;; :column-gap "0.6rem"
+                          ;; :row-gap "0.4rem"
+                          :grid-template-columns "auto 1fr auto"})}
+            (for [c utils/consts
+                  :let [id (str "ini-weights-" (name c))
+                        weight (c rand-weights)]]
+              (<>
+                {:key id}
+                ($ Label
+                   {:class (css {:font-style "italic"})
+                    :htmlFor id}
+                   (name c))
+                ($ Slider
+                   {:class ($$slider-const-styles c)
+                    :id id
+                    :value [weight]
+                    :disabled disabled?
+                    :onValueChange (fn [arr]
+                                     (let [v (aget arr 0)
+                                           next-weights (assoc rand-weights c v)]
+                                       (set-rand-weights next-weights)))
+                    :min 0
+                    :max 1
+                    :step 0.05})
+                (d/div
+                  {:class (css :text-xs :fg-muted)}
+                  (str (when weight (.toFixed weight 3))))
+                #_
+                (d/div (str (utils/pad (utils/<&> "&nbsp;") 3
+                                       (str (Math/round (* 100 weight))))
+                            (utils/<&> "&thinsp;") "%"))
+                )))))))
+  )
 
 (defnc CaOptsRandom
-  [{:keys [ini set-ini]}]
-  (let [{:keys [bg-type rand-weights]} (:bg ini)
-        rand-density (calc-density rand-weights)]
+  [{:keys [disabled? set-rand-weights rand-weights]}]
+  (let [[rand-density set-rand-density] (hooks/use-state
+                                         (utils/calc-density rand-weights))]
     ($ FuncOptsGroup
        {:dir :column}
-       (d/div
-         {:class (css :w-64 :gap-x-3 :gap-y :font-mono :text-sm
-                      {:display "grid"
-                       ;; :column-gap "0.6rem"
-                       ;; :row-gap "0.4rem"
-                       :grid-template-columns "auto 1fr auto"})}
-         (for [c utils/consts
-               :let [id (str "ini-weights-" (name c))
-                     weight (c rand-weights)]]
-           (<>
-             {:key id}
-             ($ Label
-                {:class (css {:font-style "italic"})
-                 :htmlFor id}
-                (name c))
-             ($ Slider
-                {:class ($$slider-const-styles c)
-                 :id id
-                 :value [weight]
-                 :disabled (not= :random bg-type)
-                 :onValueChange (fn [arr]
-                                  (let [v (aget arr 0)
-                                        next-weights (assoc rand-weights c v)]
-                                    (set-ini
-                                     (assoc-in ini [:bg :rand-weights]
-                                               next-weights))))
-                 :min 0
-                 :max 1
-                 :step 0.05})
-             (d/div
-               (str (.toFixed weight 2)))
-             #_
-             (d/div (str (utils/pad (utils/<&> "&nbsp;") 3
-                                    (str (Math/round (* 100 weight))))
-                         (utils/<&> "&thinsp;") "%"))
-             )))
        ($ FuncOptsGroup
-          {:class (css :gap-4
+          {:class (css :gap-2
                        {:align-items "center"})
            :dir :row}
           ($ FuncOptsGroup
@@ -211,23 +221,43 @@
                  :min "0.0"
                  :max "1.0"
                  :value rand-density
+                 :disabled disabled?
                  :onChange
                  (fn [e]
-                   (let [next-rand-density (try
-                                             (parse-long (.. e -target -value))
-                                             (catch js/Error err
-                                               (js/console.error err)))]
-                     (set-ini (assoc-in ini [:bg :rand-weights]
-                                        (apply-density-on-weights
-                                         next-rand-density rand-weights)))))}))
+                   (let [next-density (max 0.0
+                                           (min 1.0
+                                                (parse-double
+                                                 (.. e -target -value))))
+                         next-weights (utils/apply-density-on-weights
+                                       next-density rand-weights)]
+                     (set-rand-density next-density)
+                     (set-rand-weights next-weights)))}))
           ($ Button
              {:variant :secondary
               :size :sm
-              ;; :disabled (not= :random bg-type)
+              :disabled disabled?
               :title "balance random weights"
-              :onClick (fn [_] (set-ini (assoc-in ini [:bg :rand-weights]
-                                                 equal-weights)))}
-             "equal")))))
+              :onClick (fn [_]
+                         (set-rand-density (utils/calc-density
+                                            utils/equal-weights))
+                         (set-rand-weights utils/equal-weights))}
+             ($d lucide-icons/Equal
+               {:class (css :size-icon-sm)}))
+          ($ WeightsPopover
+             {:disabled? disabled?
+              :rand-weights rand-weights
+              :set-rand-weights (fn [next-weights]
+                                  (set-rand-density (utils/calc-density
+                                                     next-weights))
+                                  (set-rand-weights next-weights))}
+             ($ Button
+                {:variant :primary
+                 :size :sm
+                 :disabled disabled?
+                 :title "set random weights by value"
+                 :onClick (fn [_] nil)}
+                ($d radix-icons/MixerHorizontalIcon
+                  {:class (css :size-icon-sm)})))))))
 
 
 (def $options-subgrid
@@ -242,15 +272,15 @@
 
 (defnc CaOptsIniBackground
   [{:keys [dim ini set-ini reset-ini]}]
-  (let [{:keys [bg-type const cycle-vals]} (:bg ini)]
+  (let [{:keys [bg-type const cycle-vals rand-weights]} (:bg ini)]
     ($ FuncOptsGroup
-       {:class (css :gap-5
+       {:class (css :gap-6
                     ["& > *:last-child"
                      {:flex "none"}])
         :dir :row}
        ($ RadioGroup
           {:class (css "IniType"
-                       :gap-5
+                       :gap-6
                        {:display "flex"})
            :value (name bg-type)
            :aria-label "CA ini type"
@@ -273,7 +303,7 @@
                                  (set-ini
                                   (assoc-in ini [:bg :const] (keyword s))))
                 :class (css :font-mono)
-                :orientation "vertical"
+                :orientation "horizontal"
                 :group-variant :joined
                 :variant :outline
                 :disabled (not= :constant bg-type)
@@ -296,8 +326,10 @@
                "Random:")
             (d/div {:class "empty-grid-cell"})
             ($ CaOptsRandom
-               {:ini ini
-                :set-ini set-ini}))
+               {:disabled? (not= :random bg-type)
+                :rand-weights rand-weights
+                :set-rand-weights
+                #(set-ini (assoc-in ini [:bg :rand-weights] %))}))
           (d/div
             {:class $options-subgrid}
             ($ RadioGroupItem
@@ -308,7 +340,7 @@
                "Cycling values:")
             (d/div {:class "empty-grid-cell"})
             ($ Input
-               {:class (css :w-62)
+               {:class (css :w-42)
                 :id "ca-bg-cycle"
                 :type "text"
                 :value (string/join (mapv name cycle-vals))
@@ -334,7 +366,7 @@
         :dir :column}
        ($ FuncOptHead "Instances:")
        ($ FuncOptsGroup
-          {:class (css :gap-6)
+          {:class (css :gap-3)
            :dir :row}
           ($ FuncOptsGroup
              {:class (css {:align-items "center"})
@@ -354,9 +386,9 @@
                  :value (first copies)
                  :onChange
                  (fn [e]
-                   (let [next-copies-x (try (parse-long (.. e -target -value))
-                                            (catch js/Error err
-                                              (js/console.error err)))]
+                   (let [next-copies-x
+                         (try (max 1 (parse-long (.. e -target -value)))
+                              (catch js/Error err (js/console.error err)))]
                      (set-ini (assoc-in ini [:figure :copies 0]
                                         next-copies-x))))}))
           ($ FuncOptsGroup
@@ -372,8 +404,8 @@
                  :id "ca-spacing-x"
                  :type "number"
                  :step "1"
-                 :min "1"
-                 :max "10"
+                 :min "0"
+                 :max "100"
                  :value (first spacing)
                  :onChange
                  (fn [e]
@@ -384,7 +416,7 @@
                                         next-spacing-x))))})))
        (when (= dim :2d)
          ($ FuncOptsGroup
-            {:class (css :gap-6)
+            {:class (css :gap-3)
              :dir :row}
             ($ FuncOptsGroup
                {:class (css {:align-items "center"})
@@ -404,9 +436,9 @@
                    :value (second copies)
                    :onChange
                    (fn [e]
-                     (let [next-copies-y (try (parse-long (.. e -target -value))
-                                              (catch js/Error err
-                                                (js/console.error err)))]
+                     (let [next-copies-y
+                           (try (max 1 (parse-long (.. e -target -value)))
+                                (catch js/Error err (js/console.error err)))]
                        (set-ini (assoc-in ini [:figure :copies 1]
                                           next-copies-y))))}))
             ($ FuncOptsGroup
@@ -422,8 +454,8 @@
                    :id "ca-spacing-y"
                    :type "number"
                    :step "1"
-                   :min "1"
-                   :max "10"
+                   :min "0"
+                   :max "100"
                    :value (second spacing)
                    :onChange
                    (fn [e]
@@ -431,8 +463,7 @@
                                                (catch js/Error err
                                                  (js/console.error err)))]
                        (set-ini (assoc-in ini [:figure :spacing 1]
-                                          next-spacing-y))))}))
-            )))))
+                                          next-spacing-y))))})))))))
 
 (def align-kws
   [:topleft
@@ -477,7 +508,7 @@
 (defnc CaOptsIniFigurePosition
   [{:keys [dim ini set-ini]}]
   (let [{:keys [pos align]} (:figure ini)
-        [linked? set-linked?] (hooks/use-state false)
+        [linked? set-linked?] (hooks/use-state true)
         [slider2d-xy set-slider2d-xy] (hooks/use-state pos)]
     (hooks/use-effect
       [pos]
@@ -606,7 +637,7 @@
 
 (defnc CaOptsIniFigure
   [{:keys [dim res ini set-ini reset-ini]}]
-  (let [{:keys [fig-type pattern rand-res rand-decay apply?]}
+  (let [{:keys [fig-type pattern rand-res rand-weights rand-decay apply?]}
         (:figure ini)
         ;; [ini-fig-type set-ini-fig-type] (hooks/use-state :pattern)
         ;; [fig-pattern set-fig-pattern] (hooks/use-state :ball)
@@ -632,24 +663,21 @@
           {:class (css :gap-4 :mb-4
                        {:justify-content "flex-start"
                         :align-items "stretch"}
-                       ["& > *"
-                        :border-col :pl-4
-                        {:border-left-width "1px"
-                         :border-left-style "dashed"}]
-                       ["& > *:first-child"
-                        :pl-0
-                        {:border-left "none"}])
-           :dir :row
+                       ["& > *:last-child"
+                        :border-col :pt-4
+                        {:border-top-width "1px"
+                         :border-top-style "dashed"}])
+           :dir :column
            :aria-labelledby "figure-ini-head"}
           ($ RadioGroup
              {:class (css "IniFigureType"
-                          :gap-5
+                          :gap-6
                           {:display "flex"
-                           :flex-direction "column"})
+                           :flex-direction "row"})
               :value (name fig-type)
               :disabled (not apply?)
               :aria-label "CA ini figure type"
-              :orientation "vertical"
+              :orientation "horizontal"
               :onValueChange (fn [s]
                                (set-ini (assoc-in ini
                                                   [:figure :fig-type]
@@ -665,6 +693,7 @@
               (d/div {:class "empty-grid-cell"})
               ($d Select
                   {:value pattern
+                   :disabled (not= :pattern fig-type)
                    :onValueChange (fn [kw]
                                     (set-ini (assoc-in ini
                                                        [:figure :pattern]
@@ -690,95 +719,114 @@
                   :value "random"})
               ($ Label
                  {:htmlFor "ini-fig-rand"}
-                 "Random:")
+                 "Random area:")
               (d/div {:class "empty-grid-cell"})
               ($ FuncOptsGroup
-                 {:class (css :gap-3)
-                  :dir :column}
+                 {:class (css :gap-6)
+                  :dir :row}
+                 ($ FuncOptsGroup
+                    {:class (css :gap-3)
+                     :dir :column}
+                    (d/div
+                      {:class (css :gap-2
+                                   {:display "flex"
+                                    :align-items "center"})}
+                      ($ Input
+                         {:class (css :w-20)
+                          :id "ca-fig-rand-res-x"
+                          :type "number"
+                          :step "1"
+                          :min "1"
+                          :max (str (first res))
+                          :value (first rand-res)
+                          :disabled (not= :random fig-type)
+                          :onChange
+                          (fn [e]
+                            (let [next-res-x
+                                  (try (parse-long (.. e -target -value))
+                                       (catch js/Error err
+                                         (js/console.error err)))]
+                              (set-ini
+                               (assoc-in ini
+                                         [:figure :rand-res]
+                                         [next-res-x (second rand-res)]))))})
+                      (when (= :2d dim)
+                        (<>
+                          (d/span "×")
+                          ($ Input
+                             {:class (css :w-20)
+                              :id "ca-fig-rand-res-y"
+                              :type "number"
+                              :step "1"
+                              :min "1"
+                              :max (str (last res))
+                              :value (second rand-res)
+                              :disabled (not= :random fig-type)
+                              :onChange
+                              (fn [e]
+                                (let [next-res-y
+                                      (try (parse-long (.. e -target -value))
+                                           (catch js/Error err
+                                             (js/console.error err)))]
+                                  (set-ini
+                                   (assoc-in ini
+                                             [:figure :rand-res]
+                                             [(first rand-res) next-res-y]))))})))))
+                 ($ CaOptsRandom
+                    {:disabled? (not= :random fig-type)
+                     :rand-weights rand-weights
+                     :set-rand-weights
+                     #(set-ini (assoc-in ini [:figure :rand-weights] %))}))))
+          ($ FuncOptsGroup
+             {:class (css :gap-8)
+              :dir :row}
+            ($ CaOptsIniFigurePosition
+               {:dim dim
+                :ini ini
+                :set-ini set-ini})
+            ($ CaOptsIniFigureInstances
+               {:dim dim
+                :ini ini
+                :set-ini set-ini})
+            ($ FuncOptsGroup
+               {:class (css :gap-3)
+                :dir :column}
+               ;; ($ FuncOptHead "Instances:")
+               ;; {:class (css :gap-x-2
+               ;;              {:display "flex"
+               ;;               :align-items "center"}
+               ;;              ["& > *:nth-child(2)"
+               ;;               :w-30])}
+               ($ Label
+                  {:htmlFor "ca-fig-rand-decay"}
+                  "Decay:")
+               (d/div
+                 {:class (css :w-42 :gap-3
+                           {:display "flex"})}
+                 ($ Slider
+                    {:id "ca-fig-rand-decay"
+                     :value [rand-decay]
+                     :onValueChange (fn [arr]
+                                      (let [next-decay (aget arr 0)]
+                                        (set-ini
+                                         (assoc-in ini
+                                                   [:figure :rand-decay]
+                                                   next-decay))))
+                     :min 0
+                     :max 1
+                     :step 0.01})
                  (d/div
-                  {:class (css :gap-2
-                               {:display "flex"
-                                :align-items "center"})}
-                  ($ Input
-                     {:class (css :w-20)
-                      :id "ca-fig-rand-res-x"
-                      :type "number"
-                      :step "1"
-                      :min "1"
-                      :max (str (first res))
-                      :value (first rand-res)
-                      :onChange
-                      (fn [e]
-                        (let [next-res-x
-                              (try (parse-long (.. e -target -value))
-                                   (catch js/Error err
-                                     (js/console.error err)))]
-                          (set-ini
-                           (assoc-in ini
-                                     [:figure :rand-res]
-                                     [next-res-x (second rand-res)]))))})
-                  (when (= :2d dim)
-                    (<>
-                     (d/span "×")
-                     ($ Input
-                        {:class (css :w-20)
-                         :id "ca-fig-rand-res-y"
-                         :type "number"
-                         :step "1"
-                         :min "1"
-                         :max (str (last res))
-                         :value (second rand-res)
-                         :onChange
-                         (fn [e]
-                           (let [next-res-y
-                                 (try (parse-long (.. e -target -value))
-                                      (catch js/Error err
-                                        (js/console.error err)))]
-                             (set-ini
-                              (assoc-in ini
-                                        [:figure :rand-res]
-                                        [(first rand-res) next-res-y]))))}))))
-                 (d/div
-                  {:class (css :gap-x-2
-                               {:display "flex"
-                                :align-items "center"}
-                               ["& > *:nth-child(2)"
-                                :w-42])}
-                  ($ Label
-                     {:htmlFor "ca-fig-rand-decay"}
-                     "Decay:")
-                  ($ Slider
-                     {:id "ca-fig-rand-decay"
-                      :value [rand-decay]
-                      ;; :disabled (not= :random fig-ini-type)
-                      :onValueChange (fn [arr]
-                                       (let [next-decay (aget arr 0)]
-                                         (set-ini
-                                          (assoc-in ini
-                                                    [:figure :rand-decay]
-                                                    next-decay))))
-                      :min 0
-                      :max 1
-                      :step 0.01})
-                  (d/div
+                   {:class (css {:white-space "nowrap"})}
                    (str (Math/round (* 100 rand-decay))
-                        (utils/<&> "&thinsp;") "%"))
-                  #_
-                  (d/div
-                   (str (.toFixed fig-rand-decay 2)))
-                  #_
-                  (d/div (str (utils/pad (utils/<&> "&nbsp;") 3
-                                         (str (Math/round (* 100 weight))))
-                              (utils/<&> "&thinsp;") "%"))
-                  ))))
-          ($ CaOptsIniFigurePosition
-             {:dim dim
-              :ini ini
-              :set-ini set-ini})
-          ($ CaOptsIniFigureInstances
-             {:dim dim
-              :ini ini
-              :set-ini set-ini}))))))
+                        (utils/<&> "&thinsp;") "%")))
+               #_
+               (d/div
+                 (str (.toFixed fig-rand-decay 2)))
+               #_
+               (d/div (str (utils/pad (utils/<&> "&nbsp;") 3
+                                      (str (Math/round (* 100 weight))))
+                           (utils/<&> "&thinsp;") "%"))
+               )))))))
 
 (defnc CaOptsGeneral
   [{:keys [dim res set-res cell-size set-cell-size seed set-seed]}]

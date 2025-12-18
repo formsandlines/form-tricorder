@@ -181,6 +181,40 @@
    ;; (.-MAX_SAFE_INTEGER js/Number)
    ))
 
+(defn calc-density
+  [weights]
+  (let [total (+ 0.0 (reduce + (vals weights)))
+        normal-weights (update-vals weights #(/ % total))
+        ;; n-weight (:n normal-weights)
+        v-weights (vals (dissoc normal-weights :n))]
+    (.toPrecision (reduce + v-weights) 2)))
+
+;;           1-d    d
+;; d=1    -> n=0    uim=1
+;; d=0.25 -> n=0.75 uim=0.25
+;; d=0.5  -> n=0.5  uim=0.5
+;; d=0.75 -> n=0.25 uim=0.75
+;; d=0    -> n=1    uim=0
+(defn apply-density-on-weights
+  [density weights]
+  (let [total (+ 0.0 (reduce + (vals weights)))
+        {:keys [n u i m]} (update-vals weights #(/ % total))
+        n-diff (- 1.0 density n)
+        v (+ u i m)
+        v-diff (- density v)
+        v->v' #(max 0 (+ % (* v-diff (if (> v 0)
+                                       (/ % v)
+                                       (/ 1.0 3.0)))))]
+    {:n (max 0 (+ n n-diff))
+     :u (v->v' u)
+     :i (v->v' i)
+     :m (v->v' m)}))
+
+(def equal-weights {:n 0.25
+                    :u 0.25
+                    :i 0.25
+                    :m 0.25})
+
 (comment
   (pad 2 (.getUTCDate (js/Date.)))
   (get-timestamp)

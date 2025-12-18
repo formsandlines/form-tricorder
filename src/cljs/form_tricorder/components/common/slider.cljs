@@ -64,7 +64,11 @@
                              {:width "100%"}]
                             ["&[data-orientation=vertical]"
                              :w-1-5
-                             {:height "100%"}]))
+                             {:height "100%"}]
+                            ["&[data-disabled]"
+                             {:pointer-events "none"
+                              :cursor "not-allowed"
+                              :opacity "0.5"}]))
          "data-slot" "slider-track"}
         ($d SliderRange
             {:class (unite className class
@@ -90,8 +94,9 @@
                                :bg-accent :ring] ;; ring-4
                               ["&:focus-visible"
                                :ring :outline-none] ;; ring-4
-                              ["&:disabled"
+                              ["&[data-disabled]"
                                {:pointer-events "none"
+                                :cursor "not-allowed"
                                 :opacity "0.5"}]))
            "data-slot" "slider-thumb"
            :key (str i)})))))
