@@ -1,3 +1,12 @@
+;; SPDX-FileCopyrightText:
+;;   2015 Simon Howe <footless@gmail.com>
+;;   2025 Peter Hofmann <peter.hofmann@formsandlines.eu>
+;;
+;; SPDX-License-Identifier: EPL-1.0
+
+;: This file is a heavily modified/adapted version of the original source:
+;; https://github.com/foot/slider2d/blob/master/src/cljs/slider2d/core.cljs
+
 (ns form-tricorder.components.common.slider2d
   (:require
    [helix.core :refer [defnc fnc $ <>]]
@@ -11,9 +20,6 @@
   (:import [goog.events EventType]))
 
 (def r) ;; hotfix for linting error in let+
-
-;; adapted from source:
-;; https://github.com/foot/slider2d/blob/master/src/cljs/slider2d/core.cljs
 
 (defn drag-move-fn [on-drag]
   (fn [e]
